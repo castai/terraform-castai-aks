@@ -22,7 +22,7 @@ Requires `castai/castai`, `hashicorp/azurerm`, `hashicorp/azuread`, `hashicorp/h
 
 ```hcl
 module "castai-aks-cluster" {
-  source = "../../../terraform-castai-aks-cluster"
+  source = "castai/aks-cluster/castai"
 
   aks_cluster_name    = var.aks_cluster_name
   aks_cluster_region  = var.aks_cluster_region

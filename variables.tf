@@ -1,7 +1,7 @@
 variable "api_url" {
   type        = string
   description = "URL of alternative CAST AI API to be used during development or testing"
-  default     = "https://api-matas.localenv.cast.ai"
+  default     = "https://api.cast.ai"
 }
 
 variable "aks_cluster_name" {
