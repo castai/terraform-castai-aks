@@ -20,6 +20,8 @@ A module to create Azure role and a service principal that can be used to connec
 
 Requires `castai/castai`, `hashicorp/azurerm`, `hashicorp/azuread`, `hashicorp/helm` providers to be configured.
 
+The required parameters can be provided manually or alternatively can be easily acquired from your AKS cluster resource or Azure RM subscription data source.
+
 ```hcl
 module "castai-aks-cluster" {
   source = "castai/aks-cluster/castai"
