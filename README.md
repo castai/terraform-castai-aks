@@ -24,7 +24,7 @@ The required parameters can be provided manually or alternatively can be easily 
 
 ```hcl
 module "castai-aks-cluster" {
-  source = "castai/aks-cluster/castai"
+  source = "castai/aks/castai"
 
   aks_cluster_name    = var.aks_cluster_name
   aks_cluster_region  = var.aks_cluster_region
