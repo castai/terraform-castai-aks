@@ -42,3 +42,9 @@ variable "node_resource_group" {
 variable "tenant_id" {
   type = string
 }
+
+variable "castai_components_labels" {
+  type = map
+  description = "Optional additional Kubernetes labels for CAST AI pods"
+  default = {}
+}
