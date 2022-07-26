@@ -36,7 +36,7 @@ resource "azurerm_role_definition" "castai" {
       "Microsoft.ContainerService/managedClusters/start/action",
       "Microsoft.ContainerService/managedClusters/stop/action",
       "Microsoft.ContainerService/managedClusters/runCommand/action",
-      "Microsoft.ContainerService/managedClusters/agentPools/write",
+      "Microsoft.ContainerService/managedClusters/agentPools/*",
       "Microsoft.Resources/*/read",
       "Microsoft.Resources/tags/write",
       "Microsoft.Authorization/roleAssignments/read",
