@@ -1,14 +1,32 @@
 resource "castai_aks_cluster" "castai_cluster" {
   name = var.aks_cluster_name
 
-  region                     = var.aks_cluster_region
+  region          = var.aks_cluster_region
+  subscription_id = var.subscription_id
+  tenant_id       = var.tenant_id
+  client_id       = azuread_application.castai.application_id
+  client_secret   = azuread_application_password.castai.value
+
+  node_resource_group        = var.node_resource_group
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
 
-  subscription_id     = var.subscription_id
-  node_resource_group = var.node_resource_group
-  tenant_id           = var.tenant_id
-  client_id           = azuread_application.castai.application_id
-  client_secret       = azuread_application_password.castai.value
+}
+
+resource "castai_node_configuration" "this" {
+  for_each = {for k, v in var.node_configurations : k => v}
+
+  cluster_id = castai_aks_cluster.castai_cluster.id
+
+  name           = try(each.value.name, each.key)
+  disk_cpu_ratio = try(each.value.disk_cpu_ratio, 25)
+  subnets        = try(each.value.subnets, null)
+  ssh_public_key = try(each.value.ssh_public_key, null)
+  image          = try(each.value.image, null)
+  tags           = try(each.value.tags, {})
+
+  aks {
+    max_pods_per_node = try(each.value.max_pods_per_node, 30)
+  }
 }
 
 resource "helm_release" "castai_agent" {
