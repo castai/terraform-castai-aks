@@ -44,7 +44,25 @@ variable "tenant_id" {
 }
 
 variable "castai_components_labels" {
-  type = map
+  type        = map
   description = "Optional additional Kubernetes labels for CAST AI pods"
-  default = {}
+  default     = {}
+}
+
+variable "node_configurations" {
+  type = map(object({
+    disk_cpu_ratio    = optional(number)
+    subnets           = list(string)
+    ssh_public_key    = optional(string)
+    image             = optional(string)
+    tags              = optional(map(string))
+    max_pods_per_node = optional(number)
+  }))
+  description = "Map of AKS node configurations to create"
+  default     = {}
+}
+
+variable "default_node_configuration" {
+  type        = string
+  description = "ID of the default node configuration"
 }
