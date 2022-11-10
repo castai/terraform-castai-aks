@@ -58,7 +58,7 @@ module "castai-aks-cluster" {
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13 |
 | <a name="requirement_azuread"></a> [azuread](#requirement\_azuread) | >=2.22.0 |
 | <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | >=3.7.0 |
-| <a name="requirement_castai"></a> [castai](#requirement\_castai) | >= 0.26.3 |
+| <a name="requirement_castai"></a> [castai](#requirement\_castai) | >= 1.3.0 |
 | <a name="requirement_helm"></a> [helm](#requirement\_helm) | >=2.0.0 |
 
 ## Providers
@@ -67,7 +67,7 @@ module "castai-aks-cluster" {
 |------|---------|
 | <a name="provider_azuread"></a> [azuread](#provider\_azuread) | >=2.22.0 |
 | <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | >=3.7.0 |
-| <a name="provider_castai"></a> [castai](#provider\_castai) | >= 0.26.3 |
+| <a name="provider_castai"></a> [castai](#provider\_castai) | >= 1.3.0 |
 | <a name="provider_helm"></a> [helm](#provider\_helm) | >=2.0.0 |
 
 ## Modules
@@ -104,7 +104,7 @@ No modules.
 | <a name="input_castai_components_labels"></a> [castai\_components\_labels](#input\_castai\_components\_labels) | Optional additional Kubernetes labels for CAST AI pods | `map` | `{}` | no |
 | <a name="input_default_node_configuration"></a> [default\_node\_configuration](#input\_default\_node\_configuration) | ID of the default node configuration | `string` | n/a | yes |
 | <a name="input_delete_nodes_on_disconnect"></a> [delete\_nodes\_on\_disconnect](#input\_delete\_nodes\_on\_disconnect) | Optionally delete Cast AI created nodes when the cluster is destroyed | `bool` | `false` | no |
-| <a name="input_node_configurations"></a> [node\_configurations](#input\_node\_configurations) | Map of AKS node configurations to create | <pre>map(object({<br>    disk_cpu_ratio    = optional(number)<br>    subnets           = list(string)<br>    ssh_public_key    = optional(string)<br>    image             = optional(string)<br>    tags              = optional(map(string))<br>    max_pods_per_node = optional(number)<br>  }))</pre> | `{}` | no |
+| <a name="input_node_configurations"></a> [node\_configurations](#input\_node\_configurations) | Map of AKS node configurations to create | `any` | `{}` | no |
 | <a name="input_node_resource_group"></a> [node\_resource\_group](#input\_node\_resource\_group) | n/a | `string` | n/a | yes |
 | <a name="input_resource_group"></a> [resource\_group](#input\_resource\_group) | n/a | `string` | n/a | yes |
 | <a name="input_subscription_id"></a> [subscription\_id](#input\_subscription\_id) | Azure subscription ID | `string` | n/a | yes |
