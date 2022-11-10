@@ -50,14 +50,7 @@ variable "castai_components_labels" {
 }
 
 variable "node_configurations" {
-  type = map(object({
-    disk_cpu_ratio    = optional(number)
-    subnets           = list(string)
-    ssh_public_key    = optional(string)
-    image             = optional(string)
-    tags              = optional(map(string))
-    max_pods_per_node = optional(number)
-  }))
+  type        = any
   description = "Map of AKS node configurations to create"
   default     = {}
 }
