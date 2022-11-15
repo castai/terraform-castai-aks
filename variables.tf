@@ -59,3 +59,10 @@ variable "default_node_configuration" {
   type        = string
   description = "ID of the default node configuration"
 }
+
+// https://docs.cast.ai/product-overview/console/security-insights/
+variable "install_security_agent" {
+  type = bool
+  default = false
+  description = "Optional flag for installation of security agent"
+}

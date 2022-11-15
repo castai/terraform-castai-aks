@@ -189,6 +189,32 @@ resource "helm_release" "castai_spot_handler" {
   depends_on = [helm_release.castai_agent]
 }
 
+resource "helm_release" "castai_sec_agent" {
+  count = var.install_security_agent == true ? 1 : 0
+
+  name             = "castai-sec-agent"
+  repository       = "https://castai.github.io/helm-charts"
+  chart            = "castai-sec-agent"
+  namespace        = "castai-agent"
+  create_namespace = true
+  cleanup_on_fail  = true
+
+  set {
+    name  = "castai.apiURL"
+    value = var.api_url
+  }
+
+  set {
+    name  = "castai.clusterID"
+    value =  castai_aks_cluster.castai_cluster.id
+  }
+
+  set {
+    name = "structuredConfig.provider"
+    value = "aks"
+  }
+}
+
 resource "castai_autoscaler" "castai_autoscaler_policies" {
   autoscaler_policies_json = var.autoscaler_policies_json
   cluster_id               = castai_aks_cluster.castai_cluster.id
