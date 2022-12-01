@@ -8,10 +8,10 @@ resource "azurerm_role_definition" "castai" {
   name        = local.role_name
   description = "Role used by CAST AI"
 
-  scope       = "/subscriptions/${var.subscription_id}/resourceGroups/${var.resource_group}"
+  scope = "/subscriptions/${var.subscription_id}/resourceGroups/${var.resource_group}"
 
   permissions {
-    actions     = [
+    actions = [
       "Microsoft.Compute/*/read",
       "Microsoft.Compute/virtualMachines/*",
       "Microsoft.Compute/virtualMachineScaleSets/*",
@@ -39,6 +39,7 @@ resource "azurerm_role_definition" "castai" {
       "Microsoft.ContainerService/managedClusters/agentPools/*",
       "Microsoft.Resources/*/read",
       "Microsoft.Resources/tags/write",
+      "Microsoft.Authorization/locks/read",
       "Microsoft.Authorization/roleAssignments/read",
       "Microsoft.Authorization/roleDefinitions/read",
       "Microsoft.ManagedIdentity/userAssignedIdentities/assign/action"
@@ -54,15 +55,15 @@ resource "azurerm_role_definition" "castai" {
 
 
 resource "azurerm_role_assignment" "castai_resource_group" {
-  principal_id         = azuread_service_principal.castai.id
-  role_definition_id   = azurerm_role_definition.castai.role_definition_resource_id
+  principal_id       = azuread_service_principal.castai.id
+  role_definition_id = azurerm_role_definition.castai.role_definition_resource_id
 
   scope = "/subscriptions/${var.subscription_id}/resourceGroups/${var.resource_group}"
 }
 
 resource "azurerm_role_assignment" "castai_node_resource_group" {
-  principal_id         = azuread_service_principal.castai.id
-  role_definition_id   = azurerm_role_definition.castai.role_definition_resource_id
+  principal_id       = azuread_service_principal.castai.id
+  role_definition_id = azurerm_role_definition.castai.role_definition_resource_id
 
   scope = "/subscriptions/${var.subscription_id}/resourceGroups/${var.node_resource_group}"
 }
