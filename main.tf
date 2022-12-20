@@ -38,6 +38,8 @@ resource "helm_release" "castai_agent" {
   cleanup_on_fail  = true
   wait             = true
 
+  values = var.agent_values
+
   set {
     name  = "provider"
     value = "aks"
@@ -79,6 +81,8 @@ resource "helm_release" "castai_evictor" {
   cleanup_on_fail  = true
   wait             = true
 
+  values = var.evictor_values
+
   set {
     name  = "replicaCount"
     value = "0"
@@ -107,6 +111,8 @@ resource "helm_release" "castai_cluster_controller" {
   create_namespace = true
   cleanup_on_fail  = true
   wait             = true
+
+  values = var.cluster_controller_values
 
   set {
     name  = "aks.enabled"
@@ -155,6 +161,8 @@ resource "helm_release" "castai_spot_handler" {
   cleanup_on_fail  = true
   wait             = true
 
+  values = var.spot_handler_values
+
   set {
     name  = "castai.provider"
     value = "azure"
@@ -198,6 +206,8 @@ resource "helm_release" "castai_sec_agent" {
   namespace        = "castai-agent"
   create_namespace = true
   cleanup_on_fail  = true
+
+  values = var.sec_agent_values
 
   set {
     name  = "castai.apiURL"
