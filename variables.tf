@@ -65,3 +65,33 @@ variable "install_security_agent" {
   default = false
   description = "Optional flag for installation of security agent (https://docs.cast.ai/product-overview/console/security-insights/)"
 }
+
+variable "agent_values" {
+  description = "List of YAML formatted string values for agent helm chart"
+  type        = list(string)
+  default     = []
+}
+
+variable "spot_handler_values" {
+  description = "List of YAML formatted string values for spot-handler helm chart"
+  type        = list(string)
+  default     = []
+}
+
+variable "cluster_controller_values" {
+  description = "List of YAML formatted string values for cluster-controller helm chart"
+  type        = list(string)
+  default     = []
+}
+
+variable "evictor_values" {
+  description = "List of YAML formatted string values for evictor helm chart"
+  type        = list(string)
+  default     = []
+}
+
+variable "sec_agent_values" {
+  description = "List of YAML formatted string values for sec-agent helm chart"
+  type        = list(string)
+  default     = []
+}
