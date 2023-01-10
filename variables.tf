@@ -90,8 +90,8 @@ variable "evictor_values" {
   default     = []
 }
 
-variable "sec_agent_values" {
-  description = "List of YAML formatted string values for sec-agent helm chart"
+variable "kvisor_values" {
+  description = "List of YAML formatted string values for kvisor helm chart"
   type        = list(string)
   default     = []
 }

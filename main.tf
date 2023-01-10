@@ -197,17 +197,17 @@ resource "helm_release" "castai_spot_handler" {
   depends_on = [helm_release.castai_agent]
 }
 
-resource "helm_release" "castai_sec_agent" {
+resource "helm_release" "castai_kvisor" {
   count = var.install_security_agent == true ? 1 : 0
 
-  name             = "castai-sec-agent"
+  name             = "castai-kvisor"
   repository       = "https://castai.github.io/helm-charts"
-  chart            = "castai-sec-agent"
+  chart            = "castai-kvisor"
   namespace        = "castai-agent"
   create_namespace = true
   cleanup_on_fail  = true
 
-  values = var.sec_agent_values
+  values = var.kvisor_values
 
   set {
     name  = "castai.apiURL"
