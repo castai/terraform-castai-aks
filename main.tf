@@ -207,7 +207,7 @@ resource "helm_release" "castai_kvisor" {
   create_namespace = true
   cleanup_on_fail  = true
 
-  values = var.sec_agent_values
+  values = var.kvisor_values
 
   set {
     name  = "castai.apiURL"
