@@ -29,6 +29,11 @@ resource "castai_node_configuration" "this" {
   }
 }
 
+resource "castai_node_configuration_default" "this" {
+  cluster_id       = castai_aks_cluster.castai_cluster.id
+  configuration_id = var.default_node_configuration
+}
+
 resource "helm_release" "castai_agent" {
   name             = "castai-agent"
   repository       = "https://castai.github.io/helm-charts"
