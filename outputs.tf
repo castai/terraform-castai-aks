@@ -10,3 +10,10 @@ output "castai_node_configurations" {
     for k, v in castai_node_configuration.this : v.name => v.id
   }
 }
+
+output "castai_node_templates" {
+  description = "Map of node template by name"
+  value = {
+    for k, v in castai_node_template.this : v.name => v.name
+  }
+}

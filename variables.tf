@@ -60,6 +60,12 @@ variable "default_node_configuration" {
   description = "ID of the default node configuration"
 }
 
+variable "node_templates" {
+  type        = any
+  description = "Map of node templates to create"
+  default     = {}
+}
+
 variable "install_security_agent" {
   type = bool
   default = false

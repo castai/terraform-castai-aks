@@ -58,7 +58,7 @@ module "castai-aks-cluster" {
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13 |
 | <a name="requirement_azuread"></a> [azuread](#requirement\_azuread) | >=2.22.0 |
 | <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | >=3.7.0 |
-| <a name="requirement_castai"></a> [castai](#requirement\_castai) | >= 1.3.0 |
+| <a name="requirement_castai"></a> [castai](#requirement\_castai) | >= 2.0.0 |
 | <a name="requirement_helm"></a> [helm](#requirement\_helm) | >=2.0.0 |
 
 ## Providers
@@ -67,7 +67,7 @@ module "castai-aks-cluster" {
 |------|---------|
 | <a name="provider_azuread"></a> [azuread](#provider\_azuread) | >=2.22.0 |
 | <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | >=3.7.0 |
-| <a name="provider_castai"></a> [castai](#provider\_castai) | >= 1.3.0 |
+| <a name="provider_castai"></a> [castai](#provider\_castai) | >= 2.0.0 |
 | <a name="provider_helm"></a> [helm](#provider\_helm) | >=2.0.0 |
 
 ## Modules
@@ -87,6 +87,8 @@ No modules.
 | [castai_aks_cluster.castai_cluster](https://registry.terraform.io/providers/castai/castai/latest/docs/resources/aks_cluster) | resource |
 | [castai_autoscaler.castai_autoscaler_policies](https://registry.terraform.io/providers/castai/castai/latest/docs/resources/autoscaler) | resource |
 | [castai_node_configuration.this](https://registry.terraform.io/providers/castai/castai/latest/docs/resources/node_configuration) | resource |
+| [castai_node_configuration_default.this](https://registry.terraform.io/providers/castai/castai/latest/docs/resources/node_configuration_default) | resource |
+| [castai_node_template.this](https://registry.terraform.io/providers/castai/castai/latest/docs/resources/node_template) | resource |
 | [helm_release.castai_agent](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [helm_release.castai_cluster_controller](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [helm_release.castai_evictor](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
@@ -112,6 +114,7 @@ No modules.
 | <a name="input_kvisor_values"></a> [kvisor\_values](#input\_kvisor\_values) | List of YAML formatted string values for kvisor helm chart | `list(string)` | `[]` | no |
 | <a name="input_node_configurations"></a> [node\_configurations](#input\_node\_configurations) | Map of AKS node configurations to create | `any` | `{}` | no |
 | <a name="input_node_resource_group"></a> [node\_resource\_group](#input\_node\_resource\_group) | n/a | `string` | n/a | yes |
+| <a name="input_node_templates"></a> [node\_templates](#input\_node\_templates) | Map of node templates to create | `any` | `{}` | no |
 | <a name="input_resource_group"></a> [resource\_group](#input\_resource\_group) | n/a | `string` | n/a | yes |
 | <a name="input_spot_handler_values"></a> [spot\_handler\_values](#input\_spot\_handler\_values) | List of YAML formatted string values for spot-handler helm chart | `list(string)` | `[]` | no |
 | <a name="input_subscription_id"></a> [subscription\_id](#input\_subscription\_id) | Azure subscription ID | `string` | n/a | yes |
@@ -122,5 +125,6 @@ No modules.
 | Name | Description |
 |------|-------------|
 | <a name="output_castai_node_configurations"></a> [castai\_node\_configurations](#output\_castai\_node\_configurations) | Map of node configurations ids by name |
+| <a name="output_castai_node_templates"></a> [castai\_node\_templates](#output\_castai\_node\_templates) | Map of node template by name |
 | <a name="output_cluster_id"></a> [cluster\_id](#output\_cluster\_id) | CAST.AI cluster id, which can be used for accessing cluster data using API |
 <!-- END_TF_DOCS -->

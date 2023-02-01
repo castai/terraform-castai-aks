@@ -34,6 +34,38 @@ resource "castai_node_configuration_default" "this" {
   configuration_id = var.default_node_configuration
 }
 
+resource "castai_node_template" "this" {
+  for_each = {for k, v in var.node_templates : k => v}
+
+  cluster_id       = castai_aks_cluster.castai_cluster.id
+
+  name             = try(each.value.name, each.key)
+  configuration_id = try(each.value.configuration_id, null)
+  should_taint     = try(each.value.should_taint, true)
+
+  custom_label {
+    key   = each.value.custom_label.key
+    value = each.value.custom_label.value
+  }
+
+
+  constraints {
+    compute_optimized  = try(each.value.compute_optimized, false)
+    storage_optimized  = try(each.value.storage_optimized, false)
+    spot               = try(each.value.constraints.spot, false)
+    use_spot_fallbacks = try(each.value.constraints.use_spot_fallbacks, false)
+    min_cpu            = try(each.value.constraints.min_cpu, null)
+    max_cpu            = try(each.value.constraints.max_cpu, null)
+    min_memory         = try(each.value.constraints.min_memory, null)
+    max_memory         = try(each.value.constraints.max_memory, null)
+
+    instance_families {
+      include = try(each.value.constraints.instance_families.include, [])
+      exclude = try(each.value.constraints.instance_families.exclude, [])
+    }
+  }
+}
+
 resource "helm_release" "castai_agent" {
   name             = "castai-agent"
   repository       = "https://castai.github.io/helm-charts"
