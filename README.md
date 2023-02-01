@@ -49,7 +49,7 @@ module "castai-aks-cluster" {
   }
   node_templates = {
     spot_tmpl = {
-      configuration_id = module.cast-eks-cluster.castai_node_configurations["default"]
+      configuration_id = module.castai-aks-cluster.castai_node_configurations["default"]
 
       should_taint = true
       custom_label = {
