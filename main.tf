@@ -48,20 +48,26 @@ resource "castai_node_template" "this" {
     value = each.value.custom_label.value
   }
 
+  dynamic "constraints" {
+    for_each = flatten([lookup(each.value, "constraints", [])])
+    content {
+      compute_optimized  = try(constraints.value.compute_optimized, false)
+      storage_optimized  = try(constraints.value.storage_optimized, false)
+      spot               = try(constraints.value.spot, false)
+      use_spot_fallbacks = try(constraints.value.use_spot_fallbacks, false)
+      min_cpu            = try(constraints.value.min_cpu, null)
+      max_cpu            = try(constraints.value.max_cpu, null)
+      min_memory         = try(constraints.value.min_memory, null)
+      max_memory         = try(constraints.value.max_memory, null)
 
-  constraints {
-    compute_optimized  = try(each.value.compute_optimized, false)
-    storage_optimized  = try(each.value.storage_optimized, false)
-    spot               = try(each.value.constraints.spot, false)
-    use_spot_fallbacks = try(each.value.constraints.use_spot_fallbacks, false)
-    min_cpu            = try(each.value.constraints.min_cpu, null)
-    max_cpu            = try(each.value.constraints.max_cpu, null)
-    min_memory         = try(each.value.constraints.min_memory, null)
-    max_memory         = try(each.value.constraints.max_memory, null)
+      dynamic "instance_families" {
+        for_each = flatten([lookup(constraints.value, "instance_families", [])])
 
-    instance_families {
-      include = try(each.value.constraints.instance_families.include, [])
-      exclude = try(each.value.constraints.instance_families.exclude, [])
+        content {
+          include = try(instance_families.value.include, [])
+          exclude = try(instance_families.value.exclude, [])
+        }
+      }
     }
   }
 }
