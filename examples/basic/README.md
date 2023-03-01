@@ -1,1 +1,0 @@
-The example usage for this module can be found [here](https://github.com/castai/terraform-provider-castai/tree/master/examples/aks) 

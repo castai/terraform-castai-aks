@@ -73,6 +73,9 @@ module "castai-aks-cluster" {
   }
 }
 ```
+# Examples 
+
+Usage examples are located in [terraform provider repo](https://github.com/castai/terraform-provider-castai/tree/master/examples/aks)
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
