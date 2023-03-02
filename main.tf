@@ -52,6 +52,16 @@ resource "castai_node_template" "this" {
     }
   }
 
+  dynamic "custom_taints" {
+    for_each = flatten([lookup(each.value, "custom_taints", [])])
+
+    content {
+      key    = try(custom_taints.value.key, null)
+      value  = try(custom_taints.value.value, null)
+      effect = try(custom_taints.value.effect, null)
+    }
+  }
+
   dynamic "constraints" {
     for_each = flatten([lookup(each.value, "constraints", [])])
     content {
