@@ -57,6 +57,17 @@ module "castai-aks-cluster" {
         value = "label-value"
       }
 
+      custom_taints = [
+        {
+          key = "custom-taint-key-1"
+          value = "custom-taint-value-1"
+        },
+        {
+          key = "custom-taint-key-2"
+          value = "custom-taint-value-2"
+        }
+      ]
+
       constraints = {
         fallback_restore_rate_seconds = 1800
         spot = true
