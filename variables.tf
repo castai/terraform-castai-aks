@@ -101,3 +101,33 @@ variable "kvisor_values" {
   type        = list(string)
   default     = []
 }
+
+variable "agent_version" {
+  description = "Version of castai-agent helm chart. If not provided, latest version will be used."
+  type        = string
+  default     = null
+}
+
+variable "spot_handler_version" {
+  description = "Version of castai-spot-handler helm chart. If not provided, latest version will be used."
+  type        = string
+  default     = null
+}
+
+variable "cluster_controller_version" {
+  description = "Version of castai-cluster-controller helm chart. If not provided, latest version will be used."
+  type        = string
+  default     = null
+}
+
+variable "evictor_version" {
+  description = "Version of castai-evictor chart. If not provided, latest version will be used."
+  type        = string
+  default     = null
+}
+
+variable "kvisor_version" {
+  description = "Version of kvisor chart. If not provided, latest version will be used."
+  type        = string
+  default     = null
+}
