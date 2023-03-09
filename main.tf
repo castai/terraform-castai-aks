@@ -65,14 +65,15 @@ resource "castai_node_template" "this" {
   dynamic "constraints" {
     for_each = flatten([lookup(each.value, "constraints", [])])
     content {
-      compute_optimized  = try(constraints.value.compute_optimized, false)
-      storage_optimized  = try(constraints.value.storage_optimized, false)
-      spot               = try(constraints.value.spot, false)
-      use_spot_fallbacks = try(constraints.value.use_spot_fallbacks, false)
-      min_cpu            = try(constraints.value.min_cpu, null)
-      max_cpu            = try(constraints.value.max_cpu, null)
-      min_memory         = try(constraints.value.min_memory, null)
-      max_memory         = try(constraints.value.max_memory, null)
+      compute_optimized  	    = try(constraints.value.compute_optimized, false)
+      storage_optimized  	    = try(constraints.value.storage_optimized, false)
+      spot               	    = try(constraints.value.spot, false)
+      use_spot_fallbacks 	    = try(constraints.value.use_spot_fallbacks, false)
+      fallback_restore_rate_seconds = try(constraints.value.fallback_restore_rate_seconds, null)
+      min_cpu           	    = try(constraints.value.min_cpu, null)
+      max_cpu            	    = try(constraints.value.max_cpu, null)
+      min_memory         	    = try(constraints.value.min_memory, null)
+      max_memory         	    = try(constraints.value.max_memory, null)
 
       dynamic "instance_families" {
         for_each = flatten([lookup(constraints.value, "instance_families", [])])
