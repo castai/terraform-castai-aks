@@ -79,6 +79,7 @@ data "azuread_client_config" "current" {}
 
 resource "azuread_application" "castai" {
   display_name = local.app_name
+  owners       = [data.azuread_client_config.current.object_id]
 }
 
 resource "azuread_application_password" "castai" {
