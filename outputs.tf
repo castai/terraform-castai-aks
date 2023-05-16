@@ -6,7 +6,7 @@ output "cluster_id" {
 
 output "castai_node_configurations" {
   description = "Map of node configurations ids by name"
-  value       = {
+  value = {
     for k, v in castai_node_configuration.this : v.name => v.id
   }
 }

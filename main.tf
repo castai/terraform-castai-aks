@@ -13,12 +13,13 @@ resource "castai_aks_cluster" "castai_cluster" {
 }
 
 resource "castai_node_configuration" "this" {
-  for_each = {for k, v in var.node_configurations : k => v}
+  for_each = { for k, v in var.node_configurations : k => v }
 
   cluster_id = castai_aks_cluster.castai_cluster.id
 
   name           = try(each.value.name, each.key)
   disk_cpu_ratio = try(each.value.disk_cpu_ratio, 0)
+  min_disk_size  = try(each.value.min_disk_size, 100)
   subnets        = try(each.value.subnets, null)
   ssh_public_key = try(each.value.ssh_public_key, null)
   image          = try(each.value.image, null)
@@ -35,9 +36,9 @@ resource "castai_node_configuration_default" "this" {
 }
 
 resource "castai_node_template" "this" {
-  for_each = {for k, v in var.node_templates : k => v}
+  for_each = { for k, v in var.node_templates : k => v }
 
-  cluster_id       = castai_aks_cluster.castai_cluster.id
+  cluster_id = castai_aks_cluster.castai_cluster.id
 
   name             = try(each.value.name, each.key)
   configuration_id = try(each.value.configuration_id, null)
@@ -51,7 +52,7 @@ resource "castai_node_template" "this" {
       value = try(custom_label.value.value, null)
     }
   }
-  
+
   custom_labels = try(each.value.custom_labels, {})
 
   dynamic "custom_taints" {
@@ -67,15 +68,15 @@ resource "castai_node_template" "this" {
   dynamic "constraints" {
     for_each = flatten([lookup(each.value, "constraints", [])])
     content {
-      compute_optimized  	    = try(constraints.value.compute_optimized, false)
-      storage_optimized  	    = try(constraints.value.storage_optimized, false)
-      spot               	    = try(constraints.value.spot, false)
-      use_spot_fallbacks 	    = try(constraints.value.use_spot_fallbacks, false)
+      compute_optimized             = try(constraints.value.compute_optimized, false)
+      storage_optimized             = try(constraints.value.storage_optimized, false)
+      spot                          = try(constraints.value.spot, false)
+      use_spot_fallbacks            = try(constraints.value.use_spot_fallbacks, false)
       fallback_restore_rate_seconds = try(constraints.value.fallback_restore_rate_seconds, null)
-      min_cpu           	    = try(constraints.value.min_cpu, null)
-      max_cpu            	    = try(constraints.value.max_cpu, null)
-      min_memory         	    = try(constraints.value.min_memory, null)
-      max_memory         	    = try(constraints.value.max_memory, null)
+      min_cpu                       = try(constraints.value.min_cpu, null)
+      max_cpu                       = try(constraints.value.max_cpu, null)
+      min_memory                    = try(constraints.value.min_memory, null)
+      max_memory                    = try(constraints.value.max_memory, null)
 
       dynamic "instance_families" {
         for_each = flatten([lookup(constraints.value, "instance_families", [])])
@@ -99,7 +100,7 @@ resource "helm_release" "castai_agent" {
   wait             = true
 
   version = var.agent_version
-  values = var.agent_values
+  values  = var.agent_values
 
   set {
     name  = "provider"
@@ -143,7 +144,7 @@ resource "helm_release" "castai_evictor" {
   wait             = true
 
   version = var.evictor_version
-  values = var.evictor_values
+  values  = var.evictor_values
 
   set {
     name  = "replicaCount"
@@ -175,7 +176,7 @@ resource "helm_release" "castai_cluster_controller" {
   wait             = true
 
   version = var.cluster_controller_version
-  values = var.cluster_controller_values
+  values  = var.cluster_controller_values
 
   set {
     name  = "aks.enabled"
@@ -225,7 +226,7 @@ resource "helm_release" "castai_spot_handler" {
   wait             = true
 
   version = var.spot_handler_version
-  values = var.spot_handler_values
+  values  = var.spot_handler_values
 
   set {
     name  = "castai.provider"
@@ -272,7 +273,7 @@ resource "helm_release" "castai_kvisor" {
   cleanup_on_fail  = true
 
   version = var.kvisor_version
-  values = var.kvisor_values
+  values  = var.kvisor_values
 
   set {
     name  = "castai.apiURL"
@@ -281,11 +282,11 @@ resource "helm_release" "castai_kvisor" {
 
   set {
     name  = "castai.clusterID"
-    value =  castai_aks_cluster.castai_cluster.id
+    value = castai_aks_cluster.castai_cluster.id
   }
 
   set {
-    name = "structuredConfig.provider"
+    name  = "structuredConfig.provider"
     value = "aks"
   }
 }
