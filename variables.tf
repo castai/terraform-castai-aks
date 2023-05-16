@@ -44,7 +44,7 @@ variable "tenant_id" {
 }
 
 variable "castai_components_labels" {
-  type        = map
+  type        = map(any)
   description = "Optional additional Kubernetes labels for CAST AI pods"
   default     = {}
 }
@@ -67,8 +67,8 @@ variable "node_templates" {
 }
 
 variable "install_security_agent" {
-  type = bool
-  default = false
+  type        = bool
+  default     = false
   description = "Optional flag for installation of security agent (https://docs.cast.ai/product-overview/console/security-insights/)"
 }
 
