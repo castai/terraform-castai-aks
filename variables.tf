@@ -35,6 +35,11 @@ variable "resource_group" {
   type = string
 }
 
+variable "network_resource_group" {
+  type    = string
+  default = ""
+}
+
 variable "node_resource_group" {
   type = string
 }
