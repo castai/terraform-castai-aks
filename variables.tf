@@ -36,7 +36,7 @@ variable "resource_group" {
 }
 
 variable "additional_resource_groups" {
-  type    = array(string)
+  type    = list(string)
   default = []
 }
 
