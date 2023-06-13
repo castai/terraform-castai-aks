@@ -52,7 +52,7 @@ resource "azurerm_role_definition" "castai" {
     not_actions = []
   }
 
-  assignable_scopes = flatten(distinct(compact([
+  assignable_scopes = distinct(compact(flatten([
     "/subscriptions/${var.subscription_id}/resourceGroups/${var.resource_group}",
     "/subscriptions/${var.subscription_id}/resourceGroups/${var.node_resource_group}",
     var.additional_resource_groups
