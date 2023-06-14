@@ -52,10 +52,11 @@ resource "azurerm_role_definition" "castai" {
     not_actions = []
   }
 
-  assignable_scopes = [
+  assignable_scopes = distinct(compact(flatten([
     "/subscriptions/${var.subscription_id}/resourceGroups/${var.resource_group}",
-    "/subscriptions/${var.subscription_id}/resourceGroups/${var.node_resource_group}"
-  ]
+    "/subscriptions/${var.subscription_id}/resourceGroups/${var.node_resource_group}",
+    var.additional_resource_groups
+  ])))
 }
 
 
@@ -71,6 +72,13 @@ resource "azurerm_role_assignment" "castai_node_resource_group" {
   role_definition_id = azurerm_role_definition.castai.role_definition_resource_id
 
   scope = "/subscriptions/${var.subscription_id}/resourceGroups/${var.node_resource_group}"
+}
+
+resource "azurerm_role_assignment" "castai_additional_resource_groups" {
+  for_each           = toset(var.additional_resource_groups)
+  principal_id       = azuread_service_principal.castai.id
+  role_definition_id = azurerm_role_definition.castai.role_definition_resource_id
+  scope              = each.key
 }
 
 // Azure AD

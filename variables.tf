@@ -35,6 +35,11 @@ variable "resource_group" {
   type = string
 }
 
+variable "additional_resource_groups" {
+  type    = list(string)
+  default = []
+}
+
 variable "node_resource_group" {
   type = string
 }
