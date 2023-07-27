@@ -4,6 +4,12 @@ variable "api_url" {
   default     = "https://api.cast.ai"
 }
 
+variable "castai_api_token" {
+  type = string
+  description = "CAST AI API token created in console.cast.ai API Access keys section."
+  sensitive = true
+}
+
 variable "aks_cluster_name" {
   type        = string
   description = "Name of the cluster to be connected to CAST AI."
@@ -135,4 +141,10 @@ variable "kvisor_version" {
   description = "Version of kvisor chart. If not provided, latest version will be used."
   type        = string
   default     = null
+}
+
+variable "wait_for_cluster_ready" {
+  type        = bool
+  description = "Wait for cluster to be ready before finishing the module execution"
+  default     = true
 }
