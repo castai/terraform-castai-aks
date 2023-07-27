@@ -231,7 +231,7 @@ resource "null_resource" "wait_for_cluster" {
 
         for i in $(seq 1 $RETRY_COUNT); do
             sleep $POOLING_INTERVAL
-            curl -s ${var.api_url}/v1/kubernetes/external-clusters/${castai_gke_cluster.castai_cluster.id} -H "x-api-key: $API_KEY" | grep '"status"\s*:\s*"ready"' && exit 0
+            curl -s ${var.api_url}/v1/kubernetes/external-clusters/${castai_aks_cluster.castai_cluster.id} -H "x-api-key: $API_KEY" | grep '"status"\s*:\s*"ready"' && exit 0
         done
 
         echo "Cluster is not ready after 10 minutes"
