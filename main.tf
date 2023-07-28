@@ -226,7 +226,7 @@ resource "null_resource" "wait_for_cluster" {
       API_KEY = var.castai_api_token
     }
     command = <<-EOT
-        RETRY_COUNT=20
+        RETRY_COUNT=30
         POOLING_INTERVAL=30
 
         for i in $(seq 1 $RETRY_COUNT); do
@@ -234,7 +234,7 @@ resource "null_resource" "wait_for_cluster" {
             curl -s ${var.api_url}/v1/kubernetes/external-clusters/${castai_aks_cluster.castai_cluster.id} -H "x-api-key: $API_KEY" | grep '"status"\s*:\s*"ready"' && exit 0
         done
 
-        echo "Cluster is not ready after 10 minutes"
+        echo "Cluster is not ready after 15 minutes"
         exit 1
     EOT
 
