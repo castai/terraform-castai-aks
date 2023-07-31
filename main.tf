@@ -216,6 +216,32 @@ resource "helm_release" "castai_cluster_controller" {
   }
 }
 
+resource "null_resource" "wait_for_cluster" {
+  count = var.wait_for_cluster_ready ? 1 : 0
+  depends_on = [helm_release.castai_cluster_controller, helm_release.castai_agent]
+
+  provisioner "local-exec" {
+    quiet = true
+    environment = {
+      API_KEY = var.castai_api_token
+    }
+    command = <<-EOT
+        RETRY_COUNT=30
+        POOLING_INTERVAL=30
+
+        for i in $(seq 1 $RETRY_COUNT); do
+            sleep $POOLING_INTERVAL
+            curl -s ${var.api_url}/v1/kubernetes/external-clusters/${castai_aks_cluster.castai_cluster.id} -H "x-api-key: $API_KEY" | grep '"status"\s*:\s*"ready"' && exit 0
+        done
+
+        echo "Cluster is not ready after 15 minutes"
+        exit 1
+    EOT
+
+    interpreter = ["bash", "-c"]
+  }
+}
+
 resource "helm_release" "castai_spot_handler" {
   name             = "castai-spot-handler"
   repository       = "https://castai.github.io/helm-charts"
