@@ -41,6 +41,8 @@ resource "castai_node_template" "this" {
   cluster_id = castai_aks_cluster.castai_cluster.id
 
   name             = try(each.value.name, each.key)
+  is_default       = try(each.value.is_default, false)
+  is_enabled       = try(each.value.is_enabled, null)
   configuration_id = try(each.value.configuration_id, null)
   should_taint     = try(each.value.should_taint, true)
 
@@ -68,15 +70,20 @@ resource "castai_node_template" "this" {
   dynamic "constraints" {
     for_each = flatten([lookup(each.value, "constraints", [])])
     content {
-      compute_optimized             = try(constraints.value.compute_optimized, false)
-      storage_optimized             = try(constraints.value.storage_optimized, false)
-      spot                          = try(constraints.value.spot, false)
-      use_spot_fallbacks            = try(constraints.value.use_spot_fallbacks, false)
-      fallback_restore_rate_seconds = try(constraints.value.fallback_restore_rate_seconds, null)
-      min_cpu                       = try(constraints.value.min_cpu, null)
-      max_cpu                       = try(constraints.value.max_cpu, null)
-      min_memory                    = try(constraints.value.min_memory, null)
-      max_memory                    = try(constraints.value.max_memory, null)
+      compute_optimized                           = try(constraints.value.compute_optimized, false)
+      storage_optimized                           = try(constraints.value.storage_optimized, false)
+      spot                                        = try(constraints.value.spot, false)
+      on_demand                                   = try(constraints.value.on_demand, null)
+      use_spot_fallbacks                          = try(constraints.value.use_spot_fallbacks, false)
+      fallback_restore_rate_seconds               = try(constraints.value.fallback_restore_rate_seconds, null)
+      enable_spot_diversity                       = try(constraints.value.enable_spot_diversity, false)
+      spot_diversity_price_increase_limit_percent = try(constraints.value.spot_diversity_price_increase_limit_percent, null)
+      spot_interruption_predictions_enabled       = try(constraints.value.spot_interruption_predictions_enabled, false)
+      spot_interruption_predictions_type          = try(constraints.value.spot_interruption_predictions_type, false)
+      min_cpu                                     = try(constraints.value.min_cpu, null)
+      max_cpu                                     = try(constraints.value.max_cpu, null)
+      min_memory                                  = try(constraints.value.min_memory, null)
+      max_memory                                  = try(constraints.value.max_memory, null)
 
       dynamic "instance_families" {
         for_each = flatten([lookup(constraints.value, "instance_families", [])])
