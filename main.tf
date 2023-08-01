@@ -221,7 +221,6 @@ resource "null_resource" "wait_for_cluster" {
   depends_on = [helm_release.castai_cluster_controller, helm_release.castai_agent]
 
   provisioner "local-exec" {
-    quiet = true
     environment = {
       API_KEY = var.castai_api_token
     }
