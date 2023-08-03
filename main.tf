@@ -95,6 +95,7 @@ resource "castai_node_template" "this" {
       }
     }
   }
+  depends_on = [ castai_autoscaler.castai_autoscaler_policies ]
 }
 
 resource "helm_release" "castai_agent" {
