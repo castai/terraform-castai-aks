@@ -79,7 +79,7 @@ resource "castai_node_template" "this" {
       enable_spot_diversity                       = try(constraints.value.enable_spot_diversity, false)
       spot_diversity_price_increase_limit_percent = try(constraints.value.spot_diversity_price_increase_limit_percent, null)
       spot_interruption_predictions_enabled       = try(constraints.value.spot_interruption_predictions_enabled, false)
-      spot_interruption_predictions_type          = try(constraints.value.spot_interruption_predictions_type, false)
+      spot_interruption_predictions_type          = try(constraints.value.spot_interruption_predictions_type, null)
       min_cpu                                     = try(constraints.value.min_cpu, null)
       max_cpu                                     = try(constraints.value.max_cpu, null)
       min_memory                                  = try(constraints.value.min_memory, null)
