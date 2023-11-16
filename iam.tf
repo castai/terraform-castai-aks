@@ -91,7 +91,7 @@ resource "azuread_application" "castai" {
 }
 
 resource "azuread_application_password" "castai" {
-  application_object_id = azuread_application.castai.object_id
+  application_id = azuread_application.castai.object_id
 }
 
 resource "azuread_service_principal" "castai" {
