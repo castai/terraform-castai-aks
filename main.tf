@@ -46,15 +46,6 @@ resource "castai_node_template" "this" {
   configuration_id = try(each.value.configuration_id, null)
   should_taint     = try(each.value.should_taint, true)
 
-  dynamic "custom_label" {
-    for_each = flatten([lookup(each.value, "custom_label", [])])
-
-    content {
-      key   = try(custom_label.value.key, null)
-      value = try(custom_label.value.value, null)
-    }
-  }
-
   custom_labels = try(each.value.custom_labels, {})
 
   dynamic "custom_taints" {

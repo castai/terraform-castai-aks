@@ -85,6 +85,41 @@ module "castai-aks-cluster" {
   }
 }
 ```
+
+Migrating from 2.x.x to 3.x.x
+---------------------------
+
+Version 3.x.x changed:
+* Removed `custom_label` attribute in `castai_node_template` resource. Use `custom_labels` instead.
+
+Old configuration:
+```terraform
+module "castai-aks-cluster" {
+  node_templates = {
+    spot_tmpl = {
+      custom_label = {
+        key = "custom-label-key-1"
+        value = "custom-label-value-1"
+      }
+    }
+  }
+}
+```
+
+New configuration:
+```terraform
+module "castai-aks-cluster" {
+  node_templates = {
+    spot_tmpl = {
+      custom_labels = {
+        custom-label-key-1 = "custom-label-value-1"
+      }
+    }
+  }
+}
+```
+
+
 # Examples 
 
 Usage examples are located in [terraform provider repo](https://github.com/castai/terraform-provider-castai/tree/master/examples/aks)
