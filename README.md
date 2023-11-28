@@ -89,7 +89,7 @@ module "castai-aks-cluster" {
 Migrating from 2.x.x to 3.x.x
 ---------------------------
 
-Version 3.x.x changed:
+Version 3.x.x changes:
 * Removed `custom_label` attribute in `castai_node_template` resource. Use `custom_labels` instead.
 
 Old configuration:
