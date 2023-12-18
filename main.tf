@@ -30,6 +30,7 @@ resource "castai_node_configuration" "this" {
 
   aks {
     max_pods_per_node = try(each.value.max_pods_per_node, 30)
+    os_disk_type = try(each.value.os_disk_type, null)
   }
 }
 
