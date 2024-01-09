@@ -67,6 +67,12 @@ variable "castai_components_labels" {
   default     = {}
 }
 
+variable "castai_components_sets" {
+  type        = map(string)
+  description = "Optional additional 'set' configurations for helm resources."
+  default     = {}
+}
+
 variable "node_configurations" {
   type        = any
   description = "Map of AKS node configurations to create"

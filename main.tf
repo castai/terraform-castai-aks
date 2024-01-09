@@ -137,6 +137,14 @@ resource "helm_release" "castai_agent" {
     }
   }
 
+  dynamic "set" {
+    for_each = var.castai_components_sets
+    content {
+      name  = set.key
+      value = set.value
+    }
+  }
+
   set_sensitive {
     name  = "apiKey"
     value = castai_aks_cluster.castai_cluster.cluster_token
@@ -164,6 +172,14 @@ resource "helm_release" "castai_evictor" {
     for_each = var.castai_components_labels
     content {
       name  = "podLabels.${set.key}"
+      value = set.value
+    }
+  }
+
+  dynamic "set" {
+    for_each = var.castai_components_sets
+    content {
+      name  = set.key
       value = set.value
     }
   }
@@ -209,6 +225,14 @@ resource "helm_release" "castai_cluster_controller" {
     for_each = var.castai_components_labels
     content {
       name  = "podLabels.${set.key}"
+      value = set.value
+    }
+  }
+
+  dynamic "set" {
+    for_each = var.castai_components_sets
+    content {
+      name  = set.key
       value = set.value
     }
   }
@@ -293,6 +317,14 @@ resource "helm_release" "castai_pod_pinner" {
     }
   }
 
+  dynamic "set" {
+    for_each = var.castai_components_sets
+    content {
+      name  = set.key
+      value = set.value
+    }
+  }
+
   set {
     name  = "replicaCount"
     value = "0"
@@ -343,6 +375,14 @@ resource "helm_release" "castai_spot_handler" {
     }
   }
 
+  dynamic "set" {
+    for_each = var.castai_components_sets
+    content {
+      name  = set.key
+      value = set.value
+    }
+  }
+
   set {
     name  = "castai.clusterID"
     value = castai_aks_cluster.castai_cluster.id
@@ -377,6 +417,14 @@ resource "helm_release" "castai_kvisor" {
   set {
     name  = "structuredConfig.provider"
     value = "aks"
+  }
+
+  dynamic "set" {
+    for_each = var.castai_components_sets
+    content {
+      name  = set.key
+      value = set.value
+    }
   }
 }
 
