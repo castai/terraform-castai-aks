@@ -1,3 +1,7 @@
+locals {
+  configuration_id_regex_pattern = "[a-zA-Z0-9]{8}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{12}"
+}
+
 resource "castai_aks_cluster" "castai_cluster" {
   name = var.aks_cluster_name
 
@@ -9,7 +13,6 @@ resource "castai_aks_cluster" "castai_cluster" {
 
   node_resource_group        = var.node_resource_group
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
-
 }
 
 resource "castai_node_configuration" "this" {
@@ -27,12 +30,15 @@ resource "castai_node_configuration" "this" {
 
   aks {
     max_pods_per_node = try(each.value.max_pods_per_node, 30)
+    os_disk_type = try(each.value.os_disk_type, null)
   }
 }
 
 resource "castai_node_configuration_default" "this" {
   cluster_id       = castai_aks_cluster.castai_cluster.id
-  configuration_id = var.default_node_configuration
+  configuration_id = length(regexall(local.configuration_id_regex_pattern, var.default_node_configuration)) > 0 ? var.default_node_configuration : castai_node_configuration.this[var.default_node_configuration].id
+
+  depends_on = [ castai_node_configuration.this ]
 }
 
 resource "castai_node_template" "this" {
@@ -40,20 +46,12 @@ resource "castai_node_template" "this" {
 
   cluster_id = castai_aks_cluster.castai_cluster.id
 
-  name             = try(each.value.name, each.key)
-  is_default       = try(each.value.is_default, false)
-  is_enabled       = try(each.value.is_enabled, true)
-  configuration_id = try(each.value.configuration_id, null)
-  should_taint     = try(each.value.should_taint, true)
-
-  dynamic "custom_label" {
-    for_each = flatten([lookup(each.value, "custom_label", [])])
-
-    content {
-      key   = try(custom_label.value.key, null)
-      value = try(custom_label.value.value, null)
-    }
-  }
+  name                         = try(each.value.name, each.key)
+  is_default                   = try(each.value.is_default, false)
+  is_enabled                   = try(each.value.is_enabled, null)
+  configuration_id             = can(each.value.configuration_id) ? length(regexall(local.configuration_id_regex_pattern, each.value.configuration_id)) > 0 ? each.value.configuration_id : castai_node_configuration.this[each.value.configuration_id].id : null
+  should_taint                 = try(each.value.should_taint, true)
+  rebalancing_config_min_nodes = try(each.value.rebalancing_config_min_nodes, 0)
 
   custom_labels = try(each.value.custom_labels, {})
 
@@ -84,6 +82,8 @@ resource "castai_node_template" "this" {
       max_cpu                                     = try(constraints.value.max_cpu, null)
       min_memory                                  = try(constraints.value.min_memory, null)
       max_memory                                  = try(constraints.value.max_memory, null)
+      architectures                               = try(constraints.value.architectures, ["amd64"])
+      os                                          = try(constraints.value.os, ["linux"])
 
       dynamic "instance_families" {
         for_each = flatten([lookup(constraints.value, "instance_families", [])])
@@ -91,6 +91,16 @@ resource "castai_node_template" "this" {
         content {
           include = try(instance_families.value.include, [])
           exclude = try(instance_families.value.exclude, [])
+        }
+      }
+
+      dynamic "custom_priority" {
+        for_each = flatten([lookup(constraints.value, "custom_priority", [])])
+
+        content {
+          instance_families = try(custom_priority.value.instance_families, [])
+          spot = try(custom_priority.value.spot, false)
+          on_demand = try(custom_priority.value.on_demand, false)
         }
       }
     }
@@ -110,6 +120,10 @@ resource "helm_release" "castai_agent" {
   version = var.agent_version
   values  = var.agent_values
 
+  set {
+    name  = "replicaCount"
+    value = "2"
+  }
   set {
     name  = "provider"
     value = "aks"
@@ -132,6 +146,14 @@ resource "helm_release" "castai_agent" {
     for_each = var.castai_components_labels
     content {
       name  = "podLabels.${set.key}"
+      value = set.value
+    }
+  }
+
+  dynamic "set" {
+    for_each = var.castai_components_sets
+    content {
+      name  = set.key
       value = set.value
     }
   }
@@ -163,6 +185,14 @@ resource "helm_release" "castai_evictor" {
     for_each = var.castai_components_labels
     content {
       name  = "podLabels.${set.key}"
+      value = set.value
+    }
+  }
+
+  dynamic "set" {
+    for_each = var.castai_components_sets
+    content {
+      name  = set.key
       value = set.value
     }
   }
@@ -212,6 +242,14 @@ resource "helm_release" "castai_cluster_controller" {
     }
   }
 
+  dynamic "set" {
+    for_each = var.castai_components_sets
+    content {
+      name  = set.key
+      value = set.value
+    }
+  }
+
   set_sensitive {
     name  = "castai.apiKey"
     value = castai_aks_cluster.castai_cluster.cluster_token
@@ -246,6 +284,69 @@ resource "null_resource" "wait_for_cluster" {
     EOT
 
     interpreter = ["bash", "-c"]
+  }
+}
+
+resource "helm_release" "castai_pod_pinner" {
+  name             = "castai-pod-pinner"
+  repository       = "https://castai.github.io/helm-charts"
+  chart            = "castai-pod-pinner"
+  namespace        = "castai-agent"
+  create_namespace = true
+  cleanup_on_fail  = true
+  wait             = true
+
+  set {
+    name  = "castai.clusterID"
+    value = castai_aks_cluster.castai_cluster.id
+  }
+
+  dynamic "set" {
+    for_each = var.api_url != "" ? [var.api_url] : []
+    content {
+      name  = "castai.apiURL"
+      value = var.api_url
+    }
+  }
+
+  set_sensitive {
+    name  = "castai.apiKey"
+    value = castai_aks_cluster.castai_cluster.cluster_token
+  }
+
+  dynamic "set" {
+    for_each = var.grpc_url != "" ? [var.grpc_url] : []
+    content {
+      name  = "castai.grpcURL"
+      value = var.grpc_url
+    }
+  }
+
+  dynamic "set" {
+    for_each = var.castai_components_labels
+    content {
+      name  = "podLabels.${set.key}"
+      value = set.value
+    }
+  }
+
+  dynamic "set" {
+    for_each = var.castai_components_sets
+    content {
+      name  = set.key
+      value = set.value
+    }
+  }
+
+  set {
+    name  = "replicaCount"
+    value = "0"
+  }
+
+  depends_on = [helm_release.castai_agent]
+
+  lifecycle {
+    ignore_changes = [set, version]
   }
 }
 
@@ -287,6 +388,14 @@ resource "helm_release" "castai_spot_handler" {
     }
   }
 
+  dynamic "set" {
+    for_each = var.castai_components_sets
+    content {
+      name  = set.key
+      value = set.value
+    }
+  }
+
   set {
     name  = "castai.clusterID"
     value = castai_aks_cluster.castai_cluster.id
@@ -321,6 +430,14 @@ resource "helm_release" "castai_kvisor" {
   set {
     name  = "structuredConfig.provider"
     value = "aks"
+  }
+
+  dynamic "set" {
+    for_each = var.castai_components_sets
+    content {
+      name  = set.key
+      value = set.value
+    }
   }
 }
 

@@ -11,6 +11,12 @@ variable "castai_api_token" {
   default = ""
 }
 
+variable "grpc_url" {
+  type        = string
+  description = "gRPC endpoint used by pod-pinner"
+  default     = "grpc.cast.ai:443"
+}
+
 variable "aks_cluster_name" {
   type        = string
   description = "Name of the cluster to be connected to CAST AI."
@@ -58,6 +64,12 @@ variable "tenant_id" {
 variable "castai_components_labels" {
   type        = map(any)
   description = "Optional additional Kubernetes labels for CAST AI pods"
+  default     = {}
+}
+
+variable "castai_components_sets" {
+  type        = map(string)
+  description = "Optional additional 'set' configurations for helm resources."
   default     = {}
 }
 
