@@ -94,6 +94,17 @@ resource "castai_node_template" "this" {
         }
       }
 
+      dynamic "gpu" {
+        for_each = flatten([lookup(constraints.value, "gpu", [])])
+        content {
+          manufacturers = try(gpu.value.manufacturers, [])
+          include_names = try(gpu.value.include_names, [])
+          exclude_names = try(gpu.value.exclude_names, [])
+          min_count     = try(gpu.value.min_count, null)
+          max_count     = try(gpu.value.max_count, null)
+        }
+      }
+
       dynamic "custom_priority" {
         for_each = flatten([lookup(constraints.value, "custom_priority", [])])
 
