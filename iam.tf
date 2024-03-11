@@ -91,11 +91,11 @@ resource "azuread_application" "castai" {
 }
 
 resource "azuread_application_password" "castai" {
-  application_object_id = azuread_application.castai.object_id
+  application_id = azuread_application.castai.object_id
 }
 
 resource "azuread_service_principal" "castai" {
-  application_id               = azuread_application.castai.application_id
+  client_id                    = azuread_application.castai.client_id
   app_role_assignment_required = false
   owners                       = [data.azuread_client_config.current.object_id]
 }
