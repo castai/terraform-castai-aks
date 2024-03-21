@@ -17,6 +17,12 @@ variable "grpc_url" {
   default     = "grpc.cast.ai:443"
 }
 
+variable "api_grpc_addr" {
+  type        = string
+  description = "CAST AI GRPC API address"
+  default     = "api-grpc.cast.ai:443"
+}
+
 variable "aks_cluster_name" {
   type        = string
   description = "Name of the cluster to be connected to CAST AI."
@@ -153,7 +159,7 @@ variable "evictor_version" {
 variable "kvisor_version" {
   description = "Version of kvisor chart. If not provided, latest version will be used."
   type        = string
-  default     = "0.16.74"
+  default     = null
 }
 
 variable "wait_for_cluster_ready" {
