@@ -405,8 +405,6 @@ resource "helm_release" "castai_spot_handler" {
 }
 
 resource "helm_release" "castai_kvisor" {
-  count = var.install_security_agent == true ? 1 : 0
-
   name             = "castai-kvisor"
   repository       = "https://castai.github.io/helm-charts"
   chart            = "castai-kvisor"
@@ -417,9 +415,8 @@ resource "helm_release" "castai_kvisor" {
   version = var.kvisor_version
   values  = var.kvisor_values
 
-  set {
-    name  = "castai.apiURL"
-    value = var.api_url
+  lifecycle {
+    ignore_changes = [version]
   }
 
   set {
@@ -427,8 +424,38 @@ resource "helm_release" "castai_kvisor" {
     value = castai_aks_cluster.castai_cluster.id
   }
 
+  set_sensitive {
+    name  = "castai.apiKey"
+    value = castai_aks_cluster.castai_cluster.cluster_token
+  }
+
   set {
-    name  = "structuredConfig.provider"
+    name  = "castai.grpcAddr"
+    value = var.api_grpc_addr
+  }
+
+  set {
+    name  = "controller.replicas"
+    value = var.install_security_agent == true ? 1 : 0
+  }
+
+  set {
+    name = "controller.extraArgs.kube-linter-enabled"
+    value = "true"
+  }
+
+  set {
+    name = "controller.extraArgs.image-scan-enabled"
+    value = "true"
+  }
+
+  set {
+    name = "controller.extraArgs.kube-bench-enabled"
+    value = "true"
+  }
+
+  set {
+    name = "controller.extraArgs.kube-bench-cloud-provider"
     value = "aks"
   }
 
