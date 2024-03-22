@@ -426,7 +426,7 @@ resource "helm_release" "castai_kvisor" {
 
   set_sensitive {
     name  = "castai.apiKey"
-    value = castai_aks_cluster.astai_cluster.cluster_token
+    value = castai_aks_cluster.castai_cluster.cluster_token
   }
 
   set {
