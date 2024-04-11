@@ -8,11 +8,24 @@ resource "castai_aks_cluster" "castai_cluster" {
   region          = var.aks_cluster_region
   subscription_id = var.subscription_id
   tenant_id       = var.tenant_id
-  client_id       = azuread_application.castai.application_id
+  client_id       = azuread_application.castai.client_id
   client_secret   = azuread_application_password.castai.value
 
   node_resource_group        = var.node_resource_group
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
+
+  # CastAI needs cloud permission to do some clean up
+  # when disconnecting the culster.
+  # This ensures IAM configurations exist during disconnect.
+  depends_on = [
+    azurerm_role_definition.castai,
+    azurerm_role_assignment.castai_resource_group,
+    azurerm_role_assignment.castai_node_resource_group,
+    azurerm_role_assignment.castai_additional_resource_groups,
+    azuread_application.castai,
+    azuread_application_password.castai,
+    azuread_service_principal.castai
+  ]
 }
 
 resource "castai_node_configuration" "this" {
@@ -30,7 +43,7 @@ resource "castai_node_configuration" "this" {
 
   aks {
     max_pods_per_node = try(each.value.max_pods_per_node, 30)
-    os_disk_type = try(each.value.os_disk_type, null)
+    os_disk_type      = try(each.value.os_disk_type, null)
   }
 }
 
@@ -38,7 +51,7 @@ resource "castai_node_configuration_default" "this" {
   cluster_id       = castai_aks_cluster.castai_cluster.id
   configuration_id = length(regexall(local.configuration_id_regex_pattern, var.default_node_configuration)) > 0 ? var.default_node_configuration : castai_node_configuration.this[var.default_node_configuration].id
 
-  depends_on = [ castai_node_configuration.this ]
+  depends_on = [castai_node_configuration.this]
 }
 
 resource "castai_node_template" "this" {
@@ -99,13 +112,13 @@ resource "castai_node_template" "this" {
 
         content {
           instance_families = try(custom_priority.value.instance_families, [])
-          spot = try(custom_priority.value.spot, false)
-          on_demand = try(custom_priority.value.on_demand, false)
+          spot              = try(custom_priority.value.spot, false)
+          on_demand         = try(custom_priority.value.on_demand, false)
         }
       }
     }
   }
-  depends_on = [ castai_autoscaler.castai_autoscaler_policies ]
+  depends_on = [castai_autoscaler.castai_autoscaler_policies]
 }
 
 resource "helm_release" "castai_agent" {
@@ -263,7 +276,7 @@ resource "helm_release" "castai_cluster_controller" {
 }
 
 resource "null_resource" "wait_for_cluster" {
-  count = var.wait_for_cluster_ready ? 1 : 0
+  count      = var.wait_for_cluster_ready ? 1 : 0
   depends_on = [helm_release.castai_cluster_controller, helm_release.castai_agent]
 
   provisioner "local-exec" {
@@ -440,22 +453,22 @@ resource "helm_release" "castai_kvisor" {
   }
 
   set {
-    name = "controller.extraArgs.kube-linter-enabled"
+    name  = "controller.extraArgs.kube-linter-enabled"
     value = "true"
   }
 
   set {
-    name = "controller.extraArgs.image-scan-enabled"
+    name  = "controller.extraArgs.image-scan-enabled"
     value = "true"
   }
 
   set {
-    name = "controller.extraArgs.kube-bench-enabled"
+    name  = "controller.extraArgs.kube-bench-enabled"
     value = "true"
   }
 
   set {
-    name = "controller.extraArgs.kube-bench-cloud-provider"
+    name  = "controller.extraArgs.kube-bench-cloud-provider"
     value = "aks"
   }
 
