@@ -22,6 +22,7 @@ resource "castai_node_configuration" "this" {
 
   name           = try(each.value.name, each.key)
   disk_cpu_ratio = try(each.value.disk_cpu_ratio, 0)
+  drain_timeout_sec = try(each.value.drain_timeout_sec, 0)
   min_disk_size  = try(each.value.min_disk_size, 100)
   subnets        = try(each.value.subnets, null)
   ssh_public_key = try(each.value.ssh_public_key, null)
