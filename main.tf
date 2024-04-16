@@ -33,14 +33,14 @@ resource "castai_node_configuration" "this" {
 
   cluster_id = castai_aks_cluster.castai_cluster.id
 
-  name           = try(each.value.name, each.key)
-  disk_cpu_ratio = try(each.value.disk_cpu_ratio, 0)
+  name              = try(each.value.name, each.key)
+  disk_cpu_ratio    = try(each.value.disk_cpu_ratio, 0)
   drain_timeout_sec = try(each.value.drain_timeout_sec, 0)
-  min_disk_size  = try(each.value.min_disk_size, 100)
-  subnets        = try(each.value.subnets, null)
-  ssh_public_key = try(each.value.ssh_public_key, null)
-  image          = try(each.value.image, null)
-  tags           = try(each.value.tags, {})
+  min_disk_size     = try(each.value.min_disk_size, 100)
+  subnets           = try(each.value.subnets, null)
+  ssh_public_key    = try(each.value.ssh_public_key, null)
+  image             = try(each.value.image, null)
+  tags              = try(each.value.tags, {})
 
   aks {
     max_pods_per_node = try(each.value.max_pods_per_node, 30)
@@ -419,6 +419,8 @@ resource "helm_release" "castai_spot_handler" {
 }
 
 resource "helm_release" "castai_kvisor" {
+  count = var.install_security_agent ? 1 : 0
+
   name             = "castai-kvisor"
   repository       = "https://castai.github.io/helm-charts"
   chart            = "castai-kvisor"
@@ -446,11 +448,6 @@ resource "helm_release" "castai_kvisor" {
   set {
     name  = "castai.grpcAddr"
     value = var.api_grpc_addr
-  }
-
-  set {
-    name  = "controller.replicas"
-    value = var.install_security_agent == true ? 1 : 0
   }
 
   set {
