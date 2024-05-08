@@ -78,8 +78,8 @@ module "castai-aks-cluster" {
         instance_families = {
           exclude = ["standard_DPLSv5"]
         }
-        compute_optimized = false
-        storage_optimized = false
+        compute_optimized_status = "disabled"
+        storage_optimized_status = "disabled"
       }
     }
   }
@@ -118,7 +118,39 @@ module "castai-aks-cluster" {
   }
 }
 ```
+Migrating from 3.x.x to 4.x.x
+---------------------------
 
+Version 4.x.x changed:
+* Removed `compute_optimized` and `storage_optimized` attributes in `castai_node_template` resource, `constraints` object. Use `compute_optimized_status` and `storage_optimized_status` instead.
+
+Old configuration:
+```terraform
+module "castai-aks-cluster" {
+  node_templates = {
+    spot_tmpl = {
+      constraints = {
+        compute_optimized = false
+        storage_optimized = true
+      }
+    }
+  }
+}
+```
+
+New configuration:
+```terraform
+module "castai-aks-cluster" {
+  node_templates = {
+    spot_tmpl = {
+      constraints = {
+        compute_optimized_status = "disabled"
+        storage_optimized_status = "enabled"
+      }
+    }
+  }
+}
+```
 
 # Examples 
 
@@ -132,7 +164,7 @@ Usage examples are located in [terraform provider repo](https://github.com/casta
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13 |
 | <a name="requirement_azuread"></a> [azuread](#requirement\_azuread) | >= 2.22.0 |
 | <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | >= 3.7.0 |
-| <a name="requirement_castai"></a> [castai](#requirement\_castai) | >= v6.6.0 |
+| <a name="requirement_castai"></a> [castai](#requirement\_castai) | ~> 7.0.0 |
 | <a name="requirement_helm"></a> [helm](#requirement\_helm) | >= 2.0.0 |
 
 ## Providers
@@ -141,7 +173,7 @@ Usage examples are located in [terraform provider repo](https://github.com/casta
 |------|---------|
 | <a name="provider_azuread"></a> [azuread](#provider\_azuread) | >= 2.22.0 |
 | <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | >= 3.7.0 |
-| <a name="provider_castai"></a> [castai](#provider\_castai) | >= v6.6.0 |
+| <a name="provider_castai"></a> [castai](#provider\_castai) | ~> 7.0.0 |
 | <a name="provider_helm"></a> [helm](#provider\_helm) | >= 2.0.0 |
 | <a name="provider_null"></a> [null](#provider\_null) | n/a |
 
