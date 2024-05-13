@@ -126,6 +126,12 @@ variable "evictor_values" {
   default     = []
 }
 
+variable "evictor_ext_values" {
+  description = "List of YAML formatted string with evictor-ext values"
+  type        = list(string)
+  default     = []
+}
+
 variable "kvisor_values" {
   description = "List of YAML formatted string values for kvisor helm chart"
   type        = list(string)
@@ -138,12 +144,6 @@ variable "agent_version" {
   default     = null
 }
 
-variable "spot_handler_version" {
-  description = "Version of castai-spot-handler helm chart. If not provided, latest version will be used."
-  type        = string
-  default     = null
-}
-
 variable "cluster_controller_version" {
   description = "Version of castai-cluster-controller helm chart. If not provided, latest version will be used."
   type        = string
@@ -152,6 +152,24 @@ variable "cluster_controller_version" {
 
 variable "evictor_version" {
   description = "Version of castai-evictor chart. If not provided, latest version will be used."
+  type        = string
+  default     = null
+}
+
+variable "evictor_ext_version" {
+  description = "Version of castai-evictor-ext chart. Default latest"
+  type        = string
+  default     = null
+}
+
+variable "pod_pinner_version" {
+  description = "Version of pod-pinner helm chart. Default latest"
+  type        = string
+  default     = null
+}
+
+variable "spot_handler_version" {
+  description = "Version of castai-spot-handler helm chart. If not provided, latest version will be used."
   type        = string
   default     = null
 }
