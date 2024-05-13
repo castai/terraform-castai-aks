@@ -98,6 +98,7 @@ resource "castai_node_template" "this" {
       max_memory                                  = try(constraints.value.max_memory, null)
       architectures                               = try(constraints.value.architectures, ["amd64"])
       os                                          = try(constraints.value.os, ["linux"])
+      azs                                         = try(constraints.value.azs, null)
 
       dynamic "instance_families" {
         for_each = flatten([lookup(constraints.value, "instance_families", [])])
