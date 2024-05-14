@@ -159,13 +159,13 @@ Usage examples are located in [terraform provider repo](https://github.com/casta
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
-| Name | Version |
-|------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13 |
+| Name | Version   |
+|------|-----------|
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13   |
 | <a name="requirement_azuread"></a> [azuread](#requirement\_azuread) | >= 2.22.0 |
-| <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | >= 3.7.0 |
+| <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | >= 3.7.0  |
 | <a name="requirement_castai"></a> [castai](#requirement\_castai) | ~> 7.0.0 |
-| <a name="requirement_helm"></a> [helm](#requirement\_helm) | >= 2.0.0 |
+| <a name="requirement_helm"></a> [helm](#requirement\_helm) | >= 2.0.0  |
 
 ## Providers
 
