@@ -78,8 +78,8 @@ module "castai-aks-cluster" {
         instance_families = {
           exclude = ["standard_DPLSv5"]
         }
-        compute_optimized_status = "disabled"
-        storage_optimized_status = "disabled"
+        compute_optimized_state = "disabled"
+        storage_optimized_state = "disabled"
       }
     }
   }
@@ -122,7 +122,7 @@ Migrating from 3.x.x to 4.x.x
 ---------------------------
 
 Version 4.x.x changed:
-* Removed `compute_optimized` and `storage_optimized` attributes in `castai_node_template` resource, `constraints` object. Use `compute_optimized_status` and `storage_optimized_status` instead.
+* Removed `compute_optimized` and `storage_optimized` attributes in `castai_node_template` resource, `constraints` object. Use `compute_optimized_state` and `storage_optimized_state` instead.
 
 Old configuration:
 ```terraform
@@ -144,8 +144,8 @@ module "castai-aks-cluster" {
   node_templates = {
     spot_tmpl = {
       constraints = {
-        compute_optimized_status = "disabled"
-        storage_optimized_status = "enabled"
+        compute_optimized_state = "disabled"
+        storage_optimized_state = "enabled"
       }
     }
   }
