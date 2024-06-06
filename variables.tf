@@ -126,6 +126,12 @@ variable "evictor_values" {
   default     = []
 }
 
+variable "evictor_ext_values" {
+  description = "List of YAML formatted string with evictor-ext values"
+  type        = list(string)
+  default     = []
+}
+
 variable "kvisor_values" {
   description = "List of YAML formatted string values for kvisor helm chart"
   type        = list(string)
@@ -134,12 +140,6 @@ variable "kvisor_values" {
 
 variable "agent_version" {
   description = "Version of castai-agent helm chart. If not provided, latest version will be used."
-  type        = string
-  default     = null
-}
-
-variable "spot_handler_version" {
-  description = "Version of castai-spot-handler helm chart. If not provided, latest version will be used."
   type        = string
   default     = null
 }
@@ -156,10 +156,34 @@ variable "evictor_version" {
   default     = null
 }
 
+variable "evictor_ext_version" {
+  description = "Version of castai-evictor-ext chart. Default latest"
+  type        = string
+  default     = null
+}
+
+variable "pod_pinner_version" {
+  description = "Version of pod-pinner helm chart. Default latest"
+  type        = string
+  default     = null
+}
+
+variable "spot_handler_version" {
+  description = "Version of castai-spot-handler helm chart. If not provided, latest version will be used."
+  type        = string
+  default     = null
+}
+
 variable "kvisor_version" {
   description = "Version of kvisor chart. If not provided, latest version will be used."
   type        = string
   default     = null
+}
+
+variable "self_managed" {
+  type        = bool
+  default     = false
+  description = "Whether CAST AI components' upgrades are managed by a customer; by default upgrades are managed CAST AI central system."
 }
 
 variable "wait_for_cluster_ready" {
