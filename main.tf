@@ -730,8 +730,140 @@ resource "helm_release" "castai_kvisor_self_managed" {
 }
 
 resource "castai_autoscaler" "castai_autoscaler_policies" {
-  autoscaler_policies_json = var.autoscaler_policies_json
   cluster_id               = castai_aks_cluster.castai_cluster.id
+
+  // Deprecated  -- kept for backward compatibility
+  autoscaler_policies_json = var.autoscaler_policies_json
+
+  dynamic "autoscaler_policy_overrides" {
+    for_each = try([var.autoscaler_policy_overrides], [])
+
+    content {
+      enabled                                 = try(autoscaler_policy_overrides.value.enabled, null)
+      is_scoped_mode                          = try(autoscaler_policy_overrides.value.is_scoped_mode, null)
+      node_templates_partial_matching_enabled = try(autoscaler_policy_overrides.value.node_templates_partial_matching_enabled, null)
+
+      dynamic "unschedulable_pods" {
+        for_each = try([autoscaler_policy_overrides.value.unschedulable_pods], [])
+
+        content {
+          enabled                  = try(unschedulable_pods.value.enabled, null)
+          custom_instances_enabled = try(unschedulable_pods.value.custom_instances_enabled, null)
+
+          dynamic "headroom" {
+            for_each = try([unschedulable_pods.value.headroom], [])
+
+            content {
+              enabled           = try(headroom.value.enabled, null)
+              cpu_percentage    = try(headroom.value.cpu_percentage, null)
+              memory_percentage = try(headroom.value.memory_percentage, null)
+            }
+          }
+
+          dynamic "headroom_spot" {
+            for_each = try([unschedulable_pods.value.headroom_spot], [])
+
+            content {
+              enabled           = try(headroom_spot.value.enabled, null)
+              cpu_percentage    = try(headroom_spot.value.cpu_percentage, null)
+              memory_percentage = try(headroom_spot.value.memory_percentage, null)
+            }
+          }
+
+          dynamic "node_constraints" {
+            for_each = try([unschedulable_pods.value.node_constraints], [])
+
+            content {
+              enabled       = try(node_constraints.value.enabled, null)
+              min_cpu_cores = try(node_constraints.value.min_cpu_cores, null)
+              max_cpu_cores = try(node_constraints.value.max_cpu_cores, null)
+              min_ram_mib   = try(node_constraints.value.min_ram_mib, null)
+              max_ram_mib   = try(node_constraints.value.max_ram_mib, null)
+            }
+          }
+        }
+      }
+
+      dynamic "cluster_limits" {
+        for_each = try([autoscaler_policy_overrides.value.cluster_limits], [])
+
+        content {
+          enabled = try(cluster_limits.value.enabled, null)
+
+
+          dynamic "cpu" {
+            for_each = try([cluster_limits.value.cpu], [])
+
+            content {
+              min_cores = try(cpu.value.min_cores, null)
+              max_cores = try(cpu.value.max_cores, null)
+            }
+          }
+        }
+      }
+
+      dynamic "spot_instances" {
+        for_each = try([autoscaler_policy_overrides.value.spot_instances], [])
+
+        content {
+          enabled                             = try(spot_instances.value.enabled, null)
+          max_reclaim_rate                    = try(spot_instances.value.max_reclaim_rate, null)
+          spot_diversity_enabled              = try(spot_instances.value.spot_diversity_enabled, null)
+          spot_diversity_price_increase_limit = try(spot_instances.value.spot_diversity_price_increase_limit, null)
+
+          dynamic "spot_backups" {
+            for_each = try([spot_instances.value.spot_backups], [])
+
+            content {
+              enabled                          = try(spot_backups.value.enabled, null)
+              spot_backup_restore_rate_seconds = try(spot_backups.value.spot_backup_restore_rate_seconds, null)
+            }
+          }
+
+          dynamic "spot_interruption_predictions" {
+            for_each = try([spot_instances.value.spot_interruption_predictions], [])
+
+            content {
+              enabled                            = try(spot_interruption_predictions.value.enabled, null)
+              spot_interruption_predictions_type = try(spot_interruption_predictions.value.spot_interruption_predictions_type, null)
+            }
+          }
+        }
+      }
+
+      dynamic "node_downscaler" {
+        for_each = try([autoscaler_policy_overrides.value.node_downscaler], [])
+
+        content {
+          enabled = try(node_downscaler.value.enabled, null)
+
+          dynamic "empty_nodes" {
+            for_each = try([node_downscaler.value.empty_nodes], [])
+
+            content {
+              enabled       = try(empty_nodes.value.enabled, null)
+              delay_seconds = try(empty_nodes.value.delay_seconds, null)
+            }
+          }
+
+          dynamic "evictor" {
+            for_each = try([node_downscaler.value.evictor], [])
+
+            content {
+              enabled                                = try(evictor.value.enabled, null)
+              dry_run                                = try(evictor.value.dry_run, null)
+              aggressive_mode                        = try(evictor.value.aggressive_mode, null)
+              scoped_mode                            = try(evictor.value.scoped_mode, null)
+              cycle_interval                         = try(evictor.value.cycle_interval, null)
+              node_grace_period_minutes              = try(evictor.value.node_grace_period_minutes, null)
+              pod_eviction_failure_back_off_interval = try(evictor.value.pod_eviction_failure_back_off_interval, null)
+              ignore_pod_disruption_budgets          = try(evictor.value.ignore_pod_disruption_budgets, null)
+            }
+          }
+        }
+      }
+    }
+  }
 
   depends_on = [helm_release.castai_agent, helm_release.castai_evictor]
 }
