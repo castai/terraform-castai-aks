@@ -40,13 +40,7 @@ variable "subscription_id" {
 
 variable "autoscaler_policies_json" {
   type        = string
-  description = "Optional json object to override CAST AI cluster autoscaler policies. Deprecated, use `autoscaler_policy_overrides` instead."
-  default     = null
-}
-
-variable "autoscaler_policy_overrides" {
-  type        = any
-  description = "Optional Autoscaler policy definitions to override current autoscaler settings"
+  description = "Optional json object to override CAST AI cluster autoscaler policies"
   default     = null
 }
 
