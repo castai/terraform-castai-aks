@@ -736,7 +736,7 @@ resource "castai_autoscaler" "castai_autoscaler_policies" {
   autoscaler_policies_json = var.autoscaler_policies_json
 
   dynamic "autoscaler_settings" {
-    for_each = try([var.autoscaler_settings], [])
+    for_each = var.autoscaler_settings != null ? [var.autoscaler_settings] : []
 
     content {
       enabled                                 = try(autoscaler_settings.value.enabled, null)
