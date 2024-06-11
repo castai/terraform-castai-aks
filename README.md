@@ -202,7 +202,7 @@ module "castai-aks-cluster" {
 Migrating from 5.0.x to 5.2.x
 ---------------------------
 
-Version 5.1.x changed:
+Version 5.2.x changed:
 * Deprecated `autoscaler_policies_json` attribute. Use `autoscaler_settings` instead.
 
 Old configuration:
