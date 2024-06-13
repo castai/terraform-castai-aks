@@ -59,24 +59,24 @@ resource "azurerm_role_definition" "castai" {
   ])))
 }
 
-
 resource "azurerm_role_assignment" "castai_resource_group" {
   principal_id       = azuread_service_principal.castai.id
   role_definition_id = azurerm_role_definition.castai.role_definition_resource_id
-
-  scope = "/subscriptions/${var.subscription_id}/resourceGroups/${var.resource_group}"
+  description        = "castai role assignment for resource group ${var.resource_group}"
+  scope              = "/subscriptions/${var.subscription_id}/resourceGroups/${var.resource_group}"
 }
 
 resource "azurerm_role_assignment" "castai_node_resource_group" {
   principal_id       = azuread_service_principal.castai.id
   role_definition_id = azurerm_role_definition.castai.role_definition_resource_id
-
-  scope = "/subscriptions/${var.subscription_id}/resourceGroups/${var.node_resource_group}"
+  description        = "castai role assignment for resource group ${var.aks_cluster_name}"
+  scope              = "/subscriptions/${var.subscription_id}/resourceGroups/${var.node_resource_group}"
 }
 
 resource "azurerm_role_assignment" "castai_additional_resource_groups" {
   for_each           = toset(var.additional_resource_groups)
   principal_id       = azuread_service_principal.castai.id
+  description        = "castai role assignment for resource group ${var.additional_resource_groups}"
   role_definition_id = azurerm_role_definition.castai.role_definition_resource_id
   scope              = each.key
 }
