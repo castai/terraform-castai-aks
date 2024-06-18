@@ -644,7 +644,7 @@ resource "helm_release" "castai_kvisor" {
   }
 
   dynamic "set" {
-    for_each = merge(var.kvisor_controller_extra_args.default, var.kvisor_controller_extra_args)
+    for_each = var.kvisor_controller_extra_args
     content {
       name  = "controller.extraArgs.${set.key}"
       value = set.value
