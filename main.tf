@@ -15,7 +15,7 @@ resource "castai_aks_cluster" "castai_cluster" {
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
 
   # CastAI needs cloud permission to do some clean up
-  # when disconnecting the culster.
+  # when disconnecting the cluster.
   # This ensures IAM configurations exist during disconnect.
   depends_on = [
     azurerm_role_definition.castai,
