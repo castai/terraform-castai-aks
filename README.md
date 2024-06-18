@@ -288,23 +288,23 @@ Usage examples are located in [terraform provider repo](https://github.com/casta
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
-| Name | Version   |
-|------|-----------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13   |
+| Name | Version |
+|------|---------|
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13 |
 | <a name="requirement_azuread"></a> [azuread](#requirement\_azuread) | >= 2.22.0 |
-| <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | >= 3.7.0  |
-| <a name="requirement_castai"></a> [castai](#requirement\_castai) | ~> 7.4.0  |
-| <a name="requirement_helm"></a> [helm](#requirement\_helm) | >= 2.0.0  |
+| <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | >= 3.7.0 |
+| <a name="requirement_castai"></a> [castai](#requirement\_castai) | >= 7.4.0 |
+| <a name="requirement_helm"></a> [helm](#requirement\_helm) | >= 2.0.0 |
 
 ## Providers
 
-| Name | Version   |
-|------|-----------|
+| Name | Version |
+|------|---------|
 | <a name="provider_azuread"></a> [azuread](#provider\_azuread) | >= 2.22.0 |
-| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | >= 3.7.0  |
-| <a name="provider_castai"></a> [castai](#provider\_castai) | ~> 7.4.0  |
-| <a name="provider_helm"></a> [helm](#provider\_helm) | >= 2.0.0  |
-| <a name="provider_null"></a> [null](#provider\_null) | n/a       |
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | >= 3.7.0 |
+| <a name="provider_castai"></a> [castai](#provider\_castai) | >= 7.4.0 |
+| <a name="provider_helm"></a> [helm](#provider\_helm) | >= 2.0.0 |
+| <a name="provider_null"></a> [null](#provider\_null) | n/a |
 
 ## Modules
 
@@ -352,7 +352,7 @@ No modules.
 | <a name="input_api_grpc_addr"></a> [api\_grpc\_addr](#input\_api\_grpc\_addr) | CAST AI GRPC API address | `string` | `"api-grpc.cast.ai:443"` | no |
 | <a name="input_api_url"></a> [api\_url](#input\_api\_url) | URL of alternative CAST AI API to be used during development or testing | `string` | `"https://api.cast.ai"` | no |
 | <a name="input_autoscaler_policies_json"></a> [autoscaler\_policies\_json](#input\_autoscaler\_policies\_json) | Optional json object to override CAST AI cluster autoscaler policies. Deprecated, use `autoscaler_settings` instead. | `string` | `null` | no |
-| <a name="input_autoscaler_settings"></a> [autoscaler\_policy\_overrides](#input\_autoscaler\_policy\_overrides) | Optional Autoscaler policy definitions to override current autoscaler settings | `any` | `null` | no |
+| <a name="input_autoscaler_settings"></a> [autoscaler\_settings](#input\_autoscaler\_settings) | Optional Autoscaler policy definitions to override current autoscaler settings | `any` | `null` | no |
 | <a name="input_castai_api_token"></a> [castai\_api\_token](#input\_castai\_api\_token) | Optional CAST AI API token created in console.cast.ai API Access keys section. Used only when `wait_for_cluster_ready` is set to true | `string` | `""` | no |
 | <a name="input_castai_components_labels"></a> [castai\_components\_labels](#input\_castai\_components\_labels) | Optional additional Kubernetes labels for CAST AI pods | `map(any)` | `{}` | no |
 | <a name="input_castai_components_sets"></a> [castai\_components\_sets](#input\_castai\_components\_sets) | Optional additional 'set' configurations for helm resources. | `map(string)` | `{}` | no |
