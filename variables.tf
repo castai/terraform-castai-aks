@@ -30,7 +30,6 @@ variable "kvisor_controller_extra_args" {
     "kube-linter-enabled"        = "true"
     "image-scan-enabled"         = "true"
     "kube-bench-enabled"         = "true"
-    "kube-bench-cloud-provider"  = "aks"
   }
 }
 
