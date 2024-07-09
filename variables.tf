@@ -148,6 +148,12 @@ variable "evictor_ext_values" {
   default     = []
 }
 
+variable "pod_pinner_values" {
+  description = "List of YAML formatted string values for agent helm chart"
+  type        = list(string)
+  default     = []
+}
+
 variable "kvisor_values" {
   description = "List of YAML formatted string values for kvisor helm chart"
   type        = list(string)
