@@ -385,11 +385,6 @@ resource "helm_release" "castai_evictor_self_managed" {
   values  = var.evictor_values
 
   set {
-    name  = "replicaCount"
-    value = "0"
-  }
-
-  set {
     name  = "castai-evictor-ext.enabled"
     value = "false"
   }
@@ -440,6 +435,7 @@ resource "helm_release" "castai_pod_pinner" {
   wait             = true
 
   version = var.pod_pinner_version
+  values  = var.pod_pinner_values
 
   set {
     name  = "castai.clusterID"
@@ -507,6 +503,7 @@ resource "helm_release" "castai_pod_pinner_self_managed" {
   wait             = true
 
   version = var.pod_pinner_version
+  values  = var.pod_pinner_values
 
   set {
     name  = "castai.clusterID"
@@ -548,11 +545,6 @@ resource "helm_release" "castai_pod_pinner_self_managed" {
       name  = set.key
       value = set.value
     }
-  }
-
-  set {
-    name  = "replicaCount"
-    value = "0"
   }
 
   depends_on = [helm_release.castai_agent]
