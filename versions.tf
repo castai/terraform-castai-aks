@@ -12,7 +12,7 @@ terraform {
     }
     castai = {
       source  = "castai/castai"
-      version = "~> 7.8"
+      version = "~> 7.10"
     }
     helm = {
       source  = "hashicorp/helm"
