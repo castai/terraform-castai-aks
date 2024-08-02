@@ -710,6 +710,67 @@ resource "helm_release" "castai_kvisor_self_managed" {
   }
 }
 
+#---------------------------------------------------#
+# CAST.AI Workload Autoscaler configuration         #
+#---------------------------------------------------#
+resource "helm_release" "castai_workload_autoscaler" {
+  count = var.install_workload_autoscaler && !var.self_managed ? 1 : 0
+
+  name             = "castai-workload-autoscaler"
+  repository       = "https://castai.github.io/helm-charts"
+  chart            = "castai-workload-autoscaler"
+  namespace        = "castai-agent"
+  create_namespace = true
+  cleanup_on_fail  = true
+  wait             = true
+
+  version = var.workload_autoscaler_version
+  values  = var.workload_autoscaler_values
+
+  set {
+    name  = "castai.apiKeySecretRef"
+    value = "castai-cluster-controller"
+  }
+
+  set {
+    name  = "castai.configMapRef"
+    value = "castai-cluster-controller"
+  }
+
+  depends_on = [helm_release.castai_agent]
+
+  lifecycle {
+    ignore_changes = [version]
+  }
+}
+
+resource "helm_release" "castai_workload_autoscaler_self_managed" {
+  count = var.install_workload_autoscaler && var.self_managed ? 1 : 0
+
+  name             = "castai-workload-autoscaler"
+  repository       = "https://castai.github.io/helm-charts"
+  chart            = "castai-workload-autoscaler"
+  namespace        = "castai-agent"
+  create_namespace = true
+  cleanup_on_fail  = true
+  wait             = true
+
+  version = var.workload_autoscaler_version
+  values  = var.workload_autoscaler_values
+
+  set {
+    name  = "castai.apiKeySecretRef"
+    value = "castai-cluster-controller"
+  }
+
+  set {
+    name  = "castai.configMapRef"
+    value = "castai-cluster-controller"
+  }
+
+  depends_on = [helm_release.castai_agent, helm_release.castai_workload_autoscaler]
+}
+
 resource "castai_autoscaler" "castai_autoscaler_policies" {
   cluster_id               = castai_aks_cluster.castai_cluster.id
 
