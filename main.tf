@@ -758,7 +758,7 @@ resource "helm_release" "castai_workload_autoscaler" {
     value = "castai-cluster-controller"
   }
 
-  depends_on = [helm_release.castai_agent]
+  depends_on = [helm_release.castai_agent, helm_release.castai_cluster_controller]
 
   lifecycle {
     ignore_changes = [version]
@@ -789,7 +789,7 @@ resource "helm_release" "castai_workload_autoscaler_self_managed" {
     value = "castai-cluster-controller"
   }
 
-  depends_on = [helm_release.castai_agent, helm_release.castai_workload_autoscaler]
+  depends_on = [helm_release.castai_agent, helm_release.castai_cluster_controller]
 }
 
 resource "castai_autoscaler" "castai_autoscaler_policies" {
