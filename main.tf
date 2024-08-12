@@ -132,7 +132,7 @@ resource "castai_workload_scaling_policy" "this" {
   for_each = { for k, v in var.workload_scaling_policies : k => v }
 
   name              = try(each.value.name, each.key)
-  cluster_id = castai_aks_cluster.castai_cluster.id
+  cluster_id        = castai_aks_cluster.castai_cluster.id
 
   apply_type        = try(each.value.apply_type, "DEFERRED")
   management_option = try(each.value.management_option, "READ_ONLY")
