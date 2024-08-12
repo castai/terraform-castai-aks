@@ -128,6 +128,27 @@ resource "castai_node_template" "this" {
   depends_on = [castai_autoscaler.castai_autoscaler_policies]
 }
 
+resource "castai_workload_scaling_policy" "this" {
+  for_each = { for k, v in var.workload_scaling_policies : k => v }
+
+  name              = try(each.value.name, each.key)
+  cluster_id = castai_aks_cluster.castai_cluster.id
+
+  apply_type        = try(each.value.apply_type, "DEFERRED")
+  management_option = try(each.value.management_option, "READ_ONLY")
+  cpu {
+    function        = try(each.value.cpu.function, "QUANTILE")
+    overhead        = try(each.value.cpu.overhead, 0)
+    apply_threshold = try(each.value.cpu.apply_threshold, 0.1)
+    args            = try(each.value.cpu.args, ["0.8"])
+  }
+  memory {
+    function        = try(each.value.memory.function, "MAX")
+    overhead        = try(each.value.memory.overhead, 0.1)
+    apply_threshold = try(each.value.memory.apply_threshold, 0.1)
+  }
+}
+
 resource "helm_release" "castai_agent" {
   name             = "castai-agent"
   repository       = "https://castai.github.io/helm-charts"
