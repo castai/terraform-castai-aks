@@ -63,7 +63,7 @@ resource "castai_node_template" "this" {
   name                         = try(each.value.name, each.key)
   is_default                   = try(each.value.is_default, false)
   is_enabled                   = try(each.value.is_enabled, true)
-  configuration_id             = try(each.value.configuration_name, null) != null ? castai_node_configuration.this[each.value.configuration_name] : can(each.value.configuration_id) ? length(regexall(local.configuration_id_regex_pattern, each.value.configuration_id)) > 0 ? each.value.configuration_id : castai_node_configuration.this[each.value.configuration_id].id : null
+  configuration_id             = try(each.value.configuration_name, null) != null ? castai_node_configuration.this[each.value.configuration_name].id : can(each.value.configuration_id) ? length(regexall(local.configuration_id_regex_pattern, each.value.configuration_id)) > 0 ? each.value.configuration_id : castai_node_configuration.this[each.value.configuration_id].id : null
   should_taint                 = try(each.value.should_taint, true)
   rebalancing_config_min_nodes = try(each.value.rebalancing_config_min_nodes, 0)
 
