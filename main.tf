@@ -106,6 +106,7 @@ resource "castai_node_template" "this" {
       burstable_instances                         = try(constraints.value.burstable_instances, null)
       customer_specific                           = try(constraints.value.customer_specific, null)
       cpu_manufacturers                           = try(constraints.value.cpu_manufacturers, null)
+      is_gpu_only                                 = try(constraints.value.is_gpu_only, false)
 
       dynamic "instance_families" {
         for_each = [for instance_families in flatten([lookup(constraints.value, "instance_families", [])]) : instance_families if instance_families != null]
@@ -123,6 +124,18 @@ resource "castai_node_template" "this" {
           instance_families = try(custom_priority.value.instance_families, [])
           spot              = try(custom_priority.value.spot, false)
           on_demand         = try(custom_priority.value.on_demand, false)
+        }
+      }
+
+      dynamic "gpu" {
+        for_each = [for gpu in flatten([lookup(constraints.value, "gpu", [])]) : gpu if gpu != null]
+
+        content {
+          manufacturers = try(gpu.value.manufacturers, [])
+          include_names = try(gpu.value.include_names, [])
+          exclude_names = try(gpu.value.exclude_names, [])
+          min_count     = try(gpu.value.min_count, null)
+          max_count     = try(gpu.value.max_count, null)
         }
       }
     }
