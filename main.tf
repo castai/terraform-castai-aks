@@ -859,6 +859,14 @@ resource "castai_autoscaler" "castai_autoscaler_policies" {
               max_ram_mib   = try(node_constraints.value.max_ram_mib, null)
             }
           }
+
+          dynamic "pod_pinner" {
+            for_each = try([unschedulable_pods.value.pod_pinner], [])
+
+            content {
+              enabled = try(pod_pinner.value.enabled, null)
+            }
+          }
         }
       }
 
