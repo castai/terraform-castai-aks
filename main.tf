@@ -525,7 +525,7 @@ resource "helm_release" "castai_pod_pinner" {
   depends_on = [helm_release.castai_agent]
 
   lifecycle {
-    ignore_changes = [set, version]
+    ignore_changes = [version]
   }
 }
 
@@ -951,5 +951,5 @@ resource "castai_autoscaler" "castai_autoscaler_policies" {
     }
   }
 
-  depends_on = [helm_release.castai_agent, helm_release.castai_evictor]
+  depends_on = [helm_release.castai_agent, helm_release.castai_evictor, helm_release.castai_pod_pinner]
 }
