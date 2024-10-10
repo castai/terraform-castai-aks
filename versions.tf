@@ -8,7 +8,7 @@ terraform {
     }
     azuread = {
       source  = "hashicorp/azuread"
-      version = ">= 2.22.0"
+      version = "~> 3"
     }
     castai = {
       source  = "castai/castai"
