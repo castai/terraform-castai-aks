@@ -61,6 +61,21 @@ resource "castai_node_configuration" "this" {
       }
     }
   }
+
+  dynamic "loadbalancers" {
+    for_each = flatten([lookup(each.value, "loadbalancers", [])])
+
+    content {
+      name = try(loadbalancers.value.name, null)
+      dynamic "ip_based_backend_pools" {
+        for_each = flatten([lookup(loadbalancers.value, "ip_based_backend_pools", [])])
+
+        content {
+          name = try(ip_based_backend_pools.value.name, null)
+        }
+      }
+    }
+  }
 }
 
 resource "castai_node_configuration_default" "this" {
