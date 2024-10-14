@@ -60,14 +60,14 @@ resource "azurerm_role_definition" "castai" {
 }
 
 resource "azurerm_role_assignment" "castai_resource_group" {
-  principal_id       = azuread_service_principal.castai.id
+  principal_id       = azuread_service_principal.castai.object_id
   role_definition_id = azurerm_role_definition.castai.role_definition_resource_id
   description        = "castai role assignment for resource group ${var.resource_group}"
   scope              = "/subscriptions/${var.subscription_id}/resourceGroups/${var.resource_group}"
 }
 
 resource "azurerm_role_assignment" "castai_node_resource_group" {
-  principal_id       = azuread_service_principal.castai.id
+  principal_id       = azuread_service_principal.castai.object_id
   role_definition_id = azurerm_role_definition.castai.role_definition_resource_id
   description        = "castai role assignment for resource group ${var.aks_cluster_name}"
   scope              = "/subscriptions/${var.subscription_id}/resourceGroups/${var.node_resource_group}"
@@ -75,7 +75,7 @@ resource "azurerm_role_assignment" "castai_node_resource_group" {
 
 resource "azurerm_role_assignment" "castai_additional_resource_groups" {
   for_each           = toset(var.additional_resource_groups)
-  principal_id       = azuread_service_principal.castai.id
+  principal_id       = azuread_service_principal.castai.object_id
   description        = "castai role assignment for resource group ${each.key}"
   role_definition_id = azurerm_role_definition.castai.role_definition_resource_id
   scope              = each.key
@@ -91,7 +91,7 @@ resource "azuread_application" "castai" {
 }
 
 resource "azuread_application_password" "castai" {
-  application_object_id = azuread_application.castai.object_id
+  application_id         = azuread_application.castai.id
 }
 
 resource "azuread_service_principal" "castai" {
