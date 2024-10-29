@@ -442,6 +442,11 @@ resource "helm_release" "castai_evictor_self_managed" {
     value = "false"
   }
 
+  set {
+    name  = "managedByCASTAI"
+    value = "false"
+  }
+
   dynamic "set" {
     for_each = var.castai_components_labels
     content {
@@ -561,6 +566,11 @@ resource "helm_release" "castai_pod_pinner_self_managed" {
   set {
     name  = "castai.clusterID"
     value = castai_aks_cluster.castai_cluster.id
+  }
+
+  set {
+    name  = "managedByCASTAI"
+    value = "false"
   }
 
   dynamic "set" {
