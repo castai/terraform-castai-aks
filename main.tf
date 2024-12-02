@@ -50,12 +50,22 @@ resource "castai_node_configuration" "this" {
       for_each = flatten([lookup(each.value, "loadbalancers", [])])
 
       content {
+        id = try(loadbalancers.value.id, null)
         name = try(loadbalancers.value.name, null)
+
         dynamic "ip_based_backend_pools" {
           for_each = flatten([lookup(loadbalancers.value, "ip_based_backend_pools", [])])
 
           content {
             name = try(ip_based_backend_pools.value.name, null)
+          }
+        }
+
+        dynamic "nic_based_backend_pools" {
+          for_each = flatten([lookup(loadbalancers.value, "nic_based_backend_pools", [])])
+
+          content {
+            name = try(nic_based_backend_pools.value.name, null)
           }
         }
       }
