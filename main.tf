@@ -46,6 +46,13 @@ resource "castai_node_configuration" "this" {
     max_pods_per_node = try(each.value.max_pods_per_node, 30)
     os_disk_type      = try(each.value.os_disk_type, null)
     aks_image_family  = try(each.value.aks_image_family, null)
+    dynamic "ephemeral_os_disk" {
+      for_each = flatten([lookup(each.value, "aks_ephemeral_os_disk", [])])
+      content {
+        placement = try(ephemeral_os_disk.value.placement, null)
+        cache = try(ephemeral_os_disk.value.cache, null)
+      }
+    }
     dynamic "loadbalancers" {
       for_each = flatten([lookup(each.value, "loadbalancers", [])])
 
