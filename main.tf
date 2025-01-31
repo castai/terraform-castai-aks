@@ -1,5 +1,6 @@
 locals {
   configuration_id_regex_pattern = "[a-zA-Z0-9]{8}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{12}"
+  has_http_proxy = length(var.no_proxy) > 0 || (var.http_proxy != null && var.http_proxy != "") || (var.https_proxy != null && var.https_proxy != "")
 }
 
 resource "castai_aks_cluster" "castai_cluster" {
@@ -13,6 +14,16 @@ resource "castai_aks_cluster" "castai_cluster" {
 
   node_resource_group        = var.node_resource_group
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
+  
+  dynamic "http_proxy_config" {
+    for_each = local.has_http_proxy ? [true] : []
+
+    content {
+      http_proxy = try(var.http_proxy, null)
+      https_proxy = try(var.https_proxy, null)
+      no_proxy = try(var.no_proxy, [])
+    }
+  }
 
   # CastAI needs cloud permission to do some clean up
   # when disconnecting the cluster.

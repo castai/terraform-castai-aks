@@ -83,6 +83,24 @@ variable "tenant_id" {
   type = string
 }
 
+variable "http_proxy" {
+  type = string
+  description = "Address to use for proxying http requests from CAST AI components running directly on nodes."
+  default = null
+}
+
+variable "https_proxy" {
+  type = string
+  description = "Address to use for proxying https requests from CAST AI components running directly on nodes."
+  default = null
+}
+
+variable "no_proxy" {
+  type = list(string)
+  description = "List of addresses to skip proxying requests from CAST AI components running directly on nodes. Used with http_proxy and https_proxy."
+  default = []
+}
+
 variable "castai_components_labels" {
   type        = map(any)
   description = "Optional additional Kubernetes labels for CAST AI pods"
