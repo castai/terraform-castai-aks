@@ -181,6 +181,15 @@ resource "castai_node_template" "this" {
           max_count     = try(gpu.value.max_count, null)
         }
       }
+
+      dynamic "resource_limits" {
+        for_each = [for resource_limits in flatten([lookup(constraints.value, "resource_limits", [])]) : resource_limits if resource_limits != null]
+
+        content {
+          cpu_limit_enabled   = try(resource_limits.value.cpu_limit_enabled, false)
+          cpu_limit_max_cores = try(resource_limits.value.cpu_limit_max_cores, 0)
+        }
+      }
     }
   }
   depends_on = [castai_autoscaler.castai_autoscaler_policies]
