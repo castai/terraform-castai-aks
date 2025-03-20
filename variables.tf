@@ -27,9 +27,9 @@ variable "kvisor_controller_extra_args" {
   type        = map(string)
   description = "Extra arguments for the kvisor controller. Optionally enable kvisor to lint Kubernetes YAML manifests, scan workload images and check if workloads pass CIS Kubernetes Benchmarks as well as NSA, WASP and PCI recommendations."
   default = {
-    "kube-linter-enabled"        = "true"
-    "image-scan-enabled"         = "true"
-    "kube-bench-enabled"         = "true"
+    "kube-linter-enabled" = "true"
+    "image-scan-enabled"  = "true"
+    "kube-bench-enabled"  = "true"
   }
 }
 
@@ -84,21 +84,21 @@ variable "tenant_id" {
 }
 
 variable "http_proxy" {
-  type = string
+  type        = string
   description = "Address to use for proxying http requests from CAST AI components running directly on nodes."
-  default = null
+  default     = null
 }
 
 variable "https_proxy" {
-  type = string
+  type        = string
   description = "Address to use for proxying https requests from CAST AI components running directly on nodes."
-  default = null
+  default     = null
 }
 
 variable "no_proxy" {
-  type = list(string)
+  type        = list(string)
   description = "List of addresses to skip proxying requests from CAST AI components running directly on nodes. Used with http_proxy and https_proxy."
-  default = []
+  default     = []
 }
 
 variable "castai_components_labels" {
@@ -122,13 +122,13 @@ variable "node_configurations" {
 variable "default_node_configuration" {
   type        = string
   description = "ID of the default node configuration"
-  default = ""
+  default     = ""
 }
 
 variable "default_node_configuration_name" {
   type        = string
   description = "Name of the default node configuration"
-  default = ""
+  default     = ""
 }
 
 variable "node_templates" {
