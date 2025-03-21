@@ -88,14 +88,24 @@ data "azuread_client_config" "current" {}
 resource "azuread_application" "castai" {
   display_name = local.app_name
   owners       = [data.azuread_client_config.current.object_id]
+  lifecycle {
+    ignore_changes = [
+      owners,
+    ]
+  }
 }
 
 resource "azuread_application_password" "castai" {
-  application_id         = azuread_application.castai.id
+  application_id = azuread_application.castai.id
 }
 
 resource "azuread_service_principal" "castai" {
   client_id                    = azuread_application.castai.client_id
   app_role_assignment_required = false
   owners                       = [data.azuread_client_config.current.object_id]
+  lifecycle {
+    ignore_changes = [
+      owners,
+    ]
+  }
 }
