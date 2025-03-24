@@ -87,7 +87,7 @@ data "azuread_client_config" "current" {}
 
 resource "azuread_application" "castai" {
   display_name = local.app_name
-  owners       = [data.azuread_client_config.current.object_id]
+  owners       = (var.azuread_owners == null ? [data.azuread_client_config.current.object_id] : var.azuread_owners)
 }
 
 resource "azuread_application_password" "castai" {
@@ -97,5 +97,5 @@ resource "azuread_application_password" "castai" {
 resource "azuread_service_principal" "castai" {
   client_id                    = azuread_application.castai.client_id
   app_role_assignment_required = false
-  owners                       = [data.azuread_client_config.current.object_id]
+  owners                       = (var.azuread_owners == null ? [data.azuread_client_config.current.object_id] : var.azuread_owners)
 }

@@ -262,3 +262,9 @@ variable "workload_autoscaler_values" {
   type        = list(string)
   default     = []
 }
+
+variable "azuread_owners" {
+  description = "A set of object IDs of principals that will be granted ownership of the Azure AD service principal and application. Defaults to current user."
+  type        = list(string)
+  default     = null
+}
