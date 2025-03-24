@@ -20,7 +20,7 @@ terraform {
     }
 
     null = {
-      source = "hashicorp/null"
+      source  = "hashicorp/null"
       version = "~> 3"
     }
   }
