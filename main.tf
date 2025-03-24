@@ -1,6 +1,6 @@
 locals {
   configuration_id_regex_pattern = "[a-zA-Z0-9]{8}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{12}"
-  has_http_proxy = length(var.no_proxy) > 0 || (var.http_proxy != null && var.http_proxy != "") || (var.https_proxy != null && var.https_proxy != "")
+  has_http_proxy                 = length(var.no_proxy) > 0 || (var.http_proxy != null && var.http_proxy != "") || (var.https_proxy != null && var.https_proxy != "")
 }
 
 resource "castai_aks_cluster" "castai_cluster" {
@@ -14,14 +14,14 @@ resource "castai_aks_cluster" "castai_cluster" {
 
   node_resource_group        = var.node_resource_group
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
-  
+
   dynamic "http_proxy_config" {
     for_each = local.has_http_proxy ? [true] : []
 
     content {
-      http_proxy = try(var.http_proxy, null)
+      http_proxy  = try(var.http_proxy, null)
       https_proxy = try(var.https_proxy, null)
-      no_proxy = try(var.no_proxy, [])
+      no_proxy    = try(var.no_proxy, [])
     }
   }
 
@@ -61,14 +61,14 @@ resource "castai_node_configuration" "this" {
       for_each = flatten([lookup(each.value, "aks_ephemeral_os_disk", [])])
       content {
         placement = try(ephemeral_os_disk.value.placement, null)
-        cache = try(ephemeral_os_disk.value.cache, null)
+        cache     = try(ephemeral_os_disk.value.cache, null)
       }
     }
     dynamic "loadbalancers" {
       for_each = flatten([lookup(each.value, "loadbalancers", [])])
 
       content {
-        id = try(loadbalancers.value.id, null)
+        id   = try(loadbalancers.value.id, null)
         name = try(loadbalancers.value.name, null)
 
         dynamic "ip_based_backend_pools" {
@@ -93,7 +93,7 @@ resource "castai_node_configuration" "this" {
 
 resource "castai_node_configuration_default" "this" {
   cluster_id       = castai_aks_cluster.castai_cluster.id
-  configuration_id = var.default_node_configuration_name != "" ? castai_node_configuration.this[var.default_node_configuration_name].id :  length(regexall(local.configuration_id_regex_pattern, var.default_node_configuration)) > 0 ? var.default_node_configuration : castai_node_configuration.this[var.default_node_configuration].id
+  configuration_id = var.default_node_configuration_name != "" ? castai_node_configuration.this[var.default_node_configuration_name].id : length(regexall(local.configuration_id_regex_pattern, var.default_node_configuration)) > 0 ? var.default_node_configuration : castai_node_configuration.this[var.default_node_configuration].id
 
   depends_on = [castai_node_configuration.this]
 }
@@ -128,8 +128,8 @@ resource "castai_node_template" "this" {
     content {
       compute_optimized                           = try(constraints.value.compute_optimized, null)
       storage_optimized                           = try(constraints.value.storage_optimized, null)
-      compute_optimized_state                    = try(constraints.value.compute_optimized_state, "")
-      storage_optimized_state                    = try(constraints.value.storage_optimized_state, "")
+      compute_optimized_state                     = try(constraints.value.compute_optimized_state, "")
+      storage_optimized_state                     = try(constraints.value.storage_optimized_state, "")
       spot                                        = try(constraints.value.spot, false)
       on_demand                                   = try(constraints.value.on_demand, null)
       use_spot_fallbacks                          = try(constraints.value.use_spot_fallbacks, false)
@@ -198,8 +198,8 @@ resource "castai_node_template" "this" {
 resource "castai_workload_scaling_policy" "this" {
   for_each = { for k, v in var.workload_scaling_policies : k => v }
 
-  name              = try(each.value.name, each.key)
-  cluster_id        = castai_aks_cluster.castai_cluster.id
+  name       = try(each.value.name, each.key)
+  cluster_id = castai_aks_cluster.castai_cluster.id
 
   apply_type        = try(each.value.apply_type, "DEFERRED")
   management_option = try(each.value.management_option, "READ_ONLY")
@@ -488,7 +488,7 @@ resource "helm_release" "castai_evictor_self_managed" {
     for_each = try(var.autoscaler_settings.node_downscaler.evictor.enabled, null) == false ? [0] : []
 
     content {
-      name = "replicaCount"
+      name  = "replicaCount"
       value = set.value
     }
   }
@@ -623,7 +623,7 @@ resource "helm_release" "castai_pod_pinner_self_managed" {
     for_each = try(var.autoscaler_settings.unschedulable_pods.pod_pinner.enabled, null) == false ? [0] : []
 
     content {
-      name = "replicaCount"
+      name  = "replicaCount"
       value = set.value
     }
   }
@@ -888,7 +888,7 @@ resource "helm_release" "castai_workload_autoscaler_self_managed" {
 }
 
 resource "castai_autoscaler" "castai_autoscaler_policies" {
-  cluster_id               = castai_aks_cluster.castai_cluster.id
+  cluster_id = castai_aks_cluster.castai_cluster.id
 
   // Deprecated  -- kept for backward compatibility
   autoscaler_policies_json = var.autoscaler_policies_json
