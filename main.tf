@@ -900,6 +900,125 @@ resource "helm_release" "castai_workload_autoscaler_self_managed" {
   depends_on = [helm_release.castai_agent, helm_release.castai_cluster_controller]
 }
 
+#---------------------------------------------------#
+# CAST.AI Pod Mutator configuration                 #
+#---------------------------------------------------#
+resource "helm_release" "castai_pod_mutator" {
+  count = var.install_pod_mutator && !var.self_managed ? 1 : 0
+
+  name             = "castai-pod-mutator"
+  repository       = "https://castai.github.io/helm-charts"
+  chart            = "castai-pod-mutator"
+  namespace        = "castai-agent"
+  create_namespace = true
+  cleanup_on_fail  = true
+  wait             = true
+
+  version = var.pod_mutator_version
+  values  = var.pod_mutator_values
+
+  dynamic "set" {
+    for_each = var.api_url != "" ? [var.api_url] : []
+    content {
+      name  = "castai.apiURL"
+      value = var.api_url
+    }
+  }
+
+  set_sensitive {
+    name  = "castai.apiKey"
+    value = castai_aks_cluster.castai_cluster.cluster_token
+  }
+
+  set {
+    name  = "castai.organizationID"
+    value = var.organization_id
+  }
+
+  set {
+    name  = "castai.clusterID"
+    value = castai_aks_cluster.castai_cluster.id
+  }
+
+  dynamic "set" {
+    for_each = var.castai_components_labels
+    content {
+      name  = "podLabels.${set.key}"
+      value = set.value
+    }
+  }
+
+  dynamic "set" {
+    for_each = var.castai_components_sets
+    content {
+      name  = set.key
+      value = set.value
+    }
+  }
+
+  depends_on = [helm_release.castai_agent, helm_release.castai_cluster_controller]
+
+  lifecycle {
+    ignore_changes = [version]
+  }
+}
+
+resource "helm_release" "castai_pod_mutator_self_managed" {
+  count = var.install_pod_mutator && var.self_managed ? 1 : 0
+
+  name             = "castai-pod-mutator"
+  repository       = "https://castai.github.io/helm-charts"
+  chart            = "castai-pod-mutator"
+  namespace        = "castai-agent"
+  create_namespace = true
+  cleanup_on_fail  = true
+  wait             = true
+
+  version = var.pod_mutator_version
+  values  = var.pod_mutator_values
+
+  dynamic "set" {
+    for_each = var.api_url != "" ? [var.api_url] : []
+    content {
+      name  = "castai.apiURL"
+      value = var.api_url
+    }
+  }
+
+  set_sensitive {
+    name  = "castai.apiKey"
+    value = castai_aks_cluster.castai_cluster.cluster_token
+  }
+
+  set {
+    name  = "castai.organizationID"
+    value = var.organization_id
+  }
+
+  set {
+    name  = "castai.clusterID"
+    value = castai_aks_cluster.castai_cluster.id
+  }
+
+  dynamic "set" {
+    for_each = var.castai_components_labels
+    content {
+      name  = "podLabels.${set.key}"
+      value = set.value
+    }
+  }
+
+  dynamic "set" {
+    for_each = var.castai_components_sets
+    content {
+      name  = set.key
+      value = set.value
+    }
+  }
+
+  depends_on = [helm_release.castai_agent, helm_release.castai_cluster_controller]
+}
+
 resource "castai_autoscaler" "castai_autoscaler_policies" {
   cluster_id = castai_aks_cluster.castai_cluster.id
 
