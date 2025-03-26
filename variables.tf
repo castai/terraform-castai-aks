@@ -268,3 +268,22 @@ variable "azuread_owners" {
   type        = list(string)
   default     = null
 }
+
+variable "install_pod_mutator" {
+  type        = bool
+  default     = false
+  description = "Optional flag for installation of pod mutator"
+}
+
+variable "pod_mutator_version" {
+  description = "Version of castai-pod-mutator helm chart. Default latest"
+  type        = string
+  default     = null
+}
+
+variable "pod_mutator_values" {
+  description = "List of YAML formatted string with pod-mutator values"
+  type        = list(string)
+  default     = []
+}
+
