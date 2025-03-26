@@ -270,9 +270,9 @@ variable "azuread_owners" {
 }
 
 variable "install_pod_mutator" {
+  description = "Optional flag for installation of pod mutator"
   type        = bool
   default     = false
-  description = "Optional flag for installation of pod mutator"
 }
 
 variable "pod_mutator_version" {
@@ -282,7 +282,7 @@ variable "pod_mutator_version" {
 }
 
 variable "pod_mutator_values" {
-  description = "List of YAML formatted string with pod-mutator values"
+  description = "List of YAML formatted string values for pod-mutator helm chart"
   type        = list(string)
   default     = []
 }
