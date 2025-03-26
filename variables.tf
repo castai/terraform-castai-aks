@@ -287,3 +287,8 @@ variable "pod_mutator_values" {
   default     = []
 }
 
+variable "organization_id" {
+  description = "CAST AI Organization ID"
+  type        = string
+  default     = ""
+}
