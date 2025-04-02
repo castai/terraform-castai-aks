@@ -286,9 +286,3 @@ variable "pod_mutator_values" {
   type        = list(string)
   default     = []
 }
-
-variable "organization_id" {
-  description = "CAST AI Organization ID"
-  type        = string
-  default     = ""
-}
