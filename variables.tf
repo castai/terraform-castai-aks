@@ -17,12 +17,6 @@ variable "grpc_url" {
   default     = "grpc.cast.ai:443"
 }
 
-variable "api_grpc_addr" {
-  type        = string
-  description = "CAST AI GRPC API address, used for other services but not Kvisor"
-  default     = "api-grpc.cast.ai:443"
-}
-
 variable "kvisor_grpc_addr" {
   type        = string
   description = "CAST AI Kvisor optimized GRPC API address"
