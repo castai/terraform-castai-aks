@@ -17,15 +17,15 @@ variable "grpc_url" {
   default     = "grpc.cast.ai:443"
 }
 
-variable "api_grpc_addr" {
+variable "kvisor_grpc_addr" {
   type        = string
-  description = "CAST AI GRPC API address"
-  default     = "api-grpc.cast.ai:443"
+  description = "CAST AI Kvisor optimized GRPC API address"
+  default     = "kvisor.prod-master.cast.ai:443" // If your cluster is in the EU region, update the grpcAddr to: https://kvisor.prod-eu.cast.ai:443
 }
 
 variable "kvisor_controller_extra_args" {
   type        = map(string)
-  description = "Extra arguments for the kvisor controller. Optionally enable kvisor to lint Kubernetes YAML manifests, scan workload images and check if workloads pass CIS Kubernetes Benchmarks as well as NSA, WASP and PCI recommendations."
+  description = "⚠️ DEPRECATED: use kvisor_values instead (see example: https://github.com/castai/terraform-provider-castai/tree/master/examples/aks/aks_cluster_with_security/castai.tf ). Extra arguments for the kvisor controller. Optionally enable kvisor to lint Kubernetes YAML manifests, scan workload images and check if workloads pass CIS Kubernetes Benchmarks as well as NSA, WASP and PCI recommendations."
   default = {
     "kube-linter-enabled" = "true"
     "image-scan-enabled"  = "true"
@@ -186,7 +186,7 @@ variable "pod_pinner_values" {
 }
 
 variable "kvisor_values" {
-  description = "List of YAML formatted string values for kvisor helm chart"
+  description = "List of YAML formatted string values for kvisor helm chart, see example: https://github.com/castai/terraform-provider-castai/tree/master/examples/aks/aks_cluster_with_security/castai.tf"
   type        = list(string)
   default     = []
 }
