@@ -146,7 +146,7 @@ variable "workload_scaling_policies" {
 variable "install_security_agent" {
   type        = bool
   default     = false
-  description = "Optional flag for installation of security agent (https://docs.cast.ai/product-overview/console/security-insights/)"
+  description = "Optional flag for installation of security agent (Kvisor - https://docs.cast.ai/docs/kvisor)"
 }
 
 variable "agent_values" {
