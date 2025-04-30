@@ -866,6 +866,14 @@ resource "helm_release" "castai_workload_autoscaler" {
     value = "castai-cluster-controller"
   }
 
+  dynamic "set" {
+    for_each = var.castai_components_sets
+    content {
+      name  = set.key
+      value = set.value
+    }
+  }
+
   depends_on = [helm_release.castai_agent, helm_release.castai_cluster_controller]
 
   lifecycle {
