@@ -235,7 +235,7 @@ variable "kvisor_version" {
 
 variable "self_managed" {
   type        = bool
-  default     = false
+  default     = true
   description = "Whether CAST AI components' upgrades are managed by a customer; by default upgrades are managed CAST AI central system."
 }
 
@@ -258,6 +258,16 @@ variable "workload_autoscaler_version" {
 }
 
 variable "workload_autoscaler_values" {
+  default = [
+    <<-EOT
+    resources:
+      requests:
+        memory: "1Gi"
+      limits:
+        memory: "1Gi"
+    EOT
+  ]
+}
   description = "List of YAML formatted string with cluster-workload-autoscaler values"
   type        = list(string)
   default     = []
