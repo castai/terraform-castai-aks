@@ -1,6 +1,6 @@
 locals {
   configuration_id_regex_pattern = "[a-zA-Z0-9]{8}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{12}"
-  has_http_proxy = length(var.no_proxy) > 0 || (var.http_proxy != null && var.http_proxy != "") || (var.https_proxy != null && var.https_proxy != "")
+  has_http_proxy                 = length(var.no_proxy) > 0 || (var.http_proxy != null && var.http_proxy != "") || (var.https_proxy != null && var.https_proxy != "")
 }
 
 resource "castai_aks_cluster" "castai_cluster" {
@@ -14,14 +14,14 @@ resource "castai_aks_cluster" "castai_cluster" {
 
   node_resource_group        = var.node_resource_group
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
-  
+
   dynamic "http_proxy_config" {
     for_each = local.has_http_proxy ? [true] : []
 
     content {
-      http_proxy = try(var.http_proxy, null)
+      http_proxy  = try(var.http_proxy, null)
       https_proxy = try(var.https_proxy, null)
-      no_proxy = try(var.no_proxy, [])
+      no_proxy    = try(var.no_proxy, [])
     }
   }
 
@@ -62,14 +62,14 @@ resource "castai_node_configuration" "this" {
       for_each = flatten([lookup(each.value, "aks_ephemeral_os_disk", [])])
       content {
         placement = try(ephemeral_os_disk.value.placement, null)
-        cache = try(ephemeral_os_disk.value.cache, null)
+        cache     = try(ephemeral_os_disk.value.cache, null)
       }
     }
     dynamic "loadbalancers" {
       for_each = flatten([lookup(each.value, "loadbalancers", [])])
 
       content {
-        id = try(loadbalancers.value.id, null)
+        id   = try(loadbalancers.value.id, null)
         name = try(loadbalancers.value.name, null)
 
         dynamic "ip_based_backend_pools" {
@@ -89,12 +89,25 @@ resource "castai_node_configuration" "this" {
         }
       }
     }
+
+    network_security_group      = try(each.value.network_security_group, null)
+    application_security_groups = try(each.value.application_security_groups, null)
+    dynamic "public_ip" {
+      for_each = lookup(each.value, "public_ip", null) != null ? [each.value.public_ip] : []
+
+      content {
+        public_ip_prefix        = try(public_ip.value.public_ip_prefix, null)
+        tags                    = try(public_ip.value.tags, {})
+        idle_timeout_in_minutes = try(public_ip.value.idle_timeout_in_minutes, null)
+      }
+    }
+
   }
 }
 
 resource "castai_node_configuration_default" "this" {
   cluster_id       = castai_aks_cluster.castai_cluster.id
-  configuration_id = var.default_node_configuration_name != "" ? castai_node_configuration.this[var.default_node_configuration_name].id :  length(regexall(local.configuration_id_regex_pattern, var.default_node_configuration)) > 0 ? var.default_node_configuration : castai_node_configuration.this[var.default_node_configuration].id
+  configuration_id = var.default_node_configuration_name != "" ? castai_node_configuration.this[var.default_node_configuration_name].id : length(regexall(local.configuration_id_regex_pattern, var.default_node_configuration)) > 0 ? var.default_node_configuration : castai_node_configuration.this[var.default_node_configuration].id
 
   depends_on = [castai_node_configuration.this]
 }
@@ -127,30 +140,32 @@ resource "castai_node_template" "this" {
     for_each = [for constraints in flatten([lookup(each.value, "constraints", [])]) : constraints if constraints != null]
 
     content {
-      compute_optimized                           = try(constraints.value.compute_optimized, null)
-      storage_optimized                           = try(constraints.value.storage_optimized, null)
-      compute_optimized_state                    = try(constraints.value.compute_optimized_state, "")
-      storage_optimized_state                    = try(constraints.value.storage_optimized_state, "")
-      spot                                        = try(constraints.value.spot, false)
-      on_demand                                   = try(constraints.value.on_demand, null)
-      use_spot_fallbacks                          = try(constraints.value.use_spot_fallbacks, false)
-      fallback_restore_rate_seconds               = try(constraints.value.fallback_restore_rate_seconds, null)
-      enable_spot_diversity                       = try(constraints.value.enable_spot_diversity, false)
-      spot_diversity_price_increase_limit_percent = try(constraints.value.spot_diversity_price_increase_limit_percent, null)
-      spot_interruption_predictions_enabled       = try(constraints.value.spot_interruption_predictions_enabled, false)
-      spot_interruption_predictions_type          = try(constraints.value.spot_interruption_predictions_type, null)
-      min_cpu                                     = try(constraints.value.min_cpu, null)
-      max_cpu                                     = try(constraints.value.max_cpu, null)
-      min_memory                                  = try(constraints.value.min_memory, null)
-      max_memory                                  = try(constraints.value.max_memory, null)
-      architectures                               = try(constraints.value.architectures, ["amd64"])
-      architecture_priority                       = try(constraints.value.architecture_priority, [])
-      os                                          = try(constraints.value.os, ["linux"])
-      azs                                         = try(constraints.value.azs, null)
-      burstable_instances                         = try(constraints.value.burstable_instances, null)
-      customer_specific                           = try(constraints.value.customer_specific, null)
-      cpu_manufacturers                           = try(constraints.value.cpu_manufacturers, null)
-      is_gpu_only                                 = try(constraints.value.is_gpu_only, false)
+      compute_optimized                             = try(constraints.value.compute_optimized, null)
+      storage_optimized                             = try(constraints.value.storage_optimized, null)
+      compute_optimized_state                       = try(constraints.value.compute_optimized_state, "")
+      storage_optimized_state                       = try(constraints.value.storage_optimized_state, "")
+      spot                                          = try(constraints.value.spot, false)
+      on_demand                                     = try(constraints.value.on_demand, null)
+      use_spot_fallbacks                            = try(constraints.value.use_spot_fallbacks, false)
+      fallback_restore_rate_seconds                 = try(constraints.value.fallback_restore_rate_seconds, null)
+      enable_spot_diversity                         = try(constraints.value.enable_spot_diversity, false)
+      spot_diversity_price_increase_limit_percent   = try(constraints.value.spot_diversity_price_increase_limit_percent, null)
+      spot_reliability_enabled                      = try(constraints.value.spot_reliability_enabled, false)
+      spot_reliability_price_increase_limit_percent = try(constraints.value.spot_reliability_price_increase_limit_percent, null)
+      spot_interruption_predictions_enabled         = try(constraints.value.spot_interruption_predictions_enabled, false)
+      spot_interruption_predictions_type            = try(constraints.value.spot_interruption_predictions_type, null)
+      min_cpu                                       = try(constraints.value.min_cpu, null)
+      max_cpu                                       = try(constraints.value.max_cpu, null)
+      min_memory                                    = try(constraints.value.min_memory, null)
+      max_memory                                    = try(constraints.value.max_memory, null)
+      architectures                                 = try(constraints.value.architectures, ["amd64"])
+      architecture_priority                         = try(constraints.value.architecture_priority, [])
+      os                                            = try(constraints.value.os, ["linux"])
+      azs                                           = try(constraints.value.azs, null)
+      burstable_instances                           = try(constraints.value.burstable_instances, null)
+      customer_specific                             = try(constraints.value.customer_specific, null)
+      cpu_manufacturers                             = try(constraints.value.cpu_manufacturers, null)
+      is_gpu_only                                   = try(constraints.value.is_gpu_only, false)
 
       dynamic "instance_families" {
         for_each = [for instance_families in flatten([lookup(constraints.value, "instance_families", [])]) : instance_families if instance_families != null]
@@ -199,8 +214,8 @@ resource "castai_node_template" "this" {
 resource "castai_workload_scaling_policy" "this" {
   for_each = { for k, v in var.workload_scaling_policies : k => v }
 
-  name              = try(each.value.name, each.key)
-  cluster_id        = castai_aks_cluster.castai_cluster.id
+  name       = try(each.value.name, each.key)
+  cluster_id = castai_aks_cluster.castai_cluster.id
 
   apply_type        = try(each.value.apply_type, "DEFERRED")
   management_option = try(each.value.management_option, "READ_ONLY")
@@ -229,48 +244,37 @@ resource "helm_release" "castai_agent" {
   version = var.agent_version
   values  = var.agent_values
 
-  set {
-    name  = "replicaCount"
-    value = "2"
-  }
-  set {
-    name  = "provider"
-    value = "aks"
-  }
-
-  set {
-    name  = "createNamespace"
-    value = "false"
-  }
-
-  dynamic "set" {
-    for_each = var.api_url != "" ? [var.api_url] : []
-    content {
+  set = concat(
+    [
+      {
+        name  = "replicaCount"
+        value = "2"
+        }, {
+        name  = "provider"
+        value = "aks"
+        }, {
+        name  = "createNamespace"
+        value = "false"
+      }
+    ],
+    // castai-agent chart requires "apiURL" on the top level, NOT under "castai.apiURL"
+    var.api_url != "" ? [{
       name  = "apiURL"
       value = var.api_url
-    }
-  }
+    }] : [],
+    local.set_pod_labels,
+    local.set_components_sets,
+  )
 
-  dynamic "set" {
-    for_each = var.castai_components_labels
-    content {
-      name  = "podLabels.${set.key}"
-      value = set.value
-    }
-  }
-
-  dynamic "set" {
-    for_each = var.castai_components_sets
-    content {
-      name  = set.key
-      value = set.value
-    }
-  }
-
-  set_sensitive {
-    name  = "apiKey"
-    value = castai_aks_cluster.castai_cluster.cluster_token
-  }
+  set_sensitive = concat(
+    [
+      // castai-agent chart requires "apiKey" on the top level, NOT under "castai.apiKey"
+      {
+        name  = "apiKey"
+        value = castai_aks_cluster.castai_cluster.cluster_token
+      }
+    ],
+  )
 }
 
 resource "helm_release" "castai_cluster_controller" {
@@ -287,44 +291,20 @@ resource "helm_release" "castai_cluster_controller" {
   version = var.cluster_controller_version
   values  = var.cluster_controller_values
 
-  set {
-    name  = "aks.enabled"
-    value = "true"
-  }
+  set = concat(
+    [
+      {
+        name  = "aks.enabled"
+        value = "true"
+      },
+    ],
+    local.set_cluster_id,
+    local.set_apiurl,
+    local.set_pod_labels,
+    local.set_components_sets,
+  )
 
-  set {
-    name  = "castai.clusterID"
-    value = castai_aks_cluster.castai_cluster.id
-  }
-
-  dynamic "set" {
-    for_each = var.api_url != "" ? [var.api_url] : []
-    content {
-      name  = "castai.apiURL"
-      value = var.api_url
-    }
-  }
-
-  dynamic "set" {
-    for_each = var.castai_components_labels
-    content {
-      name  = "podLabels.${set.key}"
-      value = set.value
-    }
-  }
-
-  dynamic "set" {
-    for_each = var.castai_components_sets
-    content {
-      name  = set.key
-      value = set.value
-    }
-  }
-
-  set_sensitive {
-    name  = "castai.apiKey"
-    value = castai_aks_cluster.castai_cluster.cluster_token
-  }
+  set_sensitive = local.set_sensitive_apikey
 
   depends_on = [helm_release.castai_agent]
 
@@ -347,44 +327,20 @@ resource "helm_release" "castai_cluster_controller_self_managed" {
   version = var.cluster_controller_version
   values  = var.cluster_controller_values
 
-  set {
-    name  = "aks.enabled"
-    value = "true"
-  }
+  set = concat(
+    [
+      {
+        name  = "aks.enabled"
+        value = "true"
+      },
+    ],
+    local.set_cluster_id,
+    local.set_apiurl,
+    local.set_pod_labels,
+    local.set_components_sets,
+  )
 
-  set {
-    name  = "castai.clusterID"
-    value = castai_aks_cluster.castai_cluster.id
-  }
-
-  dynamic "set" {
-    for_each = var.api_url != "" ? [var.api_url] : []
-    content {
-      name  = "castai.apiURL"
-      value = var.api_url
-    }
-  }
-
-  dynamic "set" {
-    for_each = var.castai_components_labels
-    content {
-      name  = "podLabels.${set.key}"
-      value = set.value
-    }
-  }
-
-  dynamic "set" {
-    for_each = var.castai_components_sets
-    content {
-      name  = set.key
-      value = set.value
-    }
-  }
-
-  set_sensitive {
-    name  = "castai.apiKey"
-    value = castai_aks_cluster.castai_cluster.cluster_token
-  }
+  set_sensitive = local.set_sensitive_apikey
 
   depends_on = [helm_release.castai_agent]
 }
@@ -428,31 +384,20 @@ resource "helm_release" "castai_evictor" {
   version = var.evictor_version
   values  = var.evictor_values
 
-  set {
-    name  = "replicaCount"
-    value = "0"
-  }
-
-  set {
-    name  = "castai-evictor-ext.enabled"
-    value = "false"
-  }
-
-  dynamic "set" {
-    for_each = var.castai_components_labels
-    content {
-      name  = "podLabels.${set.key}"
-      value = set.value
-    }
-  }
-
-  dynamic "set" {
-    for_each = var.castai_components_sets
-    content {
-      name  = set.key
-      value = set.value
-    }
-  }
+  set = concat(
+    [
+      {
+        name  = "replicaCount"
+        value = "0"
+      },
+      {
+        name  = "castai-evictor-ext.enabled"
+        value = "false"
+      },
+    ],
+    local.set_pod_labels,
+    local.set_components_sets,
+  )
 
   depends_on = [helm_release.castai_agent]
 
@@ -475,40 +420,26 @@ resource "helm_release" "castai_evictor_self_managed" {
   version = var.evictor_version
   values  = var.evictor_values
 
-  set {
-    name  = "castai-evictor-ext.enabled"
-    value = "false"
-  }
-
-  set {
-    name  = "managedByCASTAI"
-    value = "false"
-  }
-
-  dynamic "set" {
-    for_each = try(var.autoscaler_settings.node_downscaler.evictor.enabled, null) == false ? [0] : []
-
-    content {
-      name = "replicaCount"
-      value = set.value
-    }
-  }
-
-  dynamic "set" {
-    for_each = var.castai_components_labels
-    content {
-      name  = "podLabels.${set.key}"
-      value = set.value
-    }
-  }
-
-  dynamic "set" {
-    for_each = var.castai_components_sets
-    content {
-      name  = set.key
-      value = set.value
-    }
-  }
+  set = concat(
+    [
+      {
+        name  = "castai-evictor-ext.enabled"
+        value = "false"
+      },
+      {
+        name  = "managedByCASTAI"
+        value = "false"
+      },
+    ],
+    try(var.autoscaler_settings.node_downscaler.evictor.enabled, null) == false ? [
+      {
+        name  = "replicaCount"
+        value = "0"
+      }
+    ] : [],
+    local.set_pod_labels,
+    local.set_components_sets,
+  )
 
   depends_on = [helm_release.castai_agent]
 }
@@ -542,52 +473,21 @@ resource "helm_release" "castai_pod_pinner" {
   version = var.pod_pinner_version
   values  = var.pod_pinner_values
 
-  set {
-    name  = "castai.clusterID"
-    value = castai_aks_cluster.castai_cluster.id
-  }
+  set = concat(
+    [
+      {
+        name  = "replicaCount"
+        value = "0"
+      }
+    ],
+    local.set_cluster_id,
+    local.set_apiurl,
+    local.set_grpc_url,
+    local.set_pod_labels,
+    local.set_components_sets,
+  )
 
-  dynamic "set" {
-    for_each = var.api_url != "" ? [var.api_url] : []
-    content {
-      name  = "castai.apiURL"
-      value = var.api_url
-    }
-  }
-
-  set_sensitive {
-    name  = "castai.apiKey"
-    value = castai_aks_cluster.castai_cluster.cluster_token
-  }
-
-  dynamic "set" {
-    for_each = var.grpc_url != "" ? [var.grpc_url] : []
-    content {
-      name  = "castai.grpcURL"
-      value = var.grpc_url
-    }
-  }
-
-  dynamic "set" {
-    for_each = var.castai_components_labels
-    content {
-      name  = "podLabels.${set.key}"
-      value = set.value
-    }
-  }
-
-  dynamic "set" {
-    for_each = var.castai_components_sets
-    content {
-      name  = set.key
-      value = set.value
-    }
-  }
-
-  set {
-    name  = "replicaCount"
-    value = "0"
-  }
+  set_sensitive = local.set_sensitive_apikey
 
   depends_on = [helm_release.castai_agent]
 
@@ -610,61 +510,27 @@ resource "helm_release" "castai_pod_pinner_self_managed" {
   version = var.pod_pinner_version
   values  = var.pod_pinner_values
 
-  set {
-    name  = "castai.clusterID"
-    value = castai_aks_cluster.castai_cluster.id
-  }
+  set = concat(
+    [
+      {
+        name  = "managedByCASTAI"
+        value = "false"
+      }
+    ],
+    local.set_cluster_id,
+    local.set_apiurl,
+    local.set_grpc_url,
+    local.set_pod_labels,
+    local.set_components_sets,
+    try(var.autoscaler_settings.unschedulable_pods.pod_pinner.enabled, null) == false ? [
+      {
+        name  = "replicaCount"
+        value = "0"
+      }
+    ] : [],
+  )
 
-  set {
-    name  = "managedByCASTAI"
-    value = "false"
-  }
-
-  dynamic "set" {
-    for_each = try(var.autoscaler_settings.unschedulable_pods.pod_pinner.enabled, null) == false ? [0] : []
-
-    content {
-      name = "replicaCount"
-      value = set.value
-    }
-  }
-
-  dynamic "set" {
-    for_each = var.api_url != "" ? [var.api_url] : []
-    content {
-      name  = "castai.apiURL"
-      value = var.api_url
-    }
-  }
-
-  set_sensitive {
-    name  = "castai.apiKey"
-    value = castai_aks_cluster.castai_cluster.cluster_token
-  }
-
-  dynamic "set" {
-    for_each = var.grpc_url != "" ? [var.grpc_url] : []
-    content {
-      name  = "castai.grpcURL"
-      value = var.grpc_url
-    }
-  }
-
-  dynamic "set" {
-    for_each = var.castai_components_labels
-    content {
-      name  = "podLabels.${set.key}"
-      value = set.value
-    }
-  }
-
-  dynamic "set" {
-    for_each = var.castai_components_sets
-    content {
-      name  = set.key
-      value = set.value
-    }
-  }
+  set_sensitive = local.set_sensitive_apikey
 
   depends_on = [helm_release.castai_agent]
 }
@@ -681,44 +547,22 @@ resource "helm_release" "castai_spot_handler" {
   version = var.spot_handler_version
   values  = var.spot_handler_values
 
-  set {
-    name  = "castai.provider"
-    value = "azure"
-  }
-
-  set {
-    name  = "createNamespace"
-    value = "false"
-  }
-
-  dynamic "set" {
-    for_each = var.api_url != "" ? [var.api_url] : []
-    content {
-      name  = "castai.apiURL"
-      value = var.api_url
-    }
-  }
-
-  dynamic "set" {
-    for_each = var.castai_components_labels
-    content {
-      name  = "podLabels.${set.key}"
-      value = set.value
-    }
-  }
-
-  dynamic "set" {
-    for_each = var.castai_components_sets
-    content {
-      name  = set.key
-      value = set.value
-    }
-  }
-
-  set {
-    name  = "castai.clusterID"
-    value = castai_aks_cluster.castai_cluster.id
-  }
+  set = concat(
+    [
+      {
+        name  = "castai.provider"
+        value = "azure"
+      },
+      {
+        name  = "createNamespace"
+        value = "false"
+      }
+    ],
+    local.set_apiurl,
+    local.set_cluster_id,
+    local.set_pod_labels,
+    local.set_components_sets,
+  )
 
   depends_on = [helm_release.castai_agent]
 }
@@ -740,41 +584,23 @@ resource "helm_release" "castai_kvisor" {
     ignore_changes = [version]
   }
 
-  set {
-    name  = "castai.clusterID"
-    value = castai_aks_cluster.castai_cluster.id
-  }
+  set = concat(
+    [
+      {
+        name  = "controller.extraArgs.kube-bench-cloud-provider"
+        value = "aks"
+      },
+    ],
+    local.set_cluster_id,
+    local.set_kvisor_grpc_addr,
+    local.set_components_sets,
+    [for k, v in var.kvisor_controller_extra_args : {
+      name  = "controller.extraArgs.${k}"
+      value = v
+    }]
+  )
 
-  set_sensitive {
-    name  = "castai.apiKey"
-    value = castai_aks_cluster.castai_cluster.cluster_token
-  }
-
-  set {
-    name  = "castai.grpcAddr"
-    value = var.api_grpc_addr
-  }
-
-  dynamic "set" {
-    for_each = var.kvisor_controller_extra_args
-    content {
-      name  = "controller.extraArgs.${set.key}"
-      value = set.value
-    }
-  }
-
-  set {
-    name  = "controller.extraArgs.kube-bench-cloud-provider"
-    value = "aks"
-  }
-
-  dynamic "set" {
-    for_each = var.castai_components_sets
-    content {
-      name  = set.key
-      value = set.value
-    }
-  }
+  set_sensitive = local.set_sensitive_apikey
 }
 
 resource "helm_release" "castai_kvisor_self_managed" {
@@ -790,41 +616,23 @@ resource "helm_release" "castai_kvisor_self_managed" {
   version = var.kvisor_version
   values  = var.kvisor_values
 
-  set {
-    name  = "castai.clusterID"
-    value = castai_aks_cluster.castai_cluster.id
-  }
+  set = concat(
+    [
+      {
+        name  = "controller.extraArgs.kube-bench-cloud-provider"
+        value = "aks"
+      },
+    ],
+    local.set_cluster_id,
+    local.set_kvisor_grpc_addr,
+    local.set_components_sets,
+    [for k, v in var.kvisor_controller_extra_args : {
+      name  = "controller.extraArgs.${k}"
+      value = v
+    }]
+  )
 
-  set_sensitive {
-    name  = "castai.apiKey"
-    value = castai_aks_cluster.castai_cluster.cluster_token
-  }
-
-  set {
-    name  = "castai.grpcAddr"
-    value = var.api_grpc_addr
-  }
-
-  dynamic "set" {
-    for_each = var.kvisor_controller_extra_args
-    content {
-      name  = "controller.extraArgs.${set.key}"
-      value = set.value
-    }
-  }
-
-  set {
-    name  = "controller.extraArgs.kube-bench-cloud-provider"
-    value = "aks"
-  }
-
-  dynamic "set" {
-    for_each = var.castai_components_sets
-    content {
-      name  = set.key
-      value = set.value
-    }
-  }
+  set_sensitive = local.set_sensitive_apikey
 }
 
 #---------------------------------------------------#
@@ -844,15 +652,19 @@ resource "helm_release" "castai_workload_autoscaler" {
   version = var.workload_autoscaler_version
   values  = var.workload_autoscaler_values
 
-  set {
-    name  = "castai.apiKeySecretRef"
-    value = "castai-cluster-controller"
-  }
-
-  set {
-    name  = "castai.configMapRef"
-    value = "castai-cluster-controller"
-  }
+  set = concat(
+    [
+      {
+        name  = "castai.apiKeySecretRef"
+        value = "castai-cluster-controller"
+      },
+      {
+        name  = "castai.configMapRef"
+        value = "castai-cluster-controller"
+      },
+    ],
+    local.set_components_sets,
+  )
 
   depends_on = [helm_release.castai_agent, helm_release.castai_cluster_controller]
 
@@ -875,21 +687,86 @@ resource "helm_release" "castai_workload_autoscaler_self_managed" {
   version = var.workload_autoscaler_version
   values  = var.workload_autoscaler_values
 
-  set {
-    name  = "castai.apiKeySecretRef"
-    value = "castai-cluster-controller"
-  }
+  set = concat(
+    [
+      {
+        name  = "castai.apiKeySecretRef"
+        value = "castai-cluster-controller"
+      },
+      {
+        name  = "castai.configMapRef"
+        value = "castai-cluster-controller"
+      },
+    ],
+    local.set_components_sets,
+  )
 
-  set {
-    name  = "castai.configMapRef"
-    value = "castai-cluster-controller"
+  depends_on = [helm_release.castai_agent, helm_release.castai_cluster_controller]
+}
+
+#---------------------------------------------------#
+# CAST.AI Pod Mutator configuration                 #
+#---------------------------------------------------#
+resource "helm_release" "castai_pod_mutator" {
+  count = var.install_pod_mutator && !var.self_managed ? 1 : 0
+
+  name             = "castai-pod-mutator"
+  repository       = "https://castai.github.io/helm-charts"
+  chart            = "castai-pod-mutator"
+  namespace        = "castai-agent"
+  create_namespace = true
+  cleanup_on_fail  = true
+  wait             = true
+
+  version = var.pod_mutator_version
+  values  = var.pod_mutator_values
+
+  set = concat(
+    local.set_cluster_id,
+    local.set_organization_id,
+    local.set_apiurl,
+    local.set_pod_labels,
+    local.set_components_sets,
+  )
+
+  set_sensitive = local.set_sensitive_apikey
+
+  depends_on = [helm_release.castai_agent, helm_release.castai_cluster_controller]
+
+  lifecycle {
+    ignore_changes = [version]
   }
+}
+
+resource "helm_release" "castai_pod_mutator_self_managed" {
+  count = var.install_pod_mutator && var.self_managed ? 1 : 0
+
+  name             = "castai-pod-mutator"
+  repository       = "https://castai.github.io/helm-charts"
+  chart            = "castai-pod-mutator"
+  namespace        = "castai-agent"
+  create_namespace = true
+  cleanup_on_fail  = true
+  wait             = true
+
+  version = var.pod_mutator_version
+  values  = var.pod_mutator_values
+
+  set = concat(
+    local.set_cluster_id,
+    local.set_organization_id,
+    local.set_apiurl,
+    local.set_pod_labels,
+    local.set_components_sets,
+  )
+
+  set_sensitive = local.set_sensitive_apikey
 
   depends_on = [helm_release.castai_agent, helm_release.castai_cluster_controller]
 }
 
 resource "castai_autoscaler" "castai_autoscaler_policies" {
-  cluster_id               = castai_aks_cluster.castai_cluster.id
+  cluster_id = castai_aks_cluster.castai_cluster.id
 
   // Deprecated  -- kept for backward compatibility
   autoscaler_policies_json = var.autoscaler_policies_json

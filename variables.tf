@@ -17,19 +17,19 @@ variable "grpc_url" {
   default     = "grpc.cast.ai:443"
 }
 
-variable "api_grpc_addr" {
+variable "kvisor_grpc_addr" {
   type        = string
-  description = "CAST AI GRPC API address"
-  default     = "api-grpc.cast.ai:443"
+  description = "CAST AI Kvisor optimized GRPC API address"
+  default     = "kvisor.prod-master.cast.ai:443" // If your cluster is in the EU region, update the grpcAddr to: https://kvisor.prod-eu.cast.ai:443
 }
 
 variable "kvisor_controller_extra_args" {
   type        = map(string)
-  description = "Extra arguments for the kvisor controller. Optionally enable kvisor to lint Kubernetes YAML manifests, scan workload images and check if workloads pass CIS Kubernetes Benchmarks as well as NSA, WASP and PCI recommendations."
+  description = "⚠️ DEPRECATED: use kvisor_values instead (see example: https://github.com/castai/terraform-provider-castai/tree/master/examples/aks/aks_cluster_with_security/castai.tf ). Extra arguments for the kvisor controller. Optionally enable kvisor to lint Kubernetes YAML manifests, scan workload images and check if workloads pass CIS Kubernetes Benchmarks as well as NSA, WASP and PCI recommendations."
   default = {
-    "kube-linter-enabled"        = "true"
-    "image-scan-enabled"         = "true"
-    "kube-bench-enabled"         = "true"
+    "kube-linter-enabled" = "true"
+    "image-scan-enabled"  = "true"
+    "kube-bench-enabled"  = "true"
   }
 }
 
@@ -84,21 +84,21 @@ variable "tenant_id" {
 }
 
 variable "http_proxy" {
-  type = string
+  type        = string
   description = "Address to use for proxying http requests from CAST AI components running directly on nodes."
-  default = null
+  default     = null
 }
 
 variable "https_proxy" {
-  type = string
+  type        = string
   description = "Address to use for proxying https requests from CAST AI components running directly on nodes."
-  default = null
+  default     = null
 }
 
 variable "no_proxy" {
-  type = list(string)
+  type        = list(string)
   description = "List of addresses to skip proxying requests from CAST AI components running directly on nodes. Used with http_proxy and https_proxy."
-  default = []
+  default     = []
 }
 
 variable "castai_components_labels" {
@@ -122,13 +122,13 @@ variable "node_configurations" {
 variable "default_node_configuration" {
   type        = string
   description = "ID of the default node configuration"
-  default = ""
+  default     = ""
 }
 
 variable "default_node_configuration_name" {
   type        = string
   description = "Name of the default node configuration"
-  default = ""
+  default     = ""
 }
 
 variable "node_templates" {
@@ -146,7 +146,7 @@ variable "workload_scaling_policies" {
 variable "install_security_agent" {
   type        = bool
   default     = false
-  description = "Optional flag for installation of security agent (https://docs.cast.ai/product-overview/console/security-insights/)"
+  description = "Optional flag for installation of security agent (Kvisor - https://docs.cast.ai/docs/kvisor)"
 }
 
 variable "agent_values" {
@@ -186,7 +186,7 @@ variable "pod_pinner_values" {
 }
 
 variable "kvisor_values" {
-  description = "List of YAML formatted string values for kvisor helm chart"
+  description = "List of YAML formatted string values for kvisor helm chart, see example: https://github.com/castai/terraform-provider-castai/tree/master/examples/aks/aks_cluster_with_security/castai.tf"
   type        = list(string)
   default     = []
 }
@@ -261,4 +261,34 @@ variable "workload_autoscaler_values" {
   description = "List of YAML formatted string with cluster-workload-autoscaler values"
   type        = list(string)
   default     = []
+}
+
+variable "azuread_owners" {
+  description = "A set of object IDs of principals that will be granted ownership of the Azure AD service principal and application. Defaults to current user."
+  type        = list(string)
+  default     = null
+}
+
+variable "install_pod_mutator" {
+  description = "Optional flag for installation of pod mutator"
+  type        = bool
+  default     = false
+}
+
+variable "pod_mutator_version" {
+  description = "Version of castai-pod-mutator helm chart. Default latest"
+  type        = string
+  default     = null
+}
+
+variable "pod_mutator_values" {
+  description = "List of YAML formatted string values for pod-mutator helm chart"
+  type        = list(string)
+  default     = []
+}
+
+variable "organization_id" {
+  description = "DEPRECATED (required only for pod mutator v0.0.25 and older): CAST AI Organization ID"
+  type        = string
+  default     = ""
 }
