@@ -57,6 +57,7 @@ resource "castai_node_configuration" "this" {
     max_pods_per_node = try(each.value.max_pods_per_node, 30)
     os_disk_type      = try(each.value.os_disk_type, null)
     aks_image_family  = try(each.value.aks_image_family, null)
+    pod_subnet_id     = try(each.value.pod_subnet_id, null)
     dynamic "ephemeral_os_disk" {
       for_each = flatten([lookup(each.value, "aks_ephemeral_os_disk", [])])
       content {
