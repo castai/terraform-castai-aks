@@ -219,16 +219,153 @@ resource "castai_workload_scaling_policy" "this" {
 
   apply_type        = try(each.value.apply_type, "DEFERRED")
   management_option = try(each.value.management_option, "READ_ONLY")
+
   cpu {
-    function        = try(each.value.cpu.function, "QUANTILE")
-    overhead        = try(each.value.cpu.overhead, 0)
-    apply_threshold = try(each.value.cpu.apply_threshold, 0.1)
-    args            = try(each.value.cpu.args, ["0.8"])
+    function                 = try(each.value.cpu.function, "QUANTILE")
+    overhead                 = try(each.value.cpu.overhead, 0)
+    apply_threshold          = try(each.value.cpu.apply_threshold, 0.1)
+    args                     = try(each.value.cpu.args, ["0.8"])
+    look_back_period_seconds = try(each.value.cpu.look_back_period_seconds, null)
+    min                      = try(each.value.cpu.min, null)
+    max                      = try(each.value.cpu.max, null)
+    management_option        = try(each.value.cpu.management_option, null)
+
+    dynamic "apply_threshold_strategy" {
+      for_each = try([each.value.cpu.apply_threshold_strategy], [])
+      content {
+        type        = try(apply_threshold_strategy.value.type, null)
+        percentage  = try(apply_threshold_strategy.value.percentage, null)
+        numerator   = try(apply_threshold_strategy.value.numerator, null)
+        denominator = try(apply_threshold_strategy.value.denominator, null)
+        exponent    = try(apply_threshold_strategy.value.exponent, null)
+      }
+    }
+
+    dynamic "limit" {
+      for_each = try([each.value.cpu.limit], [])
+      content {
+        type       = try(limit.value.type, null)
+        multiplier = try(limit.value.multiplier, null)
+      }
+    }
   }
+
   memory {
-    function        = try(each.value.memory.function, "MAX")
-    overhead        = try(each.value.memory.overhead, 0.1)
-    apply_threshold = try(each.value.memory.apply_threshold, 0.1)
+    function                 = try(each.value.memory.function, "MAX")
+    overhead                 = try(each.value.memory.overhead, 0.1)
+    apply_threshold          = try(each.value.memory.apply_threshold, 0.1)
+    args                     = try(each.value.memory.args, null)
+    look_back_period_seconds = try(each.value.memory.look_back_period_seconds, null)
+    min                      = try(each.value.memory.min, null)
+    max                      = try(each.value.memory.max, null)
+    management_option        = try(each.value.memory.management_option, null)
+
+    dynamic "apply_threshold_strategy" {
+      for_each = try([each.value.memory.apply_threshold_strategy], [])
+      content {
+        type        = try(apply_threshold_strategy.value.type, null)
+        percentage  = try(apply_threshold_strategy.value.percentage, null)
+        numerator   = try(apply_threshold_strategy.value.numerator, null)
+        denominator = try(apply_threshold_strategy.value.denominator, null)
+        exponent    = try(apply_threshold_strategy.value.exponent, null)
+      }
+    }
+
+    dynamic "limit" {
+      for_each = try([each.value.memory.limit], [])
+      content {
+        type       = try(limit.value.type, null)
+        multiplier = try(limit.value.multiplier, null)
+      }
+    }
+  }
+
+  dynamic "assignment_rules" {
+    for_each = try([each.value.assignment_rules], [])
+    content {
+      dynamic "rules" {
+        for_each = try(assignment_rules.value.rules, [])
+        content {
+          dynamic "namespace" {
+            for_each = try([rules.value.namespace], [])
+            content {
+              names = try(namespace.value.names, null)
+            }
+          }
+
+          dynamic "workload" {
+            for_each = try([rules.value.workload], [])
+            content {
+              gvk = try(workload.value.gvk, null)
+
+              dynamic "labels_expressions" {
+                for_each = try(workload.value.labels_expressions, [])
+                content {
+                  key      = try(labels_expressions.value.key, null)
+                  operator = try(labels_expressions.value.operator, null)
+                  values   = try(labels_expressions.value.values, null)
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  dynamic "confidence" {
+    for_each = try([each.value.confidence], [])
+    content {
+      threshold = try(confidence.value.threshold, null)
+    }
+  }
+
+  dynamic "startup" {
+    for_each = try([each.value.startup], [])
+    content {
+      period_seconds = try(startup.value.period_seconds, null)
+    }
+  }
+
+  dynamic "downscaling" {
+    for_each = try([each.value.downscaling], [])
+    content {
+      apply_type = try(downscaling.value.apply_type, null)
+    }
+  }
+
+  dynamic "memory_event" {
+    for_each = try([each.value.memory_event], [])
+    content {
+      apply_type = try(memory_event.value.apply_type, null)
+    }
+  }
+
+  dynamic "anti_affinity" {
+    for_each = try([each.value.anti_affinity], [])
+    content {
+      consider_anti_affinity = try(anti_affinity.value.consider_anti_affinity, null)
+    }
+  }
+
+  dynamic "predictive_scaling" {
+    for_each = try([each.value.predictive_scaling], [])
+    content {
+      dynamic "cpu" {
+        for_each = try([predictive_scaling.value.cpu], [])
+        content {
+          enabled = try(cpu.value.enabled, null)
+        }
+      }
+    }
+  }
+
+  dynamic "rollout_behavior" {
+    for_each = try([each.value.rollout_behavior], [])
+    content {
+      type              = try(rollout_behavior.value.type, null)
+      prefer_one_by_one = try(rollout_behavior.value.prefer_one_by_one, null)
+    }
   }
 }
 
