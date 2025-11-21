@@ -136,6 +136,8 @@ resource "castai_node_template" "this" {
     }
   }
 
+  edge_location_ids = try(each.value.edge_location_ids, null)
+
   dynamic "constraints" {
     for_each = [for constraints in flatten([lookup(each.value, "constraints", [])]) : constraints if constraints != null]
 
