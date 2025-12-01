@@ -90,18 +90,6 @@ module "castai-aks-cluster" {
 
     unschedulable_pods = {
       enabled = true
-
-      headroom = {
-        enabled           = true
-        cpu_percentage    = 10
-        memory_percentage = 10
-      }
-
-      headroom_spot = {
-        enabled           = true
-        cpu_percentage    = 10
-        memory_percentage = 10
-      }
     }
 
     node_downscaler = {
@@ -342,6 +330,93 @@ module "castai-aks-cluster" {
   }
 }
 ```
+
+Migrating from 9.x.x to 10.x.x
+---------------------------
+
+Version 10.x.x removes deprecated autoscaler fields that have been moved to node templates.
+
+**Removed:**
+* `autoscaler_policies_json` - Use `autoscaler_settings` instead
+* `autoscaler_settings.unschedulable_pods.custom_instances_enabled` - No longer needed
+* `autoscaler_settings.unschedulable_pods.headroom` - Use low-priority placeholder workloads instead
+* `autoscaler_settings.unschedulable_pods.headroom_spot` - Use low-priority placeholder workloads instead
+* `autoscaler_settings.unschedulable_pods.node_constraints` - Use `node_templates` constraints instead
+* `autoscaler_settings.spot_instances` - Use `node_templates` constraints instead
+
+**Migration guide:**
+
+Old configuration:
+```hcl
+module "castai-aks-cluster" {
+  source = "castai/aks/castai"
+
+  autoscaler_settings = {
+    enabled = true
+
+    unschedulable_pods = {
+      enabled                  = true
+      custom_instances_enabled = true
+
+      headroom = {
+        enabled           = true
+        cpu_percentage    = 10
+        memory_percentage = 10
+      }
+
+      node_constraints = {
+        min_cpu_cores = 4
+        max_cpu_cores = 32
+      }
+    }
+
+    spot_instances = {
+      enabled = true
+      spot_backups = {
+        enabled = true
+      }
+    }
+  }
+}
+```
+
+New configuration:
+```hcl
+module "castai-aks-cluster" {
+  source = "castai/aks/castai"
+
+  autoscaler_settings = {
+    enabled = true
+
+    unschedulable_pods = {
+      enabled = true
+    }
+  }
+
+  node_templates = {
+    default_by_castai = {
+      configuration_id = module.castai-aks-cluster.castai_node_configurations["default"]
+      is_default       = true
+
+      constraints = {
+        min_cpu            = 4
+        max_cpu            = 32
+        spot               = true
+        use_spot_fallbacks = true
+      }
+    }
+  }
+}
+
+# For headroom: Deploy low-priority placeholder workloads
+# See: https://docs.cast.ai/docs/autoscaler-faq#how-can-i-maintain-cluster-headroom
+```
+
+**Key changes:**
+* Node constraints (`min_cpu_cores`, `max_cpu_cores`, `min_ram_mib`, `max_ram_mib`) are now configured in `node_templates.constraints` as `min_cpu`, `max_cpu`, `min_memory`, `max_memory`
+* Spot instance settings (`spot`, `use_spot_fallbacks`) are now configured in `node_templates.constraints`
+* The default node template is named `default_by_castai`
+* For headroom functionality, deploy low-priority placeholder workloads as described in the [CAST AI documentation](https://docs.cast.ai/docs/autoscaler-faq#how-can-i-maintain-cluster-headroom)
 
 # Examples 
 
