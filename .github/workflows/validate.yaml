@@ -1,0 +1,73 @@
+name: Validate and lint
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  terraform_validation:
+    strategy:
+      matrix:
+        version: ["1.11", latest]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ matrix.version }}
+
+      - name: Print tf version
+        run: terraform version
+
+      - name: Terraform init
+        run: "terraform init || terraform init -upgrade"
+
+      - name: Terraform validate
+        run: "terraform validate"
+
+      - name: Terraform fmt
+        run: |
+          terraform fmt
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "ERROR: terraform fmt resulted in changes. Run 'terraform fmt' locally and append the changes."
+            echo
+            git diff
+            echo
+            git status
+            exit 1
+          fi
+
+  tflint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        name: Checkout source code
+
+      - uses: actions/cache@v3
+        name: Cache plugin dir
+        with:
+          path: ~/.tflint.d/plugins
+          key: tflint-${{ hashFiles('.tflint.hcl') }}
+
+      - uses: terraform-linters/setup-tflint@v1
+        name: Setup TFLint
+        with:
+          tflint_version: v0.60.0
+
+      - name: Show version
+        run: tflint --version
+
+      - name: Init TFLint
+        run: tflint --init
+        env:
+          # https://github.com/terraform-linters/tflint/blob/master/docs/user-guide/plugins.md#avoiding-rate-limiting
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Run TFLint
+        run: tflint -f compact
