@@ -90,18 +90,6 @@ module "castai-aks-cluster" {
 
     unschedulable_pods = {
       enabled = true
-
-      headroom = {
-        enabled           = true
-        cpu_percentage    = 10
-        memory_percentage = 10
-      }
-
-      headroom_spot = {
-        enabled           = true
-        cpu_percentage    = 10
-        memory_percentage = 10
-      }
     }
 
     node_downscaler = {
@@ -343,6 +331,93 @@ module "castai-aks-cluster" {
 }
 ```
 
+Migrating from 9.x.x to 10.x.x
+---------------------------
+
+Version 10.x.x removes deprecated autoscaler fields that have been moved to node templates.
+
+**Removed:**
+* `autoscaler_policies_json` - Use `autoscaler_settings` instead
+* `autoscaler_settings.unschedulable_pods.custom_instances_enabled` - No longer needed
+* `autoscaler_settings.unschedulable_pods.headroom` - Use low-priority placeholder workloads instead
+* `autoscaler_settings.unschedulable_pods.headroom_spot` - Use low-priority placeholder workloads instead
+* `autoscaler_settings.unschedulable_pods.node_constraints` - Use `node_templates` constraints instead
+* `autoscaler_settings.spot_instances` - Use `node_templates` constraints instead
+
+**Migration guide:**
+
+Old configuration:
+```hcl
+module "castai-aks-cluster" {
+  source = "castai/aks/castai"
+
+  autoscaler_settings = {
+    enabled = true
+
+    unschedulable_pods = {
+      enabled                  = true
+      custom_instances_enabled = true
+
+      headroom = {
+        enabled           = true
+        cpu_percentage    = 10
+        memory_percentage = 10
+      }
+
+      node_constraints = {
+        min_cpu_cores = 4
+        max_cpu_cores = 32
+      }
+    }
+
+    spot_instances = {
+      enabled = true
+      spot_backups = {
+        enabled = true
+      }
+    }
+  }
+}
+```
+
+New configuration:
+```hcl
+module "castai-aks-cluster" {
+  source = "castai/aks/castai"
+
+  autoscaler_settings = {
+    enabled = true
+
+    unschedulable_pods = {
+      enabled = true
+    }
+  }
+
+  node_templates = {
+    default_by_castai = {
+      configuration_id = module.castai-aks-cluster.castai_node_configurations["default"]
+      is_default       = true
+
+      constraints = {
+        min_cpu            = 4
+        max_cpu            = 32
+        spot               = true
+        use_spot_fallbacks = true
+      }
+    }
+  }
+}
+
+# For headroom: Deploy low-priority placeholder workloads
+# See: https://docs.cast.ai/docs/autoscaler-faq#how-can-i-maintain-cluster-headroom
+```
+
+**Key changes:**
+* Node constraints (`min_cpu_cores`, `max_cpu_cores`, `min_ram_mib`, `max_ram_mib`) are now configured in `node_templates.constraints` as `min_cpu`, `max_cpu`, `min_memory`, `max_memory`
+* Spot instance settings (`spot`, `use_spot_fallbacks`) are now configured in `node_templates.constraints`
+* The default node template is named `default_by_castai`
+* For headroom functionality, deploy low-priority placeholder workloads as described in the [CAST AI documentation](https://docs.cast.ai/docs/autoscaler-faq#how-can-i-maintain-cluster-headroom)
+
 # Examples 
 
 Usage examples are located in [terraform provider repo](https://github.com/castai/terraform-provider-castai/tree/master/examples/aks)
@@ -365,9 +440,9 @@ Usage examples are located in [terraform provider repo](https://github.com/casta
 |------|---------|
 | <a name="provider_azuread"></a> [azuread](#provider\_azuread) | ~> 3 |
 | <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | >= 3.7.0 |
-| <a name="provider_castai"></a> [castai](#provider\_castai) | 7.62.0 |
-| <a name="provider_helm"></a> [helm](#provider\_helm) | 2.17.0 |
-| <a name="provider_null"></a> [null](#provider\_null) | 3.2.4 |
+| <a name="provider_castai"></a> [castai](#provider\_castai) | >= 8.3 |
+| <a name="provider_helm"></a> [helm](#provider\_helm) | >= 3.0.0 |
+| <a name="provider_null"></a> [null](#provider\_null) | ~> 3 |
 
 ## Modules
 
@@ -422,7 +497,6 @@ No modules.
 | <a name="input_aks_cluster_name"></a> [aks\_cluster\_name](#input\_aks\_cluster\_name) | Name of the cluster to be connected to CAST AI. | `string` | n/a | yes |
 | <a name="input_aks_cluster_region"></a> [aks\_cluster\_region](#input\_aks\_cluster\_region) | Region of the AKS cluster | `string` | n/a | yes |
 | <a name="input_api_url"></a> [api\_url](#input\_api\_url) | URL of alternative CAST AI API to be used during development or testing | `string` | `"https://api.cast.ai"` | no |
-| <a name="input_autoscaler_policies_json"></a> [autoscaler\_policies\_json](#input\_autoscaler\_policies\_json) | Optional json object to override CAST AI cluster autoscaler policies. Deprecated, use `autoscaler_settings` instead. | `string` | `null` | no |
 | <a name="input_autoscaler_settings"></a> [autoscaler\_settings](#input\_autoscaler\_settings) | Optional Autoscaler policy definitions to override current autoscaler settings | `any` | `null` | no |
 | <a name="input_azuread_owners"></a> [azuread\_owners](#input\_azuread\_owners) | A set of object IDs of principals that will be granted ownership of the Azure AD service principal and application. Defaults to current user. | `list(string)` | `null` | no |
 | <a name="input_castai_api_token"></a> [castai\_api\_token](#input\_castai\_api\_token) | Optional CAST AI API token created in console.cast.ai API Access keys section. Used only when `wait_for_cluster_ready` is set to true | `string` | `""` | no |

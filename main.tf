@@ -907,9 +907,6 @@ resource "helm_release" "castai_pod_mutator_self_managed" {
 resource "castai_autoscaler" "castai_autoscaler_policies" {
   cluster_id = castai_aks_cluster.castai_cluster.id
 
-  // Deprecated  -- kept for backward compatibility
-  autoscaler_policies_json = var.autoscaler_policies_json
-
   dynamic "autoscaler_settings" {
     for_each = var.autoscaler_settings != null ? [var.autoscaler_settings] : []
 
@@ -922,40 +919,7 @@ resource "castai_autoscaler" "castai_autoscaler_policies" {
         for_each = try([autoscaler_settings.value.unschedulable_pods], [])
 
         content {
-          enabled                  = try(unschedulable_pods.value.enabled, null)
-          custom_instances_enabled = try(unschedulable_pods.value.custom_instances_enabled, null)
-
-          dynamic "headroom" {
-            for_each = try([unschedulable_pods.value.headroom], [])
-
-            content {
-              enabled           = try(headroom.value.enabled, null)
-              cpu_percentage    = try(headroom.value.cpu_percentage, null)
-              memory_percentage = try(headroom.value.memory_percentage, null)
-            }
-          }
-
-          dynamic "headroom_spot" {
-            for_each = try([unschedulable_pods.value.headroom_spot], [])
-
-            content {
-              enabled           = try(headroom_spot.value.enabled, null)
-              cpu_percentage    = try(headroom_spot.value.cpu_percentage, null)
-              memory_percentage = try(headroom_spot.value.memory_percentage, null)
-            }
-          }
-
-          dynamic "node_constraints" {
-            for_each = try([unschedulable_pods.value.node_constraints], [])
-
-            content {
-              enabled       = try(node_constraints.value.enabled, null)
-              min_cpu_cores = try(node_constraints.value.min_cpu_cores, null)
-              max_cpu_cores = try(node_constraints.value.max_cpu_cores, null)
-              min_ram_mib   = try(node_constraints.value.min_ram_mib, null)
-              max_ram_mib   = try(node_constraints.value.max_ram_mib, null)
-            }
-          }
+          enabled = try(unschedulable_pods.value.enabled, null)
 
           dynamic "pod_pinner" {
             for_each = try([unschedulable_pods.value.pod_pinner], [])
@@ -980,35 +944,6 @@ resource "castai_autoscaler" "castai_autoscaler_policies" {
             content {
               min_cores = try(cpu.value.min_cores, null)
               max_cores = try(cpu.value.max_cores, null)
-            }
-          }
-        }
-      }
-
-      dynamic "spot_instances" {
-        for_each = try([autoscaler_settings.value.spot_instances], [])
-
-        content {
-          enabled                             = try(spot_instances.value.enabled, null)
-          max_reclaim_rate                    = try(spot_instances.value.max_reclaim_rate, null)
-          spot_diversity_enabled              = try(spot_instances.value.spot_diversity_enabled, null)
-          spot_diversity_price_increase_limit = try(spot_instances.value.spot_diversity_price_increase_limit, null)
-
-          dynamic "spot_backups" {
-            for_each = try([spot_instances.value.spot_backups], [])
-
-            content {
-              enabled                          = try(spot_backups.value.enabled, null)
-              spot_backup_restore_rate_seconds = try(spot_backups.value.spot_backup_restore_rate_seconds, null)
-            }
-          }
-
-          dynamic "spot_interruption_predictions" {
-            for_each = try([spot_instances.value.spot_interruption_predictions], [])
-
-            content {
-              enabled                            = try(spot_interruption_predictions.value.enabled, null)
-              spot_interruption_predictions_type = try(spot_interruption_predictions.value.spot_interruption_predictions_type, null)
             }
           }
         }
