@@ -1104,3 +1104,28 @@ resource "helm_release" "castai_ai_optimizer_proxy_self_managed" {
 
   depends_on = [helm_release.castai_agent, helm_release.castai_cluster_controller]
 }
+
+data "azurerm_kubernetes_cluster" "aks" {
+  count = var.install_omni && !var.self_managed ? 1 : 0
+
+  name                = var.aks_cluster_name
+  resource_group_name = var.resource_group
+}
+
+module "castai_omni_cluster" {
+  count = var.install_omni && !var.self_managed ? 1 : 0
+  # tflint-ignore: terraform_module_pinned_source
+  source = "github.com/castai/terraform-castai-omni-cluster"
+
+  k8s_provider    = "aks"
+  api_url         = var.api_url
+  api_token       = var.castai_api_token
+  organization_id = castai_aks_cluster.castai_cluster.organization_id
+  cluster_id      = castai_aks_cluster.castai_cluster.id
+  cluster_name    = var.aks_cluster_name
+  cluster_region  = data.azurerm_kubernetes_cluster.aks[0].location
+
+  api_server_address = "https://${data.azurerm_kubernetes_cluster.aks[0].fqdn}"
+  pod_cidr           = data.azurerm_kubernetes_cluster.aks[0].network_profile[0].pod_cidr
+  service_cidr       = data.azurerm_kubernetes_cluster.aks[0].network_profile[0].service_cidr
+}
