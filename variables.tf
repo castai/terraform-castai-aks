@@ -227,6 +227,12 @@ variable "kvisor_version" {
   default     = null
 }
 
+variable "kvisor_wait" {
+  description = "Wait for kvisor chart to finish release"
+  type        = bool
+  default     = true
+}
+
 variable "self_managed" {
   type        = bool
   default     = false
