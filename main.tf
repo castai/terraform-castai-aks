@@ -602,7 +602,7 @@ resource "helm_release" "castai_evictor_ext" {
     local.set_components_sets,
   )
 
-  depends_on = [helm_release.castai_evictor]
+  depends_on = [helm_release.castai_evictor, helm_release.castai_evictor_self_managed]
 }
 
 resource "helm_release" "castai_pod_pinner" {
@@ -748,7 +748,6 @@ resource "helm_release" "castai_kvisor" {
   )
 
   set_sensitive = local.set_sensitive_apikey
-
 }
 
 resource "helm_release" "castai_kvisor_self_managed" {
@@ -782,7 +781,6 @@ resource "helm_release" "castai_kvisor_self_managed" {
   )
 
   set_sensitive = local.set_sensitive_apikey
-
 }
 
 #---------------------------------------------------#
