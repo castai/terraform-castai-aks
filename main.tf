@@ -1011,6 +1011,7 @@ resource "helm_release" "castai_ai_optimizer_proxy" {
     local.set_cluster_id,
     local.set_apiurl,
     local.set_pod_labels,
+    local.set_components_sets,
   )
 
   set_sensitive = local.set_sensitive_apikey
@@ -1040,6 +1041,7 @@ resource "helm_release" "castai_ai_optimizer_proxy_self_managed" {
     local.set_cluster_id,
     local.set_apiurl,
     local.set_pod_labels,
+    local.set_components_sets,
   )
 
   set_sensitive = local.set_sensitive_apikey
