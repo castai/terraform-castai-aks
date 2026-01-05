@@ -269,6 +269,17 @@ variable "azuread_owners" {
   default     = null
 }
 
+variable "authentication_method" {
+  description = "Authentication method for CAST AI. Use 'client_secret' for service principal with password, or 'workload_identity' for federated identity credential"
+  type        = string
+  default     = "client_secret"
+
+  validation {
+    condition     = contains(["client_secret", "workload_identity"], var.authentication_method)
+    error_message = "authentication_method must be either 'client_secret' or 'workload_identity'"
+  }
+}
+
 variable "install_pod_mutator" {
   description = "Optional flag for installation of pod mutator"
   type        = bool

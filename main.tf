@@ -9,8 +9,9 @@ resource "castai_aks_cluster" "castai_cluster" {
   region          = var.aks_cluster_region
   subscription_id = var.subscription_id
   tenant_id       = var.tenant_id
-  client_id       = azuread_application.castai.client_id
-  client_secret   = azuread_application_password.castai.value
+  client_id       = var.authentication_method == "client_secret" ? azuread_application.castai[0].client_id : azurerm_user_assigned_identity.this[0].client_id
+  client_secret   = var.authentication_method == "client_secret" ? azuread_application_password.castai[0].value : null
+  federation_id   = var.authentication_method == "workload_identity" ? azurerm_user_assigned_identity.this[0].principal_id : null
 
   node_resource_group        = var.node_resource_group
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
@@ -35,7 +36,9 @@ resource "castai_aks_cluster" "castai_cluster" {
     azurerm_role_assignment.castai_additional_resource_groups,
     azuread_application.castai,
     azuread_application_password.castai,
-    azuread_service_principal.castai
+    azuread_service_principal.castai,
+    azurerm_user_assigned_identity.this,
+    azurerm_federated_identity_credential.this
   ]
 }
 
