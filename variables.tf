@@ -103,7 +103,7 @@ variable "castai_components_labels" {
 
 variable "castai_components_sets" {
   type        = map(string)
-  description = "Optional additional 'set' configurations for helm resources."
+  description = "Optional additional 'set' configurations for every CAST AI Helm release."
   default     = {}
 }
 

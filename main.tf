@@ -598,6 +598,10 @@ resource "helm_release" "castai_evictor_ext" {
   version = var.evictor_ext_version
   values  = var.evictor_ext_values
 
+  set = concat(
+    local.set_components_sets,
+  )
+
   depends_on = [helm_release.castai_evictor]
 }
 
@@ -740,7 +744,7 @@ resource "helm_release" "castai_kvisor" {
     [for k, v in var.kvisor_controller_extra_args : {
       name  = "controller.extraArgs.${k}"
       value = v
-    }]
+    }],
   )
 
   set_sensitive = local.set_sensitive_apikey
@@ -774,7 +778,7 @@ resource "helm_release" "castai_kvisor_self_managed" {
     [for k, v in var.kvisor_controller_extra_args : {
       name  = "controller.extraArgs.${k}"
       value = v
-    }]
+    }],
   )
 
   set_sensitive = local.set_sensitive_apikey
