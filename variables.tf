@@ -48,12 +48,6 @@ variable "subscription_id" {
   description = "Azure subscription ID"
 }
 
-variable "autoscaler_policies_json" {
-  type        = string
-  description = "Optional json object to override CAST AI cluster autoscaler policies. Deprecated, use `autoscaler_settings` instead."
-  default     = null
-}
-
 variable "autoscaler_settings" {
   type        = any
   description = "Optional Autoscaler policy definitions to override current autoscaler settings"
@@ -109,7 +103,7 @@ variable "castai_components_labels" {
 
 variable "castai_components_sets" {
   type        = map(string)
-  description = "Optional additional 'set' configurations for helm resources."
+  description = "Optional additional 'set' configurations for every CAST AI Helm release."
   default     = {}
 }
 
@@ -233,10 +227,16 @@ variable "kvisor_version" {
   default     = null
 }
 
+variable "kvisor_wait" {
+  description = "Wait for kvisor chart to finish release"
+  type        = bool
+  default     = true
+}
+
 variable "self_managed" {
   type        = bool
   default     = false
-  description = "Whether CAST AI components' upgrades are managed by a customer; by default upgrades are managed CAST AI central system."
+  description = "Whether CAST AI components' upgrades are managed by a customer; by default upgrades are managed CAST AI central system. WARNING: changing this after the module was created is not supported."
 }
 
 variable "wait_for_cluster_ready" {
@@ -269,6 +269,17 @@ variable "azuread_owners" {
   default     = null
 }
 
+variable "authentication_method" {
+  description = "Authentication method for CAST AI. Use 'client_secret' for service principal with password, or 'workload_identity' for federated identity credential"
+  type        = string
+  default     = "client_secret"
+
+  validation {
+    condition     = contains(["client_secret", "workload_identity"], var.authentication_method)
+    error_message = "authentication_method must be either 'client_secret' or 'workload_identity'"
+  }
+}
+
 variable "install_pod_mutator" {
   description = "Optional flag for installation of pod mutator"
   type        = bool
@@ -291,4 +302,28 @@ variable "organization_id" {
   description = "DEPRECATED (required only for pod mutator v0.0.25 and older): CAST AI Organization ID"
   type        = string
   default     = ""
+}
+
+variable "install_ai_optimizer" {
+  type        = bool
+  default     = false
+  description = "Optional flag for installation of AI Optimizer (https://docs.cast.ai/docs/getting-started-ai)"
+}
+
+variable "ai_optimizer_version" {
+  description = "Version of castai-ai-optimizer helm chart. Default latest"
+  type        = string
+  default     = null
+}
+
+variable "ai_optimizer_values" {
+  description = "List of YAML formatted string with ai-optimizer values"
+  type        = list(string)
+  default     = []
+}
+
+variable "install_omni" {
+  description = "Optional flag for installing Omni capability"
+  type        = bool
+  default     = false
 }

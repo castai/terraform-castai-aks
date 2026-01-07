@@ -1,0 +1,35 @@
+name: Documentation Check
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check_readme:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup terraform-docs
+        uses: terraform-docs/gh-actions@v1.2.0
+        with:
+          working-dir: .
+          output-file: README.md
+          output-method: inject
+          git-push: "false"
+
+      - name: Check if README.md is up-to-date
+        run: |
+          make generate-doc
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "ERROR: README.md is not up-to-date. Run 'make generate-doc' locally and commit the changes."
+            echo
+            git diff
+            echo
+            git status
+            exit 1
+          fi
+          echo "README.md is up-to-date!"
