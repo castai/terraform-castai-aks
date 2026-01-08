@@ -1059,10 +1059,9 @@ data "azurerm_kubernetes_cluster" "aks" {
 }
 
 module "castai_omni_cluster" {
-  count = var.install_omni && !var.self_managed ? 1 : 0
-  # tflint-ignore: terraform_module_pinned_source
+  count   = var.install_omni && !var.self_managed ? 1 : 0
   source  = "castai/omni-cluster/castai"
-  version = "~> 1"
+  version = "~> 2.0"
 
   k8s_provider    = "aks"
   api_url         = var.api_url
@@ -1070,7 +1069,6 @@ module "castai_omni_cluster" {
   organization_id = castai_aks_cluster.castai_cluster.organization_id
   cluster_id      = castai_aks_cluster.castai_cluster.id
   cluster_name    = var.aks_cluster_name
-  cluster_region  = data.azurerm_kubernetes_cluster.aks[0].location
 
   api_server_address = "https://${data.azurerm_kubernetes_cluster.aks[0].fqdn}"
   pod_cidr           = data.azurerm_kubernetes_cluster.aks[0].network_profile[0].pod_cidr
