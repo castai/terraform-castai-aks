@@ -1061,7 +1061,8 @@ data "azurerm_kubernetes_cluster" "aks" {
 module "castai_omni_cluster" {
   count = var.install_omni && !var.self_managed ? 1 : 0
   # tflint-ignore: terraform_module_pinned_source
-  source = "github.com/castai/terraform-castai-omni-cluster"
+  source  = "castai/omni-cluster/castai"
+  version = "~> 1"
 
   k8s_provider    = "aks"
   api_url         = var.api_url
