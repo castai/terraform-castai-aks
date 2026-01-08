@@ -434,7 +434,7 @@ Usage examples are located in [terraform provider repo](https://github.com/casta
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13 |
 | <a name="requirement_azuread"></a> [azuread](#requirement\_azuread) | ~> 3 |
 | <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | >= 3.7.0 |
-| <a name="requirement_castai"></a> [castai](#requirement\_castai) | >= 8.3 |
+| <a name="requirement_castai"></a> [castai](#requirement\_castai) | >= 8.7 |
 | <a name="requirement_helm"></a> [helm](#requirement\_helm) | >= 3.0.0 |
 | <a name="requirement_null"></a> [null](#requirement\_null) | ~> 3 |
 
@@ -442,11 +442,11 @@ Usage examples are located in [terraform provider repo](https://github.com/casta
 
 | Name | Version |
 |------|---------|
-| <a name="provider_azuread"></a> [azuread](#provider\_azuread) | 3.7.0 |
-| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 4.57.0 |
-| <a name="provider_castai"></a> [castai](#provider\_castai) | 8.8.0 |
-| <a name="provider_helm"></a> [helm](#provider\_helm) | 3.1.1 |
-| <a name="provider_null"></a> [null](#provider\_null) | 3.2.4 |
+| <a name="provider_azuread"></a> [azuread](#provider\_azuread) | ~> 3 |
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | >= 3.7.0 |
+| <a name="provider_castai"></a> [castai](#provider\_castai) | >= 8.7 |
+| <a name="provider_helm"></a> [helm](#provider\_helm) | >= 3.0.0 |
+| <a name="provider_null"></a> [null](#provider\_null) | ~> 3 |
 
 ## Modules
 
@@ -531,7 +531,7 @@ Usage examples are located in [terraform provider repo](https://github.com/casta
 | <a name="input_install_pod_mutator"></a> [install\_pod\_mutator](#input\_install\_pod\_mutator) | Optional flag for installation of pod mutator | `bool` | `false` | no |
 | <a name="input_install_security_agent"></a> [install\_security\_agent](#input\_install\_security\_agent) | Optional flag for installation of security agent (Kvisor - https://docs.cast.ai/docs/kvisor) | `bool` | `false` | no |
 | <a name="input_install_workload_autoscaler"></a> [install\_workload\_autoscaler](#input\_install\_workload\_autoscaler) | Optional flag for installation of workload autoscaler (https://docs.cast.ai/docs/workload-autoscaling-configuration) | `bool` | `false` | no |
-| <a name="input_kvisor_controller_extra_args"></a> [kvisor\_controller\_extra\_args](#input\_kvisor\_controller\_extra\_args) | ⚠️ DEPRECATED: use kvisor\_values instead (see example: https://github.com/castai/terraform-provider-castai/tree/master/examples/aks/aks_cluster_with_security/castai.tf ). Extra arguments for the kvisor controller. Optionally enable kvisor to lint Kubernetes YAML manifests, scan workload images and check if workloads pass CIS Kubernetes Benchmarks as well as NSA, WASP and PCI recommendations. | `map(string)` | <pre>{<br>  "image-scan-enabled": "true",<br>  "kube-bench-enabled": "true",<br>  "kube-linter-enabled": "true"<br>}</pre> | no |
+| <a name="input_kvisor_controller_extra_args"></a> [kvisor\_controller\_extra\_args](#input\_kvisor\_controller\_extra\_args) | ⚠️ DEPRECATED: use kvisor\_values instead (see example: https://github.com/castai/terraform-provider-castai/tree/master/examples/aks/aks_cluster_with_security/castai.tf ). Extra arguments for the kvisor controller. Optionally enable kvisor to lint Kubernetes YAML manifests, scan workload images and check if workloads pass CIS Kubernetes Benchmarks as well as NSA, WASP and PCI recommendations. | `map(string)` | <pre>{<br/>  "image-scan-enabled": "true",<br/>  "kube-bench-enabled": "true",<br/>  "kube-linter-enabled": "true"<br/>}</pre> | no |
 | <a name="input_kvisor_grpc_addr"></a> [kvisor\_grpc\_addr](#input\_kvisor\_grpc\_addr) | CAST AI Kvisor optimized GRPC API address | `string` | `"kvisor.prod-master.cast.ai:443"` | no |
 | <a name="input_kvisor_values"></a> [kvisor\_values](#input\_kvisor\_values) | List of YAML formatted string values for kvisor helm chart, see example: https://github.com/castai/terraform-provider-castai/tree/master/examples/aks/aks_cluster_with_security/castai.tf | `list(string)` | `[]` | no |
 | <a name="input_kvisor_version"></a> [kvisor\_version](#input\_kvisor\_version) | Version of kvisor chart. If not provided, latest version will be used. | `string` | `null` | no |

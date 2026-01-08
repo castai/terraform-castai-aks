@@ -13,23 +13,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup terraform-docs
-        uses: terraform-docs/gh-actions@v1.2.0
+      - name: Generate documentation
+        uses: terraform-docs/gh-actions@v1.4.1
         with:
           working-dir: .
           output-file: README.md
-          output-method: inject
-          git-push: "false"
+          fail-on-diff: false
 
-      - name: Check if README.md is up-to-date
+      - name: Check for uncommitted changes
         run: |
-          make generate-doc
+          git status
           if [ -n "$(git status --porcelain)" ]; then
-            echo "ERROR: README.md is not up-to-date. Run 'make generate-doc' locally and commit the changes."
-            echo
-            git diff
-            echo
-            git status
+            echo "::error::README.md is not up-to-date. Run 'make generate-doc' locally and commit the changes."
+            echo ""
+            echo "Changes needed:"
+            git diff HEAD
             exit 1
           fi
           echo "README.md is up-to-date!"
