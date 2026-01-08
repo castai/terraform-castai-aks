@@ -452,7 +452,7 @@ Usage examples are located in [terraform provider repo](https://github.com/casta
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_castai_omni_cluster"></a> [castai\_omni\_cluster](#module\_castai\_omni\_cluster) | castai/omni-cluster/castai | ~> 1 |
+| <a name="module_castai_omni_cluster"></a> [castai\_omni\_cluster](#module\_castai\_omni\_cluster) | castai/omni-cluster/castai | ~> 2.0 |
 
 ## Resources
 
