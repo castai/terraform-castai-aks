@@ -45,8 +45,6 @@ resource "azurerm_role_definition" "castai" {
       "Microsoft.Network/loadBalancers/backendAddressPools/write",
       "Microsoft.Network/loadBalancers/backendAddressPools/join/action",
       "Microsoft.ContainerService/*/read",
-      "Microsoft.ContainerService/managedClusters/start/action",
-      "Microsoft.ContainerService/managedClusters/stop/action",
       "Microsoft.ContainerService/managedClusters/runCommand/action",
       "Microsoft.ContainerService/managedClusters/agentPools/*",
       "Microsoft.Resources/*/read",
