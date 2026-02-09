@@ -852,6 +852,75 @@ resource "helm_release" "castai_workload_autoscaler_self_managed" {
   depends_on = [helm_release.castai_agent, helm_release.castai_cluster_controller]
 }
 
+#----------------------------------------------------#
+# CAST.AI Workload Autoscaler Exporter configuration #
+#----------------------------------------------------#
+resource "helm_release" "castai_workload_autoscaler_exporter" {
+  count = var.install_workload_autoscaler_exporter && !var.self_managed ? 1 : 0
+
+  name             = "castai-workload-autoscaler-exporter"
+  repository       = "https://castai.github.io/helm-charts"
+  chart            = "castai-workload-autoscaler-exporter"
+  namespace        = "castai-agent"
+  create_namespace = true
+  cleanup_on_fail  = true
+  wait             = true
+
+  version = var.workload_autoscaler_exporter_version
+  values  = var.workload_autoscaler_exporter_values
+
+  set = concat(
+    [
+      {
+        name  = "castai.apiKeySecretRef"
+        value = "castai-cluster-controller"
+      },
+      {
+        name  = "castai.configMapRef"
+        value = "castai-cluster-controller"
+      },
+    ],
+    local.set_components_sets,
+  )
+
+  depends_on = [helm_release.castai_agent, helm_release.castai_cluster_controller]
+
+  lifecycle {
+    ignore_changes = [version]
+  }
+}
+
+resource "helm_release" "castai_workload_autoscaler_exporter_self_managed" {
+  count = var.install_workload_autoscaler_exporter && var.self_managed ? 1 : 0
+
+  name             = "castai-workload-autoscaler-exporter"
+  repository       = "https://castai.github.io/helm-charts"
+  chart            = "castai-workload-autoscaler-exporter"
+  namespace        = "castai-agent"
+  create_namespace = true
+  cleanup_on_fail  = true
+  wait             = true
+
+  version = var.workload_autoscaler_exporter_version
+  values  = var.workload_autoscaler_exporter_values
+
+  set = concat(
+    [
+      {
+        name  = "castai.apiKeySecretRef"
+        value = "castai-cluster-controller"
+      },
+      {
+        name  = "castai.configMapRef"
+        value = "castai-cluster-controller"
+      },
+    ],
+    local.set_components_sets,
+  )
+
+  depends_on = [helm_release.castai_agent, helm_release.castai_cluster_controller]
+}
+
 #---------------------------------------------------#
 # CAST.AI Pod Mutator configuration                 #
 #---------------------------------------------------#
