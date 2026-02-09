@@ -263,6 +263,24 @@ variable "workload_autoscaler_values" {
   default     = []
 }
 
+variable "install_workload_autoscaler_exporter" {
+  type        = bool
+  default     = false
+  description = "Optional flag for installation of workload autoscaler exporter (custom metrics exporter)"
+}
+
+variable "workload_autoscaler_exporter_version" {
+  description = "Version of castai-workload-autoscaler-exporter helm chart. Default latest"
+  type        = string
+  default     = null
+}
+
+variable "workload_autoscaler_exporter_values" {
+  description = "List of YAML formatted string with castai-workload-autoscaler-exporter values"
+  type        = list(string)
+  default     = []
+}
+
 variable "azuread_owners" {
   description = "A set of object IDs of principals that will be granted ownership of the Azure AD service principal and application. Defaults to current user."
   type        = list(string)
