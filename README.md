@@ -483,6 +483,7 @@ Usage examples are located in [terraform provider repo](https://github.com/casta
 | [helm_release.castai_evictor_self_managed](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [helm_release.castai_kvisor](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [helm_release.castai_kvisor_self_managed](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
+| [helm_release.castai_live](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [helm_release.castai_pod_mutator](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [helm_release.castai_pod_mutator_self_managed](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [helm_release.castai_pod_pinner](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
@@ -529,6 +530,7 @@ Usage examples are located in [terraform provider repo](https://github.com/casta
 | <a name="input_http_proxy"></a> [http\_proxy](#input\_http\_proxy) | Address to use for proxying http requests from CAST AI components running directly on nodes. | `string` | `null` | no |
 | <a name="input_https_proxy"></a> [https\_proxy](#input\_https\_proxy) | Address to use for proxying https requests from CAST AI components running directly on nodes. | `string` | `null` | no |
 | <a name="input_install_ai_optimizer"></a> [install\_ai\_optimizer](#input\_install\_ai\_optimizer) | Optional flag for installation of AI Optimizer (https://docs.cast.ai/docs/getting-started-ai) | `bool` | `false` | no |
+| <a name="input_install_live"></a> [install\_live](#input\_install\_live) | Optional flag for installation of CAST AI Live (https://docs.cast.ai/docs/clm-getting-started) | `bool` | `true` | no |
 | <a name="input_install_omni"></a> [install\_omni](#input\_install\_omni) | Optional flag for installing Omni capability | `bool` | `false` | no |
 | <a name="input_install_pod_mutator"></a> [install\_pod\_mutator](#input\_install\_pod\_mutator) | Optional flag for installation of pod mutator | `bool` | `false` | no |
 | <a name="input_install_security_agent"></a> [install\_security\_agent](#input\_install\_security\_agent) | Optional flag for installation of security agent (Kvisor - https://docs.cast.ai/docs/kvisor) | `bool` | `false` | no |
@@ -539,6 +541,8 @@ Usage examples are located in [terraform provider repo](https://github.com/casta
 | <a name="input_kvisor_values"></a> [kvisor\_values](#input\_kvisor\_values) | List of YAML formatted string values for kvisor helm chart, see example: https://github.com/castai/terraform-provider-castai/tree/master/examples/aks/aks_cluster_with_security/castai.tf | `list(string)` | `[]` | no |
 | <a name="input_kvisor_version"></a> [kvisor\_version](#input\_kvisor\_version) | Version of kvisor chart. If not provided, latest version will be used. | `string` | `null` | no |
 | <a name="input_kvisor_wait"></a> [kvisor\_wait](#input\_kvisor\_wait) | Wait for kvisor chart to finish release | `bool` | `true` | no |
+| <a name="input_live_values"></a> [live\_values](#input\_live\_values) | List of YAML formatted string with castai-live values | `list(string)` | `[]` | no |
+| <a name="input_live_version"></a> [live\_version](#input\_live\_version) | Version of castai-live helm chart. Default latest | `string` | `null` | no |
 | <a name="input_no_proxy"></a> [no\_proxy](#input\_no\_proxy) | List of addresses to skip proxying requests from CAST AI components running directly on nodes. Used with http\_proxy and https\_proxy. | `list(string)` | `[]` | no |
 | <a name="input_node_configurations"></a> [node\_configurations](#input\_node\_configurations) | Map of AKS node configurations to create | `any` | `{}` | no |
 | <a name="input_node_resource_group"></a> [node\_resource\_group](#input\_node\_resource\_group) | n/a | `string` | n/a | yes |

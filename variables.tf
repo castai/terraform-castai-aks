@@ -340,6 +340,24 @@ variable "ai_optimizer_values" {
   default     = []
 }
 
+variable "install_live" {
+  type        = bool
+  default     = true
+  description = "Optional flag for installation of CAST AI Live (https://docs.cast.ai/docs/clm-getting-started)"
+}
+
+variable "live_version" {
+  description = "Version of castai-live helm chart. Default latest"
+  type        = string
+  default     = null
+}
+
+variable "live_values" {
+  description = "List of YAML formatted string with castai-live values"
+  type        = list(string)
+  default     = []
+}
+
 variable "install_omni" {
   description = "Optional flag for installing Omni capability"
   type        = bool
