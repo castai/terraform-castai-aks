@@ -12,6 +12,7 @@ mock_provider "azurerm" {
         load_balancer_sku  = "standard"
         network_plugin     = "azure"
         network_policy     = "azure"
+        outbound_type      = "loadBalancer"
       }]
     }
   }
