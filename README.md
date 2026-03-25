@@ -450,11 +450,11 @@ Usage examples are located in [terraform provider repo](https://github.com/casta
 
 | Name | Version |
 |------|---------|
-| <a name="provider_azuread"></a> [azuread](#provider\_azuread) | 3.8.0 |
-| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 4.65.0 |
-| <a name="provider_castai"></a> [castai](#provider\_castai) | 8.24.0 |
-| <a name="provider_helm"></a> [helm](#provider\_helm) | 3.1.1 |
-| <a name="provider_null"></a> [null](#provider\_null) | 3.2.4 |
+| <a name="provider_azuread"></a> [azuread](#provider\_azuread) | ~> 3 |
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | >= 3.7.0 |
+| <a name="provider_castai"></a> [castai](#provider\_castai) | >= 8.24.0 |
+| <a name="provider_helm"></a> [helm](#provider\_helm) | >= 3.0.0 |
+| <a name="provider_null"></a> [null](#provider\_null) | ~> 3 |
 
 ## Modules
 
