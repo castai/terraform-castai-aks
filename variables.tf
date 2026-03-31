@@ -137,6 +137,12 @@ variable "workload_scaling_policies" {
   default     = {}
 }
 
+variable "workload_custom_metrics_data_sources" {
+  type        = any
+  description = "Map of workload custom metrics data sources to create"
+  default     = {}
+}
+
 variable "install_security_agent" {
   type        = bool
   default     = false
