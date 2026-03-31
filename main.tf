@@ -226,6 +226,8 @@ resource "castai_workload_scaling_policy" "this" {
   apply_type        = try(each.value.apply_type, "DEFERRED")
   management_option = try(each.value.management_option, "READ_ONLY")
 
+  excluded_containers = try(each.value.excluded_containers, null)
+
   cpu {
     function                 = try(each.value.cpu.function, "QUANTILE")
     overhead                 = try(each.value.cpu.overhead, 0)
@@ -371,6 +373,18 @@ resource "castai_workload_scaling_policy" "this" {
     content {
       type              = try(rollout_behavior.value.type, null)
       prefer_one_by_one = try(rollout_behavior.value.prefer_one_by_one, null)
+    }
+  }
+
+  dynamic "jvm" {
+    for_each = try([each.value.jvm], [])
+    content {
+      dynamic "memory" {
+        for_each = try([jvm.value.memory], [])
+        content {
+          optimization = try(memory.value.optimization, null)
+        }
+      }
     }
   }
 }
