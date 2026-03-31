@@ -125,6 +125,7 @@ resource "castai_node_template" "this" {
   is_enabled                   = try(each.value.is_enabled, null)
   configuration_id             = try(each.value.configuration_name, null) != null ? castai_node_configuration.this[each.value.configuration_name].id : can(each.value.configuration_id) ? length(regexall(local.configuration_id_regex_pattern, each.value.configuration_id)) > 0 ? each.value.configuration_id : castai_node_configuration.this[each.value.configuration_id].id : null
   should_taint                 = try(each.value.should_taint, true)
+  clm_enabled                  = try(each.value.clm_enabled, false)
   rebalancing_config_min_nodes = try(each.value.rebalancing_config_min_nodes, 0)
 
   custom_labels = try(each.value.custom_labels, {})
@@ -1132,6 +1133,31 @@ resource "helm_release" "castai_ai_optimizer_proxy_self_managed" {
   set_sensitive = local.set_sensitive_apikey
 
   depends_on = [helm_release.castai_agent, helm_release.castai_cluster_controller]
+}
+
+resource "helm_release" "castai_live" {
+  count = var.install_live ? 1 : 0
+
+  name             = "castai-live"
+  repository       = "https://castai.github.io/helm-charts"
+  chart            = "castai-live"
+  namespace        = "castai-agent"
+  create_namespace = true
+  cleanup_on_fail  = true
+  wait             = true
+
+  version = var.live_version
+  values  = var.live_values
+
+  set = concat(
+    local.set_cluster_id,
+    local.set_apiurl,
+    local.set_components_sets,
+  )
+
+  set_sensitive = local.set_sensitive_apikey
+
+  depends_on = [helm_release.castai_agent]
 }
 
 data "azurerm_kubernetes_cluster" "aks" {
