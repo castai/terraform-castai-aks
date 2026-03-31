@@ -199,6 +199,23 @@ module "castai-aks-cluster" {
       excluded_containers = ["container-1", "container-2"]
     }
   }
+
+  workload_custom_metrics_data_sources = {
+    my-prometheus = {
+      prometheus = {
+        url     = "http://prometheus-server.monitoring.svc.cluster.local:9090"
+        timeout = "30s"
+        presets = ["jvm"]
+
+        metrics = [
+          {
+            name  = "http_requests_total"
+            query = "sum(rate(http_requests_total[5m])) by (pod)"
+          }
+        ]
+      }
+    }
+  }
 }
 ```
 
@@ -487,6 +504,7 @@ Usage examples are located in [terraform provider repo](https://github.com/casta
 | [castai_node_configuration.this](https://registry.terraform.io/providers/castai/castai/latest/docs/resources/node_configuration) | resource |
 | [castai_node_configuration_default.this](https://registry.terraform.io/providers/castai/castai/latest/docs/resources/node_configuration_default) | resource |
 | [castai_node_template.this](https://registry.terraform.io/providers/castai/castai/latest/docs/resources/node_template) | resource |
+| [castai_workload_custom_metrics_data_source.this](https://registry.terraform.io/providers/castai/castai/latest/docs/resources/workload_custom_metrics_data_source) | resource |
 | [castai_workload_scaling_policy.this](https://registry.terraform.io/providers/castai/castai/latest/docs/resources/workload_scaling_policy) | resource |
 | [helm_release.castai_agent](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [helm_release.castai_ai_optimizer_proxy](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
@@ -578,6 +596,7 @@ Usage examples are located in [terraform provider repo](https://github.com/casta
 | <a name="input_workload_autoscaler_exporter_version"></a> [workload\_autoscaler\_exporter\_version](#input\_workload\_autoscaler\_exporter\_version) | Version of castai-workload-autoscaler-exporter helm chart. Default latest | `string` | `null` | no |
 | <a name="input_workload_autoscaler_values"></a> [workload\_autoscaler\_values](#input\_workload\_autoscaler\_values) | List of YAML formatted string with cluster-workload-autoscaler values | `list(string)` | `[]` | no |
 | <a name="input_workload_autoscaler_version"></a> [workload\_autoscaler\_version](#input\_workload\_autoscaler\_version) | Version of castai-workload-autoscaler helm chart. Default latest | `string` | `null` | no |
+| <a name="input_workload_custom_metrics_data_sources"></a> [workload\_custom\_metrics\_data\_sources](#input\_workload\_custom\_metrics\_data\_sources) | Map of workload custom metrics data sources to create | `any` | `{}` | no |
 | <a name="input_workload_scaling_policies"></a> [workload\_scaling\_policies](#input\_workload\_scaling\_policies) | Map of workload scaling policies to create | `any` | `{}` | no |
 
 ## Outputs
