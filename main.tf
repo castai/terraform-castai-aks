@@ -480,6 +480,7 @@ resource "helm_release" "castai_cluster_controller" {
   namespace        = "castai-agent"
   create_namespace = true
   cleanup_on_fail  = true
+  upgrade_install  = true
   wait             = true
 
   version = var.cluster_controller_version
@@ -516,6 +517,7 @@ resource "helm_release" "castai_cluster_controller_self_managed" {
   namespace        = "castai-agent"
   create_namespace = true
   cleanup_on_fail  = true
+  upgrade_install  = true
   wait             = true
 
   version = var.cluster_controller_version
@@ -573,6 +575,7 @@ resource "helm_release" "castai_evictor" {
   namespace        = "castai-agent"
   create_namespace = true
   cleanup_on_fail  = true
+  upgrade_install  = true
   wait             = true
 
   version = var.evictor_version
@@ -609,6 +612,7 @@ resource "helm_release" "castai_evictor_self_managed" {
   namespace        = "castai-agent"
   create_namespace = true
   cleanup_on_fail  = true
+  upgrade_install  = true
   wait             = true
 
   version = var.evictor_version
@@ -645,6 +649,7 @@ resource "helm_release" "castai_evictor_ext" {
   namespace        = "castai-agent"
   create_namespace = false
   cleanup_on_fail  = true
+  upgrade_install  = true
   wait             = true
 
   version = var.evictor_ext_version
@@ -666,6 +671,7 @@ resource "helm_release" "castai_pod_pinner" {
   namespace        = "castai-agent"
   create_namespace = true
   cleanup_on_fail  = true
+  upgrade_install  = true
   wait             = true
 
   version = var.pod_pinner_version
@@ -703,6 +709,7 @@ resource "helm_release" "castai_pod_pinner_self_managed" {
   namespace        = "castai-agent"
   create_namespace = true
   cleanup_on_fail  = true
+  upgrade_install  = true
   wait             = true
 
   version = var.pod_pinner_version
@@ -740,6 +747,7 @@ resource "helm_release" "castai_spot_handler" {
   namespace        = "castai-agent"
   create_namespace = true
   cleanup_on_fail  = true
+  upgrade_install  = true
   wait             = true
 
   version = var.spot_handler_version
@@ -774,6 +782,7 @@ resource "helm_release" "castai_kvisor" {
   namespace        = "castai-agent"
   create_namespace = true
   cleanup_on_fail  = true
+  upgrade_install  = true
 
   values  = var.kvisor_values
   version = var.kvisor_version
@@ -811,6 +820,7 @@ resource "helm_release" "castai_kvisor_self_managed" {
   namespace        = "castai-agent"
   create_namespace = true
   cleanup_on_fail  = true
+  upgrade_install  = true
 
   values  = var.kvisor_values
   version = var.kvisor_version
@@ -847,6 +857,7 @@ resource "helm_release" "castai_workload_autoscaler" {
   namespace        = "castai-agent"
   create_namespace = true
   cleanup_on_fail  = true
+  upgrade_install  = true
   wait             = true
 
   version = var.workload_autoscaler_version
@@ -882,6 +893,7 @@ resource "helm_release" "castai_workload_autoscaler_self_managed" {
   namespace        = "castai-agent"
   create_namespace = true
   cleanup_on_fail  = true
+  upgrade_install  = true
   wait             = true
 
   version = var.workload_autoscaler_version
@@ -916,6 +928,7 @@ resource "helm_release" "castai_workload_autoscaler_exporter" {
   namespace        = "castai-agent"
   create_namespace = true
   cleanup_on_fail  = true
+  upgrade_install  = true
   wait             = true
 
   version = var.workload_autoscaler_exporter_version
@@ -951,6 +964,7 @@ resource "helm_release" "castai_workload_autoscaler_exporter_self_managed" {
   namespace        = "castai-agent"
   create_namespace = true
   cleanup_on_fail  = true
+  upgrade_install  = true
   wait             = true
 
   version = var.workload_autoscaler_exporter_version
@@ -985,6 +999,7 @@ resource "helm_release" "castai_pod_mutator" {
   namespace        = "castai-agent"
   create_namespace = true
   cleanup_on_fail  = true
+  upgrade_install  = true
   wait             = true
 
   version = var.pod_mutator_version
@@ -1016,6 +1031,7 @@ resource "helm_release" "castai_pod_mutator_self_managed" {
   namespace        = "castai-agent"
   create_namespace = true
   cleanup_on_fail  = true
+  upgrade_install  = true
   wait             = true
 
   version = var.pod_mutator_version
@@ -1125,6 +1141,7 @@ resource "helm_release" "castai_ai_optimizer_proxy" {
   namespace        = "castai-agent"
   create_namespace = true
   cleanup_on_fail  = true
+  upgrade_install  = true
   wait             = true
 
   version = var.ai_optimizer_version
@@ -1155,6 +1172,7 @@ resource "helm_release" "castai_ai_optimizer_proxy_self_managed" {
   namespace        = "castai-agent"
   create_namespace = true
   cleanup_on_fail  = true
+  upgrade_install  = true
   wait             = true
 
   version = var.ai_optimizer_version
@@ -1181,6 +1199,7 @@ resource "helm_release" "castai_live" {
   namespace        = "castai-agent"
   create_namespace = true
   cleanup_on_fail  = true
+  upgrade_install  = true
   wait             = true
 
   version = var.live_version
