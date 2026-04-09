@@ -432,6 +432,7 @@ resource "helm_release" "castai_agent" {
   namespace        = "castai-agent"
   create_namespace = true
   cleanup_on_fail  = true
+  upgrade_install  = true
   wait             = true
 
   version = var.agent_version
