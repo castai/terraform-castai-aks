@@ -467,7 +467,7 @@ Usage examples are located in [terraform provider repo](https://github.com/casta
 | <a name="requirement_azuread"></a> [azuread](#requirement\_azuread) | ~> 3 |
 | <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | >= 3.7.0 |
 | <a name="requirement_castai"></a> [castai](#requirement\_castai) | >= 8.26.0 |
-| <a name="requirement_helm"></a> [helm](#requirement\_helm) | >= 3.0.0 |
+| <a name="requirement_helm"></a> [helm](#requirement\_helm) | >= 3.1.0 |
 | <a name="requirement_null"></a> [null](#requirement\_null) | ~> 3 |
 
 ## Providers
@@ -477,7 +477,7 @@ Usage examples are located in [terraform provider repo](https://github.com/casta
 | <a name="provider_azuread"></a> [azuread](#provider\_azuread) | ~> 3 |
 | <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | >= 3.7.0 |
 | <a name="provider_castai"></a> [castai](#provider\_castai) | >= 8.26.0 |
-| <a name="provider_helm"></a> [helm](#provider\_helm) | >= 3.0.0 |
+| <a name="provider_helm"></a> [helm](#provider\_helm) | >= 3.1.0 |
 | <a name="provider_null"></a> [null](#provider\_null) | ~> 3 |
 
 ## Modules
@@ -581,6 +581,7 @@ Usage examples are located in [terraform provider repo](https://github.com/casta
 | <a name="input_node_resource_group"></a> [node\_resource\_group](#input\_node\_resource\_group) | n/a | `string` | n/a | yes |
 | <a name="input_node_templates"></a> [node\_templates](#input\_node\_templates) | Map of node templates to create | `any` | `{}` | no |
 | <a name="input_organization_id"></a> [organization\_id](#input\_organization\_id) | DEPRECATED (required only for pod mutator v0.0.25 and older): CAST AI Organization ID | `string` | `""` | no |
+| <a name="input_overwrite_existing_helm_releases"></a> [overwrite\_existing\_helm\_releases](#input\_overwrite\_existing\_helm\_releases) | Optional flag to enable upgrade\_install on all CAST AI Helm releases. When set to true, Helm will upgrade an existing release instead of failing with 'cannot re-use a name that is still in use'. Useful when Helm releases already exist in the cluster but are not tracked in Terraform state. | `bool` | `false` | no |
 | <a name="input_pod_mutator_values"></a> [pod\_mutator\_values](#input\_pod\_mutator\_values) | List of YAML formatted string values for pod-mutator helm chart | `list(string)` | `[]` | no |
 | <a name="input_pod_mutator_version"></a> [pod\_mutator\_version](#input\_pod\_mutator\_version) | Version of castai-pod-mutator helm chart. Default latest | `string` | `null` | no |
 | <a name="input_pod_pinner_values"></a> [pod\_pinner\_values](#input\_pod\_pinner\_values) | List of YAML formatted string values for agent helm chart | `list(string)` | `[]` | no |
