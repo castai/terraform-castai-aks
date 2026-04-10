@@ -369,3 +369,9 @@ variable "install_omni" {
   type        = bool
   default     = false
 }
+
+variable "overwrite_existing_helm_releases" {
+  type        = bool
+  default     = true
+  description = "Optional flag to control upgrade_install on all CAST AI Helm releases. When set to true, Helm will upgrade an existing release instead of failing with 'cannot re-use a name that is still in use'."
+}
