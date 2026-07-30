@@ -229,9 +229,11 @@ resource "castai_workload_scaling_policy" "this" {
   excluded_containers = try(each.value.excluded_containers, null)
 
   cpu {
-    function                 = try(each.value.cpu.function, "QUANTILE")
-    overhead                 = try(each.value.cpu.overhead, 0)
-    apply_threshold          = try(each.value.cpu.apply_threshold, 0.1)
+    function = try(each.value.cpu.function, "QUANTILE")
+    overhead = try(each.value.cpu.overhead, 0)
+    # Deprecated apply_threshold conflicts with apply_threshold_strategy on older providers;
+    # omit it when strategy is set so Dynamic/adaptive strategies can be configured.
+    apply_threshold          = try(each.value.cpu.apply_threshold_strategy, null) != null ? null : try(each.value.cpu.apply_threshold, 0.1)
     args                     = try(each.value.cpu.args, ["0.8"])
     look_back_period_seconds = try(each.value.cpu.look_back_period_seconds, null)
     min                      = try(each.value.cpu.min, null)
@@ -252,16 +254,20 @@ resource "castai_workload_scaling_policy" "this" {
     dynamic "limit" {
       for_each = try([each.value.cpu.limit], [])
       content {
-        type       = try(limit.value.type, null)
-        multiplier = try(limit.value.multiplier, null)
+        type                   = try(limit.value.type, null)
+        multiplier             = try(limit.value.multiplier, null)
+        only_if_original_exist = try(limit.value.only_if_original_exist, null)
+        only_if_original_lower = try(limit.value.only_if_original_lower, null)
       }
     }
   }
 
   memory {
-    function                 = try(each.value.memory.function, "MAX")
-    overhead                 = try(each.value.memory.overhead, 0.1)
-    apply_threshold          = try(each.value.memory.apply_threshold, 0.1)
+    function = try(each.value.memory.function, "MAX")
+    overhead = try(each.value.memory.overhead, 0.1)
+    # Deprecated apply_threshold conflicts with apply_threshold_strategy on older providers;
+    # omit it when strategy is set so Dynamic/adaptive strategies can be configured.
+    apply_threshold          = try(each.value.memory.apply_threshold_strategy, null) != null ? null : try(each.value.memory.apply_threshold, 0.1)
     args                     = try(each.value.memory.args, null)
     look_back_period_seconds = try(each.value.memory.look_back_period_seconds, null)
     min                      = try(each.value.memory.min, null)
@@ -282,8 +288,10 @@ resource "castai_workload_scaling_policy" "this" {
     dynamic "limit" {
       for_each = try([each.value.memory.limit], [])
       content {
-        type       = try(limit.value.type, null)
-        multiplier = try(limit.value.multiplier, null)
+        type                   = try(limit.value.type, null)
+        multiplier             = try(limit.value.multiplier, null)
+        only_if_original_exist = try(limit.value.only_if_original_exist, null)
+        only_if_original_lower = try(limit.value.only_if_original_lower, null)
       }
     }
   }
