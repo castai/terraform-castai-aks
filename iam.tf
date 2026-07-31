@@ -140,11 +140,10 @@ resource "azurerm_user_assigned_identity" "this" {
 }
 
 resource "azurerm_federated_identity_credential" "this" {
-  count               = var.authentication_method == "workload_identity" ? 1 : 0
-  name                = local.federated_identity_name
-  resource_group_name = var.resource_group
-  audience            = ["api://AzureADTokenExchange"]
-  issuer              = "https://accounts.google.com"
-  parent_id           = azurerm_user_assigned_identity.this[0].id
-  subject             = data.castai_impersonation_service_account.this[0].id
+  count                     = var.authentication_method == "workload_identity" ? 1 : 0
+  name                      = local.federated_identity_name
+  audience                  = ["api://AzureADTokenExchange"]
+  issuer                    = "https://accounts.google.com"
+  user_assigned_identity_id = azurerm_user_assigned_identity.this[0].id
+  subject                   = data.castai_impersonation_service_account.this[0].id
 }
