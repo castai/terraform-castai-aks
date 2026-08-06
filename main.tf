@@ -340,6 +340,21 @@ resource "castai_workload_scaling_policy" "this" {
     for_each = try([each.value.startup], [])
     content {
       period_seconds = try(startup.value.period_seconds, null)
+
+      dynamic "two_phase_recommendations" {
+        for_each = try([startup.value.two_phase_recommendations], [])
+        content {
+          enabled = try(two_phase_recommendations.value.enabled, null)
+
+          dynamic "requests_on_startup" {
+            for_each = try([two_phase_recommendations.value.requests_on_startup], [])
+            content {
+              cpu_cores  = try(requests_on_startup.value.cpu_cores, null)
+              memory_gib = try(requests_on_startup.value.memory_gib, null)
+            }
+          }
+        }
+      }
     }
   }
 
