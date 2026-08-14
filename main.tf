@@ -402,6 +402,8 @@ resource "castai_workload_scaling_policy" "this" {
   dynamic "jvm" {
     for_each = try([each.value.jvm], [])
     content {
+      auto_instrument = try(jvm.value.auto_instrument, null)
+
       dynamic "memory" {
         for_each = try([jvm.value.memory], [])
         content {

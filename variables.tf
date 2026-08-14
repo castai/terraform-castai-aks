@@ -133,7 +133,26 @@ variable "node_templates" {
 
 variable "workload_scaling_policies" {
   type        = any
-  description = "Map of workload scaling policies to create"
+  description = <<-EOT
+    Map of workload scaling policies to create (passed through to castai_workload_scaling_policy).
+
+    Apply threshold:
+    - Prefer cpu/memory.apply_threshold_strategy (e.g. { type = "DEFAULT_ADAPTIVE" } for Dynamic).
+    - Deprecated apply_threshold is only set when apply_threshold_strategy is absent (default 0.1).
+    - If both are supplied, strategy wins and apply_threshold is omitted so older providers
+      that mark the fields as conflicting do not fail.
+
+    Resource limits (console Automatic / Semi-automatic map to MULTIPLIER + flags):
+    - limit.only_if_original_exist (bool) — only set limits when the workload originally had them.
+    - limit.only_if_original_lower (bool) — only raise limits when original limits are lower than
+      requests × multiplier.
+    - Both flags are optional booleans and may be combined; see provider docs for workload_scaling_policy.
+
+    JVM optimization:
+    - jvm.auto_instrument (bool) — when true, JMX exporter is automatically injected
+      into pods where a JVM runtime is detected.
+    - jvm.memory.optimization (bool) — enables JVM heap-size optimization.
+  EOT
   default     = {}
 }
 
