@@ -95,6 +95,12 @@ variable "no_proxy" {
   default     = []
 }
 
+variable "ca_certs" {
+  type        = list(string)
+  description = "List of base64-encoded CA certificates to add to the node's trust store."
+  default     = []
+}
+
 variable "castai_components_labels" {
   type        = map(any)
   description = "Optional additional Kubernetes labels for CAST AI pods"

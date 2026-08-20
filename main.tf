@@ -26,6 +26,14 @@ resource "castai_aks_cluster" "castai_cluster" {
     }
   }
 
+  dynamic "ca_cert_config" {
+    for_each = length(var.ca_certs) > 0 ? [true] : []
+
+    content {
+      ca_certs = var.ca_certs
+    }
+  }
+
   # CastAI needs cloud permission to do some clean up
   # when disconnecting the cluster.
   # This ensures IAM configurations exist during disconnect.
