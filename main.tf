@@ -244,9 +244,11 @@ resource "castai_workload_scaling_policy" "this" {
     apply_threshold          = try(each.value.cpu.apply_threshold_strategy, null) != null ? null : try(each.value.cpu.apply_threshold, 0.1)
     args                     = try(each.value.cpu.args, ["0.8"])
     look_back_period_seconds = try(each.value.cpu.look_back_period_seconds, null)
-    min                      = try(each.value.cpu.min, null)
-    max                      = try(each.value.cpu.max, null)
-    management_option        = try(each.value.cpu.management_option, null)
+    # Deprecated min/max conflict with the new constraints block; omit legacy
+    # min/max when constraints are supplied so older providers do not fail.
+    min               = try(each.value.cpu.constraints, null) != null ? null : try(each.value.cpu.min, null)
+    max               = try(each.value.cpu.constraints, null) != null ? null : try(each.value.cpu.max, null)
+    management_option = try(each.value.cpu.management_option, null)
 
     dynamic "apply_threshold_strategy" {
       for_each = try([each.value.cpu.apply_threshold_strategy], [])
@@ -256,6 +258,26 @@ resource "castai_workload_scaling_policy" "this" {
         numerator   = try(apply_threshold_strategy.value.numerator, null)
         denominator = try(apply_threshold_strategy.value.denominator, null)
         exponent    = try(apply_threshold_strategy.value.exponent, null)
+      }
+    }
+
+    dynamic "constraints" {
+      for_each = lookup(each.value.cpu, "constraints", null) != null ? [each.value.cpu.constraints] : []
+      content {
+        dynamic "min" {
+          for_each = try([constraints.value.min], [])
+          content {
+            constant               = try(min.value.constant, null)
+            percentage_of_original = try(min.value.percentage_of_original, null)
+          }
+        }
+        dynamic "max" {
+          for_each = try([constraints.value.max], [])
+          content {
+            constant               = try(max.value.constant, null)
+            percentage_of_original = try(max.value.percentage_of_original, null)
+          }
+        }
       }
     }
 
@@ -278,9 +300,11 @@ resource "castai_workload_scaling_policy" "this" {
     apply_threshold          = try(each.value.memory.apply_threshold_strategy, null) != null ? null : try(each.value.memory.apply_threshold, 0.1)
     args                     = try(each.value.memory.args, null)
     look_back_period_seconds = try(each.value.memory.look_back_period_seconds, null)
-    min                      = try(each.value.memory.min, null)
-    max                      = try(each.value.memory.max, null)
-    management_option        = try(each.value.memory.management_option, null)
+    # Deprecated min/max conflict with the new constraints block; omit legacy
+    # min/max when constraints are supplied so older providers do not fail.
+    min               = try(each.value.memory.constraints, null) != null ? null : try(each.value.memory.min, null)
+    max               = try(each.value.memory.constraints, null) != null ? null : try(each.value.memory.max, null)
+    management_option = try(each.value.memory.management_option, null)
 
     dynamic "apply_threshold_strategy" {
       for_each = try([each.value.memory.apply_threshold_strategy], [])
@@ -290,6 +314,26 @@ resource "castai_workload_scaling_policy" "this" {
         numerator   = try(apply_threshold_strategy.value.numerator, null)
         denominator = try(apply_threshold_strategy.value.denominator, null)
         exponent    = try(apply_threshold_strategy.value.exponent, null)
+      }
+    }
+
+    dynamic "constraints" {
+      for_each = lookup(each.value.memory, "constraints", null) != null ? [each.value.memory.constraints] : []
+      content {
+        dynamic "min" {
+          for_each = try([constraints.value.min], [])
+          content {
+            constant               = try(min.value.constant, null)
+            percentage_of_original = try(min.value.percentage_of_original, null)
+          }
+        }
+        dynamic "max" {
+          for_each = try([constraints.value.max], [])
+          content {
+            constant               = try(max.value.constant, null)
+            percentage_of_original = try(max.value.percentage_of_original, null)
+          }
+        }
       }
     }
 
