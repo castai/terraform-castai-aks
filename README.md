@@ -133,8 +133,22 @@ module "castai-aks-cluster" {
         args                     = ["0.9"]
         overhead                 = 0.15
         look_back_period_seconds = 172800
-        min                      = 0.1
-        max                      = 2.0
+
+        # Prefer the new constraints block. Within each min/max strategy only
+        # one of `constant` or `percentage_of_original` may be set. Legacy
+        # `min`/`max` (plain numbers) are still accepted for backward
+        # compatibility, but if both legacy `min`/`max` and `constraints`
+        # are supplied for the same resource, `constraints` takes precedence
+        # and the module omits the legacy `min`/`max` so the provider does
+        # not reject the config.
+        constraints = {
+          min = {
+            constant = 0.1
+          }
+          max = {
+            constant = 2.0
+          }
+        }
       }
 
       memory = {
@@ -615,7 +629,7 @@ Usage examples are located in [terraform provider repo](https://github.com/casta
 | <a name="input_workload_autoscaler_values"></a> [workload\_autoscaler\_values](#input\_workload\_autoscaler\_values) | List of YAML formatted string with cluster-workload-autoscaler values | `list(string)` | `[]` | no |
 | <a name="input_workload_autoscaler_version"></a> [workload\_autoscaler\_version](#input\_workload\_autoscaler\_version) | Version of castai-workload-autoscaler helm chart. Default latest | `string` | `null` | no |
 | <a name="input_workload_custom_metrics_data_sources"></a> [workload\_custom\_metrics\_data\_sources](#input\_workload\_custom\_metrics\_data\_sources) | Map of workload custom metrics data sources to create | `any` | `{}` | no |
-| <a name="input_workload_scaling_policies"></a> [workload\_scaling\_policies](#input\_workload\_scaling\_policies) | Map of workload scaling policies to create (passed through to castai\_workload\_scaling\_policy).<br/><br/>Apply threshold:<br/>- Prefer cpu/memory.apply\_threshold\_strategy (e.g. { type = "DEFAULT\_ADAPTIVE" } for Dynamic).<br/>- Deprecated apply\_threshold is only set when apply\_threshold\_strategy is absent (default 0.1).<br/>- If both are supplied, strategy wins and apply\_threshold is omitted so older providers<br/>  that mark the fields as conflicting do not fail.<br/><br/>Resource limits (console Automatic / Semi-automatic map to MULTIPLIER + flags):<br/>- limit.only\_if\_original\_exist (bool) — only set limits when the workload originally had them.<br/>- limit.only\_if\_original\_lower (bool) — only raise limits when original limits are lower than<br/>  requests × multiplier.<br/>- Both flags are optional booleans and may be combined; see provider docs for workload\_scaling\_policy.<br/><br/>JVM optimization:<br/>- jvm.auto\_instrument (bool) — when true, JMX exporter is automatically injected<br/>  into pods where a JVM runtime is detected.<br/>- jvm.memory.optimization (bool) — enables JVM heap-size optimization. | `any` | `{}` | no |
+| <a name="input_workload_scaling_policies"></a> [workload\_scaling\_policies](#input\_workload\_scaling\_policies) | Map of workload scaling policies to create (passed through to castai\_workload\_scaling\_policy).<br/><br/>Apply threshold:<br/>- Prefer cpu/memory.apply\_threshold\_strategy (e.g. { type = "DEFAULT\_ADAPTIVE" } for Dynamic).<br/>- Deprecated apply\_threshold is only set when apply\_threshold\_strategy is absent (default 0.1).<br/>- If both are supplied, strategy wins and apply\_threshold is omitted so older providers<br/>  that mark the fields as conflicting do not fail.<br/><br/>Min/max constraints:<br/>- Prefer cpu/memory.constraints for new configurations.<br/>- Each min/max strategy supports a single field — either constant<br/>  (number, MiB for memory / cores for CPU) or percentage\_of\_original<br/>  (number, percent of the original pod-spec request). Within a single<br/>  min or max strategy only one of constant / percentage\_of\_original may<br/>  be set.<br/>- Legacy cpu/memory.min and cpu/memory.max (plain numbers) are deprecated.<br/>- The module ensures only one style is passed through: if both legacy<br/>  min/max and constraints are supplied for the same resource (cpu or<br/>  memory), constraints takes precedence and the legacy min/max are<br/>  omitted so the provider does not reject the config.<br/><br/>Resource limits (console Automatic / Semi-automatic map to MULTIPLIER + flags):<br/>- limit.only\_if\_original\_exist (bool) — only set limits when the workload originally had them.<br/>- limit.only\_if\_original\_lower (bool) — only raise limits when original limits are lower than<br/>  requests × multiplier.<br/>- Both flags are optional booleans and may be combined; see provider docs for workload\_scaling\_policy.<br/><br/>JVM optimization:<br/>- jvm.auto\_instrument (bool) — when true, JMX exporter is automatically injected<br/>  into pods where a JVM runtime is detected.<br/>- jvm.memory.optimization (bool) — enables JVM heap-size optimization. | `any` | `{}` | no |
 
 ## Outputs
 
