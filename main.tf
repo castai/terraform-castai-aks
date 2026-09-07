@@ -246,8 +246,14 @@ resource "castai_workload_scaling_policy" "this" {
     look_back_period_seconds = try(each.value.cpu.look_back_period_seconds, null)
     # Deprecated min/max conflict with the new constraints block; omit legacy
     # min/max when constraints are supplied so older providers do not fail.
-    min               = try(each.value.cpu.constraints, null) != null ? null : try(each.value.cpu.min, null)
-    max               = try(each.value.cpu.constraints, null) != null ? null : try(each.value.cpu.max, null)
+    min = (
+      try(each.value.cpu.constraints.min, null) != null ||
+      try(each.value.cpu.constraints.max, null) != null
+    ) ? null : try(each.value.cpu.min, null)
+    max = (
+      try(each.value.cpu.constraints.min, null) != null ||
+      try(each.value.cpu.constraints.max, null) != null
+    ) ? null : try(each.value.cpu.max, null)
     management_option = try(each.value.cpu.management_option, null)
 
     dynamic "apply_threshold_strategy" {
@@ -262,7 +268,10 @@ resource "castai_workload_scaling_policy" "this" {
     }
 
     dynamic "constraints" {
-      for_each = lookup(each.value.cpu, "constraints", null) != null ? [each.value.cpu.constraints] : []
+      for_each = (
+        try(each.value.cpu.constraints.min, null) != null ||
+        try(each.value.cpu.constraints.max, null) != null
+      ) ? [each.value.cpu.constraints] : []
       content {
         dynamic "min" {
           for_each = try([constraints.value.min], [])
@@ -302,8 +311,14 @@ resource "castai_workload_scaling_policy" "this" {
     look_back_period_seconds = try(each.value.memory.look_back_period_seconds, null)
     # Deprecated min/max conflict with the new constraints block; omit legacy
     # min/max when constraints are supplied so older providers do not fail.
-    min               = try(each.value.memory.constraints, null) != null ? null : try(each.value.memory.min, null)
-    max               = try(each.value.memory.constraints, null) != null ? null : try(each.value.memory.max, null)
+    min = (
+      try(each.value.memory.constraints.min, null) != null ||
+      try(each.value.memory.constraints.max, null) != null
+    ) ? null : try(each.value.memory.min, null)
+    max = (
+      try(each.value.memory.constraints.min, null) != null ||
+      try(each.value.memory.constraints.max, null) != null
+    ) ? null : try(each.value.memory.max, null)
     management_option = try(each.value.memory.management_option, null)
 
     dynamic "apply_threshold_strategy" {
@@ -318,7 +333,10 @@ resource "castai_workload_scaling_policy" "this" {
     }
 
     dynamic "constraints" {
-      for_each = lookup(each.value.memory, "constraints", null) != null ? [each.value.memory.constraints] : []
+      for_each = (
+        try(each.value.memory.constraints.min, null) != null ||
+        try(each.value.memory.constraints.max, null) != null
+      ) ? [each.value.memory.constraints] : []
       content {
         dynamic "min" {
           for_each = try([constraints.value.min], [])
