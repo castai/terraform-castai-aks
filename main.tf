@@ -502,6 +502,8 @@ resource "castai_workload_scaling_policy" "this" {
       type = hpa_converters.value.type
     }
   }
+
+  depends_on = [helm_release.castai_workload_autoscaler, helm_release.castai_workload_autoscaler_self_managed]
 }
 
 resource "castai_workload_custom_metrics_data_source" "this" {
