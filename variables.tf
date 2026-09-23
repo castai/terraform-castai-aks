@@ -413,3 +413,19 @@ variable "overwrite_existing_helm_releases" {
   default     = false
   description = "Optional flag to enable upgrade_install on all CAST AI Helm releases. When set to true, Helm will upgrade an existing release instead of failing with 'cannot re-use a name that is still in use'. Useful when Helm releases already exist in the cluster but are not tracked in Terraform state."
 }
+
+variable "workload_autoscaler_keep_crds" {
+  type        = bool
+  default     = false
+  description = "Install workload-autoscaler Helm Release in \"keep CRDs\" mode, so even it it's uninstalled, its CRDs and CRs will be retained. Necessary during migrating to the Cast AI Umbrella Helm chart."
+}
+
+variable "umbrella_enabled" {
+  type        = bool
+  default     = false
+  description = "Use Cast AI Umbrella Helm chart instead of standalone charts. See https://github.com/castai/terraform-provider-castai/tree/master/docs/umbrella-migration"
+  validation {
+    condition     = !(var.umbrella_enabled && !var.workload_autoscaler_keep_crds)
+    error_message = "When setting umbrella_enabled=true, you must also have set workload_autoscaler_keep_crds=true and APPLIED THAT CHANGE SEPARATELY FIRST!"
+  }
+}
