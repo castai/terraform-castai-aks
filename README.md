@@ -484,6 +484,21 @@ module "castai-aks-cluster" {
 * The default node template is named `default_by_castai`
 * For headroom functionality, deploy low-priority placeholder workloads as described in the [CAST AI documentation](https://docs.cast.ai/docs/autoscaler-faq#how-can-i-maintain-cluster-headroom)
 
+Migrating from 11.x.x to 12.x.x
+-------------------------------
+
+Version 12.0.0 introduces the ability to use the Cast AI umbrella Helm chart instead of the standalone Helm charts.
+This behavior is controlled with the new `umbrella_enabled` variable. It is set to `false` by default and the umbrella
+Helm chart can be enabled by setting it to `true`.
+
+> [!CAUTION]
+> You MUST migrate to the umbrella Helm chart while using the 12.x.x version of this module by following the
+> instructions at https://github.com/castai/terraform-provider-castai/blob/master/docs/umbrella-migration/README.md
+
+A future major release (potentially the next one) will drop the support for the standalone Helm releases and will make
+the controlled migration impossible. If you want to move from 11.x.x or older to a version above 12.x.x, **you must
+first move to 12.x.x and complete the migration** by following the instructions above!
+
 # Examples 
 
 Usage examples are located in [terraform provider repo](https://github.com/castai/terraform-provider-castai/tree/master/examples/aks)
