@@ -334,7 +334,7 @@ variable "azuread_owners" {
 variable "authentication_method" {
   description = "Authentication method for CAST AI. Use 'client_secret' for service principal with password, or 'workload_identity' for federated identity credential"
   type        = string
-  default     = "client_secret"
+  default     = "workload_identity"
 
   validation {
     condition     = contains(["client_secret", "workload_identity"], var.authentication_method)
