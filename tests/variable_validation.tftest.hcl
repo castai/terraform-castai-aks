@@ -102,6 +102,15 @@ variables {
   }
 }
 
+run "default_authentication_method_is_workload_identity" {
+  command = plan
+
+  assert {
+    condition     = var.authentication_method == "workload_identity"
+    error_message = "Default authentication_method should be 'workload_identity'"
+  }
+}
+
 run "invalid_authentication_method" {
   command = plan
 
