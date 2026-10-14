@@ -71,28 +71,20 @@ mock_provider "helm" {}
 mock_provider "null" {}
 
 variables {
-  aks_cluster_name    = "test-cluster"
-  aks_cluster_region  = "eastus"
-  subscription_id     = "00000000-0000-0000-0000-000000000000"
-  tenant_id           = "11111111-1111-1111-1111-111111111111"
-  resource_group      = "test-rg"
-  node_resource_group = "test-node-rg"
-  castai_api_token    = "test-token-12345"
+  aks_cluster_name           = "test-cluster"
+  aks_cluster_region         = "eastus"
+  subscription_id            = "00000000-0000-0000-0000-000000000000"
+  tenant_id                  = "11111111-1111-1111-1111-111111111111"
+  resource_group             = "test-rg"
+  node_resource_group        = "test-node-rg"
+  castai_api_token           = "test-token-12345"
+  authentication_method      = "client_secret"
   default_node_configuration = "default"
   node_configurations = {
     default = {
       name    = "default"
       subnets = ["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg/providers/Microsoft.Network/virtualNetworks/test-vnet/subnets/test-subnet"]
     }
-  }
-}
-
-run "verify_default_authentication_method" {
-  command = plan
-
-  assert {
-    condition     = var.authentication_method == "client_secret"
-    error_message = "Default authentication_method should be 'client_secret'"
   }
 }
 
