@@ -499,6 +499,23 @@ A future major release (potentially the next one) will drop the support for the 
 the controlled migration impossible. If you want to move from 11.x.x or older to a version above 12.x.x, **you must
 first move to 12.x.x and complete the migration** by following the instructions above!
 
+Migrating from 12.x.x to 13.x.x
+-------------------------------
+
+Version 13.0.0 introduces a new default for the authentication method used by CAST AI to access cloud environments. This new authentication method offers better security by utilizing federated identity and no long-living credentials on CAST AI side. The behavior is controlled by the `authentication_method` variable and its default switches from `client_secret` to `workload_identity`.
+
+To opt-out of the changes, set `authentication_method = "client_secret"` before applying the changes from v13. More details on the settings below.
+
+If the value of the variable was previously set to any value, there is no change in behavior. However, if no value was set and the default was used, upgrading the module will cause the `client_secret` IAM resources to be reconfigured for workload identity - a new managed identity with federated credential is created, while the existing Entra application will be destroyed.
+
+> [!CAUTION]
+> While applying the changes, it is possible that CAST AI loses access temporarily while credentials are being reconfigured. In addition, failure to configure Workload identity but successful client secret destruction might lead to loss of access for cluster management by CAST AI. It is recommended that the change is monitored and done carefully.
+
+> [!NOTE]
+> Rolling back to client secret flow after switching to workload identity will create a new Entra application client ID for access - consider that if roles or policies are attached to the application.
+
+If users are using 11.x.x or older, it is recommended that migration to 12.x.x is completed as a separate step from 13.x.x, as both involve delicate migrations. In addition, the standalone releases mentioned in 12.x.x are kept for this release and still available.
+
 # Examples 
 
 Usage examples are located in [terraform provider repo](https://github.com/castai/terraform-provider-castai/tree/master/examples/aks)
