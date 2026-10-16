@@ -1,7 +1,7 @@
 locals {
-  role_name                           = "CastAKSRole-${var.aks_cluster_name}-tf"
-  app_name                            = substr("CAST AI ${var.aks_cluster_name}-${var.resource_group}", 0, 64)
-  federated_identity_name             = substr("castai-${var.aks_cluster_name}-${var.resource_group}", 0, 64)
+  role_name                          = "CastAKSRole-${var.aks_cluster_name}-tf"
+  app_name                           = substr("CAST AI ${var.aks_cluster_name}-${var.resource_group}", 0, 64)
+  federated_identity_name            = substr("castai-${var.aks_cluster_name}-${var.resource_group}", 0, 64)
   create_workload_identity_resources = var.authentication_method == "workload_identity" || var.migration == "prepare"
 }
 
