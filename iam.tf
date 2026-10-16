@@ -1,11 +1,12 @@
 locals {
-  role_name               = "CastAKSRole-${var.aks_cluster_name}-tf"
-  app_name                = substr("CAST AI ${var.aks_cluster_name}-${var.resource_group}", 0, 64)
-  federated_identity_name = substr("castai-${var.aks_cluster_name}-${var.resource_group}", 0, 64)
+  role_name                          = "CastAKSRole-${var.aks_cluster_name}-tf"
+  app_name                           = substr("CAST AI ${var.aks_cluster_name}-${var.resource_group}", 0, 64)
+  federated_identity_name            = substr("castai-${var.aks_cluster_name}-${var.resource_group}", 0, 64)
+  create_workload_identity_resources = var.authentication_method == "workload_identity" || var.authentication_method_migration == "prepare"
 }
 
 data "azurerm_kubernetes_cluster" "castai" {
-  count               = var.authentication_method == "workload_identity" ? 1 : 0
+  count               = local.create_workload_identity_resources ? 1 : 0
   name                = var.aks_cluster_name
   resource_group_name = var.resource_group
 }
@@ -129,18 +130,18 @@ moved {
 // Workload Identity
 
 data "castai_impersonation_service_account" "this" {
-  count = var.authentication_method == "workload_identity" ? 1 : 0
+  count = local.create_workload_identity_resources ? 1 : 0
 }
 
 resource "azurerm_user_assigned_identity" "this" {
-  count               = var.authentication_method == "workload_identity" ? 1 : 0
+  count               = local.create_workload_identity_resources ? 1 : 0
   name                = "${var.aks_cluster_name}-castai-identity"
   resource_group_name = var.resource_group
   location            = data.azurerm_kubernetes_cluster.castai[0].location
 }
 
 resource "azurerm_federated_identity_credential" "this" {
-  count                     = var.authentication_method == "workload_identity" ? 1 : 0
+  count                     = local.create_workload_identity_resources ? 1 : 0
   name                      = local.federated_identity_name
   audience                  = ["api://AzureADTokenExchange"]
   issuer                    = "https://accounts.google.com"
