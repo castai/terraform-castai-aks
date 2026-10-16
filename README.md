@@ -499,6 +499,28 @@ A future major release (potentially the next one) will drop the support for the 
 the controlled migration impossible. If you want to move from 11.x.x or older to a version above 12.x.x, **you must
 first move to 12.x.x and complete the migration** by following the instructions above!
 
+Workload identity preparation in 12.1.x
+---------------------------------------
+
+To improve security, a future version of this module will change the default authentication method from `client_secret` to `workload_identity`.
+
+As this step would cause existing app registration to be deleted, a failed apply could leave the cluster disconnected.
+To reduce this risk, a preparation step is added in version 12.1.x.
+
+The step pre-provisions the resources required for workload identity authentication while the module still
+defaults to `client_secret`. On upgrade, two additional resources are created: a user-assigned managed identity and
+a federated identity credential. They are not used for authentication while `authentication_method` is
+`client_secret` - the managed identity receives no role assignments and the module keeps authenticating with the
+existing Azure AD application - but they allow a later switch to `workload_identity` without creating anything at
+cutover time.
+
+Pre-provisioning is controlled with the `migration` variable:
+* `prepare` (default): create the workload identity resources early. This requires read access to the AKS cluster
+  and permission to create user-assigned identities and federated identity credentials.
+* `none`: opt out - no additional resources are created and no additional permissions are required. Behavior remains exactly as-is.
+
+If `authentication_method` is already set to `workload_identity`, this preparation step has no effect. Switching to this more secure mode is already available today by setting `authentication_method = "workload_identity"`.
+
 # Examples 
 
 Usage examples are located in [terraform provider repo](https://github.com/castai/terraform-provider-castai/tree/master/examples/aks)
@@ -624,6 +646,7 @@ Usage examples are located in [terraform provider repo](https://github.com/casta
 | <a name="input_kvisor_wait"></a> [kvisor\_wait](#input\_kvisor\_wait) | Wait for kvisor chart to finish release | `bool` | `true` | no |
 | <a name="input_live_values"></a> [live\_values](#input\_live\_values) | List of YAML formatted string with castai-live values | `list(string)` | `[]` | no |
 | <a name="input_live_version"></a> [live\_version](#input\_live\_version) | Version of castai-live helm chart. Default latest | `string` | `null` | no |
+| <a name="input_migration"></a> [migration](#input\_migration) | Controls migration to workload-identity authentication as more secure default. 'prepare' pre-provisions the workload identity resources - but they remain unused until the authentication method is switched. 'none' disables any migration behavior. This variable is used for incremental migration and will be removed in the future. | `string` | `"prepare"` | no |
 | <a name="input_no_proxy"></a> [no\_proxy](#input\_no\_proxy) | List of addresses to skip proxying requests from CAST AI components running directly on nodes. Used with http\_proxy and https\_proxy. | `list(string)` | `[]` | no |
 | <a name="input_node_configurations"></a> [node\_configurations](#input\_node\_configurations) | Map of AKS node configurations to create | `any` | `{}` | no |
 | <a name="input_node_resource_group"></a> [node\_resource\_group](#input\_node\_resource\_group) | n/a | `string` | n/a | yes |
