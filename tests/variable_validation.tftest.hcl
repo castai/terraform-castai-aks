@@ -144,7 +144,7 @@ run "default_migration_is_prepare" {
   command = plan
 
   assert {
-    condition     = var.migration == "prepare"
+    condition     = var.authentication_method_migration == "prepare"
     error_message = "Default migration should be 'prepare'"
   }
 }
@@ -153,11 +153,11 @@ run "valid_migration_value_none" {
   command = plan
 
   variables {
-    migration = "none"
+    authentication_method_migration = "none"
   }
 
   assert {
-    condition     = contains(["prepare", "none"], var.migration)
+    condition     = contains(["prepare", "none"], var.authentication_method_migration)
     error_message = "Should accept 'none' as valid migration"
   }
 }

@@ -514,7 +514,7 @@ a federated identity credential. They are not used for authentication while `aut
 existing Azure AD application - but they allow a later switch to `workload_identity` without creating anything at
 cutover time.
 
-Pre-provisioning is controlled with the `migration` variable:
+Pre-provisioning is controlled with the `authentication_method_migration` variable:
 * `prepare` (default): create the workload identity resources early. This requires read access to the AKS cluster
   and permission to create user-assigned identities and federated identity credentials.
 * `none`: opt out - no additional resources are created and no additional permissions are required. Behavior remains exactly as-is.
@@ -614,6 +614,7 @@ Usage examples are located in [terraform provider repo](https://github.com/casta
 | <a name="input_aks_cluster_region"></a> [aks\_cluster\_region](#input\_aks\_cluster\_region) | Region of the AKS cluster | `string` | n/a | yes |
 | <a name="input_api_url"></a> [api\_url](#input\_api\_url) | URL of alternative CAST AI API to be used during development or testing | `string` | `"https://api.cast.ai"` | no |
 | <a name="input_authentication_method"></a> [authentication\_method](#input\_authentication\_method) | Authentication method for CAST AI. Use 'client\_secret' for service principal with password, or 'workload\_identity' for federated identity credential | `string` | `"client_secret"` | no |
+| <a name="input_authentication_method_migration"></a> [authentication\_method\_migration](#input\_authentication\_method\_migration) | Controls migration to workload-identity authentication as more secure default. 'prepare' pre-provisions the workload identity resources - but they remain unused until the authentication method is switched. 'none' disables any migration behavior. This variable is used for incremental migration and will be removed in the future. | `string` | `"prepare"` | no |
 | <a name="input_autoscaler_settings"></a> [autoscaler\_settings](#input\_autoscaler\_settings) | Optional Autoscaler policy definitions to override current autoscaler settings | `any` | `null` | no |
 | <a name="input_azuread_owners"></a> [azuread\_owners](#input\_azuread\_owners) | A set of object IDs of principals that will be granted ownership of the Azure AD service principal and application. Defaults to current user. | `list(string)` | `null` | no |
 | <a name="input_ca_certs"></a> [ca\_certs](#input\_ca\_certs) | List of base64-encoded CA certificates to add to the node's trust store. | `list(string)` | `[]` | no |
@@ -646,7 +647,6 @@ Usage examples are located in [terraform provider repo](https://github.com/casta
 | <a name="input_kvisor_wait"></a> [kvisor\_wait](#input\_kvisor\_wait) | Wait for kvisor chart to finish release | `bool` | `true` | no |
 | <a name="input_live_values"></a> [live\_values](#input\_live\_values) | List of YAML formatted string with castai-live values | `list(string)` | `[]` | no |
 | <a name="input_live_version"></a> [live\_version](#input\_live\_version) | Version of castai-live helm chart. Default latest | `string` | `null` | no |
-| <a name="input_migration"></a> [migration](#input\_migration) | Controls migration to workload-identity authentication as more secure default. 'prepare' pre-provisions the workload identity resources - but they remain unused until the authentication method is switched. 'none' disables any migration behavior. This variable is used for incremental migration and will be removed in the future. | `string` | `"prepare"` | no |
 | <a name="input_no_proxy"></a> [no\_proxy](#input\_no\_proxy) | List of addresses to skip proxying requests from CAST AI components running directly on nodes. Used with http\_proxy and https\_proxy. | `list(string)` | `[]` | no |
 | <a name="input_node_configurations"></a> [node\_configurations](#input\_node\_configurations) | Map of AKS node configurations to create | `any` | `{}` | no |
 | <a name="input_node_resource_group"></a> [node\_resource\_group](#input\_node\_resource\_group) | n/a | `string` | n/a | yes |

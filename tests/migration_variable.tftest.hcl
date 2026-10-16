@@ -1,4 +1,4 @@
-# Tests the migration variable introduced in 12.x.x:
+# Tests the authentication_method_migration variable introduced in 12.x.x:
 #   prepare (default) - pre-provision workload identity resources while
 #                       authentication_method is client_secret
 #   none              - opt out of any migration behavior
@@ -117,7 +117,7 @@ run "verify_defaults_pre_provision_workload_identity" {
   command = plan
 
   assert {
-    condition     = var.authentication_method == "client_secret" && var.migration == "prepare"
+    condition     = var.authentication_method == "client_secret" && var.authentication_method_migration == "prepare"
     error_message = "Defaults should be client_secret auth with prepare migration"
   }
 
@@ -163,7 +163,7 @@ run "verify_none_opts_out_of_prep" {
   command = plan
 
   variables {
-    migration = "none"
+    authentication_method_migration = "none"
   }
 
   assert {
@@ -217,7 +217,7 @@ run "verify_none_with_workload_identity" {
 
   variables {
     authentication_method = "workload_identity"
-    migration             = "none"
+    authentication_method_migration = "none"
   }
 
   assert {
@@ -255,7 +255,7 @@ run "plan_unprep_with_none" {
   command = plan
 
   variables {
-    migration = "none"
+    authentication_method_migration = "none"
   }
 
   assert {
@@ -284,7 +284,7 @@ run "apply_unprep_with_none" {
   command = apply
 
   variables {
-    migration = "none"
+    authentication_method_migration = "none"
   }
 
   assert {
