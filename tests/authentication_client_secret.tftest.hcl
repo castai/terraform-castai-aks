@@ -78,6 +78,7 @@ variables {
   resource_group      = "test-rg"
   node_resource_group = "test-node-rg"
   castai_api_token    = "test-token-12345"
+  migration           = "none"
   default_node_configuration = "default"
   node_configurations = {
     default = {
