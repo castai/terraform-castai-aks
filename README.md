@@ -499,6 +499,28 @@ A future major release (potentially the next one) will drop the support for the 
 the controlled migration impossible. If you want to move from 11.x.x or older to a version above 12.x.x, **you must
 first move to 12.x.x and complete the migration** by following the instructions above!
 
+Workload identity preparation in 12.1.x
+---------------------------------------
+
+To improve security, a future version of this module will change the default authentication method from `client_secret` to `workload_identity`.
+
+As this step would cause existing app registration to be deleted, a failed apply could leave the cluster disconnected.
+To reduce this risk, a preparation step is added in version 12.1.x.
+
+The step pre-provisions the resources required for workload identity authentication while the module still
+defaults to `client_secret`. On upgrade, two additional resources are created: a user-assigned managed identity and
+a federated identity credential. They are not used for authentication while `authentication_method` is
+`client_secret` - the managed identity receives no role assignments and the module keeps authenticating with the
+existing Azure AD application - but they allow a later switch to `workload_identity` without creating anything at
+cutover time.
+
+Pre-provisioning is controlled with the `authentication_method_migration` variable:
+* `prepare` (default): create the workload identity resources early. This requires read access to the AKS cluster
+  and permission to create user-assigned identities and federated identity credentials.
+* `none`: opt out - no additional resources are created and no additional permissions are required. Behavior remains exactly as-is.
+
+If `authentication_method` is already set to `workload_identity`, this preparation step has no effect. Switching to this more secure mode is already available today by setting `authentication_method = "workload_identity"`.
+
 # Examples 
 
 Usage examples are located in [terraform provider repo](https://github.com/castai/terraform-provider-castai/tree/master/examples/aks)
@@ -592,6 +614,7 @@ Usage examples are located in [terraform provider repo](https://github.com/casta
 | <a name="input_aks_cluster_region"></a> [aks\_cluster\_region](#input\_aks\_cluster\_region) | Region of the AKS cluster | `string` | n/a | yes |
 | <a name="input_api_url"></a> [api\_url](#input\_api\_url) | URL of alternative CAST AI API to be used during development or testing | `string` | `"https://api.cast.ai"` | no |
 | <a name="input_authentication_method"></a> [authentication\_method](#input\_authentication\_method) | Authentication method for CAST AI. Use 'client\_secret' for service principal with password, or 'workload\_identity' for federated identity credential | `string` | `"client_secret"` | no |
+| <a name="input_authentication_method_migration"></a> [authentication\_method\_migration](#input\_authentication\_method\_migration) | Controls migration to workload-identity authentication as more secure default. 'prepare' pre-provisions the workload identity resources - but they remain unused until the authentication method is switched. 'none' disables any migration behavior. This variable is used for incremental migration and will be removed in the future. | `string` | `"prepare"` | no |
 | <a name="input_autoscaler_settings"></a> [autoscaler\_settings](#input\_autoscaler\_settings) | Optional Autoscaler policy definitions to override current autoscaler settings | `any` | `null` | no |
 | <a name="input_azuread_owners"></a> [azuread\_owners](#input\_azuread\_owners) | A set of object IDs of principals that will be granted ownership of the Azure AD service principal and application. Defaults to current user. | `list(string)` | `null` | no |
 | <a name="input_ca_certs"></a> [ca\_certs](#input\_ca\_certs) | List of base64-encoded CA certificates to add to the node's trust store. | `list(string)` | `[]` | no |

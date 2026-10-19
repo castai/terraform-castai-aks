@@ -342,6 +342,17 @@ variable "authentication_method" {
   }
 }
 
+variable "authentication_method_migration" {
+  description = "Controls migration to workload-identity authentication as more secure default. 'prepare' pre-provisions the workload identity resources - but they remain unused until the authentication method is switched. 'none' disables any migration behavior. This variable is used for incremental migration and will be removed in the future."
+  type        = string
+  default     = "prepare"
+
+  validation {
+    condition     = contains(["prepare", "none"], var.authentication_method_migration)
+    error_message = "authentication_method_migration must be either 'prepare' or 'none'"
+  }
+}
+
 variable "install_pod_mutator" {
   description = "Optional flag for installation of pod mutator"
   type        = bool
