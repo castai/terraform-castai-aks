@@ -499,27 +499,16 @@ A future major release (potentially the next one) will drop the support for the 
 the controlled migration impossible. If you want to move from 11.x.x or older to a version above 12.x.x, **you must
 first move to 12.x.x and complete the migration** by following the instructions above!
 
-Workload identity preparation in 12.1.x
----------------------------------------
+Workload identity migration tooling (added in 12.1.x)
+-----------------------------------------------------
 
-To improve security, a future version of this module will change the default authentication method from `client_secret` to `workload_identity`.
+Workload identity is the default authentication method from version 13.0.0. Switching an existing cluster from `client_secret` deletes the Azure AD application and its client secret, and a failed apply could leave the cluster disconnected. To make the switch safe and incremental, version 12.1.x introduced the `authentication_method_migration` variable:
 
-As this step would cause existing app registration to be deleted, a failed apply could leave the cluster disconnected.
-To reduce this risk, a preparation step is added in version 12.1.x.
+* `prepare`: pre-provisions the workload identity resources (a user-assigned managed identity and a federated identity credential) while the module continues to authenticate with `client_secret`. They are not used for authentication and the managed identity receives no role assignments until `authentication_method` is switched, but they allow switching later without creating anything at cutover time. This enables validating that the resources can be created safely. Has no effect if `authentication_method` is `workload_identity`.
+* `keep-secret-auth` (added in 13.0.0): keeps the Azure AD application, service principal and client secret while authenticating with `workload_identity`. Use this to retain the client-secret credentials as a fallback while (or after) switching over - otherwise they are destroyed when `authentication_method` changes and have to be recreated on rollback. This mode has no practical effect while `authentication_method` is `client_secret`. Once cluster is safely migrated to workload identity, the migration can be set to `none` to clean up.
+* `none` (default from 13.0.0): no migration behavior - no additional resources are created, no additional permissions are required, and behavior remains exactly as-is.
 
-The step pre-provisions the resources required for workload identity authentication while the module still
-defaults to `client_secret`. On upgrade, two additional resources are created: a user-assigned managed identity and
-a federated identity credential. They are not used for authentication while `authentication_method` is
-`client_secret` - the managed identity receives no role assignments and the module keeps authenticating with the
-existing Azure AD application - but they allow a later switch to `workload_identity` without creating anything at
-cutover time.
-
-Pre-provisioning is controlled with the `authentication_method_migration` variable:
-* `prepare` (default): create the workload identity resources early. This requires read access to the AKS cluster
-  and permission to create user-assigned identities and federated identity credentials.
-* `none`: opt out - no additional resources are created and no additional permissions are required. Behavior remains exactly as-is.
-
-If `authentication_method` is already set to `workload_identity`, this preparation step has no effect. Switching to this more secure mode is already available today by setting `authentication_method = "workload_identity"`.
+In the 12.1.x-12.x.x releases, `prepare` was the default so the resources exist ahead of the switch. From 13.0.0 the default is `none`, which automatically cleans up the unused pre-provisioned resources for anyone who had not switched to `workload_identity` yet. If the resources were used as preparation for the switch performed in the same upgrade, they simply stay in use and only the client secret resources are removed.
 
 Migrating from 12.x.x to 13.x.x
 -------------------------------
@@ -528,7 +517,7 @@ Version 13.0.0 introduces a new default for the authentication method used by CA
 
 To opt-out of the changes, set `authentication_method = "client_secret"` before applying the changes from v13. More details on the settings below.
 
-If the value of the variable was previously set to any value, there is no change in behavior. However, if no value was set and the default was used, upgrading the module will cause the `client_secret` IAM resources to be reconfigured for workload identity - a new managed identity with federated credential is created, while the existing Entra application will be destroyed.
+If the value of the variable was previously set to any value, there is no change in behavior. However, if no value was set and the default was used, upgrading the module will cause the `client_secret` IAM resources to be reconfigured for workload identity - a new managed identity with federated credential is created, while the existing Entra application will be destroyed. To keep the existing Entra application and its client secret instead of destroying them, set `authentication_method_migration = "keep-secret-auth"` (see the migration tooling section above).
 
 > [!CAUTION]
 > While applying the changes, it is possible that CAST AI loses access temporarily while credentials are being reconfigured. In addition, failure to configure Workload identity but successful client secret destruction might lead to loss of access for cluster management by CAST AI. It is recommended that the change is monitored and done carefully.
@@ -631,7 +620,7 @@ Usage examples are located in [terraform provider repo](https://github.com/casta
 | <a name="input_aks_cluster_region"></a> [aks\_cluster\_region](#input\_aks\_cluster\_region) | Region of the AKS cluster | `string` | n/a | yes |
 | <a name="input_api_url"></a> [api\_url](#input\_api\_url) | URL of alternative CAST AI API to be used during development or testing | `string` | `"https://api.cast.ai"` | no |
 | <a name="input_authentication_method"></a> [authentication\_method](#input\_authentication\_method) | Authentication method for CAST AI. Use 'client\_secret' for service principal with password, or 'workload\_identity' for federated identity credential | `string` | `"workload_identity"` | no |
-| <a name="input_authentication_method_migration"></a> [authentication\_method\_migration](#input\_authentication\_method\_migration) | Controls migration to workload-identity authentication as more secure default. 'prepare' pre-provisions the workload identity resources - but they remain unused until the authentication method is switched. 'none' disables any migration behavior. This variable is used for incremental migration and will be removed in the future. | `string` | `"prepare"` | no |
+| <a name="input_authentication_method_migration"></a> [authentication\_method\_migration](#input\_authentication\_method\_migration) | Controls migration to workload-identity authentication as more secure default. 'prepare' pre-provisions the workload identity resources - but they remain unused until the authentication method is switched. 'keep-secret-auth' keeps the client secret resources (Azure AD application, service principal and password) while authenticating with workload identity. 'none' disables any migration behavior. This variable is used for incremental migration and will be removed in the future. | `string` | `"none"` | no |
 | <a name="input_autoscaler_settings"></a> [autoscaler\_settings](#input\_autoscaler\_settings) | Optional Autoscaler policy definitions to override current autoscaler settings | `any` | `null` | no |
 | <a name="input_azuread_owners"></a> [azuread\_owners](#input\_azuread\_owners) | A set of object IDs of principals that will be granted ownership of the Azure AD service principal and application. Defaults to current user. | `list(string)` | `null` | no |
 | <a name="input_ca_certs"></a> [ca\_certs](#input\_ca\_certs) | List of base64-encoded CA certificates to add to the node's trust store. | `list(string)` | `[]` | no |
