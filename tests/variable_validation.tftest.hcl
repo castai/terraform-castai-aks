@@ -149,12 +149,12 @@ run "valid_workload_identity_authentication_method" {
   }
 }
 
-run "default_migration_is_prepare" {
+run "default_authentication_method_migration_is_none" {
   command = plan
 
   assert {
-    condition     = var.authentication_method_migration == "prepare"
-    error_message = "Default migration should be 'prepare'"
+    condition     = var.authentication_method_migration == "none"
+    error_message = "Default migration should be 'none'"
   }
 }
 
@@ -166,7 +166,20 @@ run "valid_migration_value_none" {
   }
 
   assert {
-    condition     = contains(["prepare", "none"], var.authentication_method_migration)
+    condition     = contains(["prepare", "none", "keep-secret-auth"], var.authentication_method_migration)
     error_message = "Should accept 'none' as valid migration"
+  }
+}
+
+run "valid_migration_value_keep_secret_auth" {
+  command = plan
+
+  variables {
+    authentication_method_migration = "keep-secret-auth"
+  }
+
+  assert {
+    condition     = var.authentication_method_migration == "keep-secret-auth"
+    error_message = "Should accept 'keep-secret-auth' as valid migration"
   }
 }
