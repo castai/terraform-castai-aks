@@ -1,10 +1,19 @@
-# Tests the authentication_method_migration variable introduced in 12.x.x:
-#   prepare (default) - pre-provision workload identity resources while
-#                       authentication_method is client_secret
-#   none              - opt out of any migration behavior
+# Tests the authentication_method_migration variable:
+#   prepare          - pre-provision workload identity resources while authentication stays on client_secret
+#   keep-secret-auth - keep the Azure AD application, service principal and secret while
+#                      authenticating with workload_identity
+#   none (default)   - opt out of any migration behavior
 #
-# The apply runs at the end exercise the prep lifecycle:
-# prep -> un-prep with none (removes only the pre-provisioned resources).
+# Matrix: (migration, authentication_method) -> resources
+#   (none, workload_identity) default      -> workload identity only
+#   (none, client_secret)                  -> client secret only (legacy behavior)
+#   (prepare, client_secret)               -> both; authentication stays on client secret
+#   (prepare, workload_identity)           -> no effect beyond workload identity
+#   (keep-secret-auth, client_secret)      -> no effect beyond client secret
+#   (keep-secret-auth, workload_identity)  -> both; authentication uses workload identity
+#
+# The apply runs at the end exercise the cutover lifecycle:
+# client_secret -> keep-secret-auth + workload_identity -> none (drops the kept secret).
 
 mock_provider "azurerm" {
   mock_data "azurerm_kubernetes_cluster" {
@@ -110,20 +119,96 @@ variables {
   }
 }
 
-# Defaults: client_secret auth + prepare migration.
-# Workload identity resources are pre-provisioned but unused: the cluster
-# registration and role assignments stay on the Azure AD service principal.
-run "verify_defaults_pre_provision_workload_identity" {
+# Defaults: workload_identity auth + none migration. Only the workload identity
+# resources exist; no Active Directory resources anywhere.
+run "verify_defaults_are_workload_identity_only" {
   command = plan
 
   assert {
-    condition     = var.authentication_method == "client_secret" && var.authentication_method_migration == "prepare"
-    error_message = "Defaults should be client_secret auth with prepare migration"
+    condition     = var.authentication_method == "workload_identity" && var.authentication_method_migration == "none"
+    error_message = "Defaults should be workload_identity auth with none migration"
+  }
+
+  assert {
+    condition     = length([for r in azuread_application.castai : r]) == 0
+    error_message = "Azure AD application should NOT be created by default"
+  }
+
+  assert {
+    condition     = length([for r in azurerm_user_assigned_identity.this : r]) == 1
+    error_message = "Managed identity should exist by default"
+  }
+
+  assert {
+    condition     = length([for r in azurerm_federated_identity_credential.this : r]) == 1
+    error_message = "Federated identity credential should exist by default"
+  }
+
+  assert {
+    condition     = castai_aks_cluster.castai_cluster.client_secret == null
+    error_message = "Cluster registration should not use client_secret by default"
+  }
+
+  assert {
+    condition     = castai_aks_cluster.castai_cluster.federation_id == "66666666-6666-6666-6666-666666666666"
+    error_message = "Cluster registration should use the managed identity principal by default"
+  }
+
+  assert {
+    condition     = azurerm_role_assignment.castai_resource_group.principal_id == "66666666-6666-6666-6666-666666666666"
+    error_message = "Role assignments should be on the managed identity by default"
+  }
+}
+
+# Legacy setup, made explicit: none + client_secret behaves exactly as before
+# the variable existed - client secret resources only, no data source reads.
+run "verify_none_with_client_secret" {
+  command = plan
+
+  variables {
+    authentication_method           = "client_secret"
+    authentication_method_migration = "none"
   }
 
   assert {
     condition     = length([for r in azuread_application.castai : r]) == 1
-    error_message = "Azure AD application should be created for client_secret auth"
+    error_message = "Azure AD application should be created with client_secret"
+  }
+
+  assert {
+    condition     = length([for r in azurerm_user_assigned_identity.this : r]) == 0
+    error_message = "Managed identity should NOT be created with client_secret + none"
+  }
+
+  assert {
+    condition     = length([for r in azurerm_federated_identity_credential.this : r]) == 0
+    error_message = "Federated identity credential should NOT be created with client_secret + none"
+  }
+
+  assert {
+    condition     = length([for r in data.azurerm_kubernetes_cluster.castai : r]) == 0
+    error_message = "AKS cluster data source should NOT be read with client_secret + none"
+  }
+
+  assert {
+    condition     = length([for r in data.castai_impersonation_service_account.this : r]) == 0
+    error_message = "CAST AI impersonation service account should NOT be read with client_secret + none"
+  }
+}
+
+# prepare pre-provisions the workload identity resources for a later switch
+# while authentication stays on the Azure AD service principal.
+run "verify_prepare_provisions_for_client_secret" {
+  command = plan
+
+  variables {
+    authentication_method           = "client_secret"
+    authentication_method_migration = "prepare"
+  }
+
+  assert {
+    condition     = length([for r in azuread_application.castai : r]) == 1
+    error_message = "Azure AD application should be created with client_secret + prepare"
   }
 
   assert {
@@ -157,47 +242,13 @@ run "verify_defaults_pre_provision_workload_identity" {
   }
 }
 
-# Opt-out: none keeps the previous behavior exactly - no workload identity
-# resources, no data source reads, no extra permissions required.
-run "verify_none_opts_out_of_prep" {
-  command = plan
-
-  variables {
-    authentication_method_migration = "none"
-  }
-
-  assert {
-    condition     = length([for r in azuread_application.castai : r]) == 1
-    error_message = "Azure AD application should still be created with none"
-  }
-
-  assert {
-    condition     = length([for r in azurerm_user_assigned_identity.this : r]) == 0
-    error_message = "Managed identity should NOT be created with none"
-  }
-
-  assert {
-    condition     = length([for r in azurerm_federated_identity_credential.this : r]) == 0
-    error_message = "Federated identity credential should NOT be created with none"
-  }
-
-  assert {
-    condition     = length([for r in data.azurerm_kubernetes_cluster.castai : r]) == 0
-    error_message = "AKS cluster data source should NOT be read with none"
-  }
-
-  assert {
-    condition     = length([for r in data.castai_impersonation_service_account.this : r]) == 0
-    error_message = "CAST AI impersonation service account should NOT be read with none"
-  }
-}
-
 # prepare has no additional effect once on workload_identity.
 run "verify_prepare_is_noop_for_workload_identity" {
   command = plan
 
   variables {
-    authentication_method = "workload_identity"
+    authentication_method           = "workload_identity"
+    authentication_method_migration = "prepare"
   }
 
   assert {
@@ -211,12 +262,12 @@ run "verify_prepare_is_noop_for_workload_identity" {
   }
 }
 
-# none + workload_identity preserves the pre-migration-variable behavior.
+# none + workload_identity explicitly preserves the default behavior.
 run "verify_none_with_workload_identity" {
   command = plan
 
   variables {
-    authentication_method = "workload_identity"
+    authentication_method           = "workload_identity"
     authentication_method_migration = "none"
   }
 
@@ -231,74 +282,247 @@ run "verify_none_with_workload_identity" {
   }
 }
 
-# --- Prep lifecycle (apply runs share state) ---
+# keep-secret-auth + client_secret is a no-op: only the client secret
+# resources exist, driven by the authentication method itself.
+run "verify_keep_secret_auth_noop_for_client_secret" {
+  command = plan
 
-# Step 1: apply the defaults (client_secret + prepare): both auth resource
-# sets exist; registration is still on the service principal.
-run "apply_defaults_with_prep" {
-  command = apply
+  variables {
+    authentication_method           = "client_secret"
+    authentication_method_migration = "keep-secret-auth"
+  }
 
   assert {
     condition     = length([for r in azuread_application.castai : r]) == 1
-    error_message = "Azure AD application should exist after prep apply"
+    error_message = "Azure AD application should be created with client_secret + keep-secret-auth"
+  }
+
+  assert {
+    condition     = length([for r in azuread_application_password.castai : r]) == 1
+    error_message = "Application password should be created with client_secret + keep-secret-auth"
+  }
+
+  assert {
+    condition     = length([for r in azuread_service_principal.castai : r]) == 1
+    error_message = "Service principal should be created with client_secret + keep-secret-auth"
+  }
+
+  assert {
+    condition     = length([for r in azurerm_user_assigned_identity.this : r]) == 0
+    error_message = "Managed identity should NOT be created with client_secret + keep-secret-auth"
+  }
+
+  assert {
+    condition     = length([for r in azurerm_federated_identity_credential.this : r]) == 0
+    error_message = "Federated identity credential should NOT be created with client_secret + keep-secret-auth"
+  }
+
+  assert {
+    condition     = length([for r in data.azurerm_kubernetes_cluster.castai : r]) == 0
+    error_message = "AKS cluster data source should NOT be read with client_secret + keep-secret-auth"
+  }
+}
+
+# keep-secret-auth + workload_identity: authentication uses workload identity
+# while the Azure AD application, service principal and secret are kept.
+run "verify_keep_secret_auth_with_workload_identity" {
+  command = plan
+
+  variables {
+    authentication_method           = "workload_identity"
+    authentication_method_migration = "keep-secret-auth"
+  }
+
+  assert {
+    condition     = length([for r in azuread_application.castai : r]) == 1
+    error_message = "Azure AD application should be kept with workload_identity + keep-secret-auth"
+  }
+
+  assert {
+    condition     = length([for r in azuread_application_password.castai : r]) == 1
+    error_message = "Application password should be kept with workload_identity + keep-secret-auth"
+  }
+
+  assert {
+    condition     = length([for r in azuread_service_principal.castai : r]) == 1
+    error_message = "Service principal should be kept with workload_identity + keep-secret-auth"
   }
 
   assert {
     condition     = length([for r in azurerm_user_assigned_identity.this : r]) == 1
-    error_message = "Managed identity should exist after prep apply"
+    error_message = "Managed identity should exist with workload_identity + keep-secret-auth"
+  }
+
+  assert {
+    condition     = length([for r in azurerm_federated_identity_credential.this : r]) == 1
+    error_message = "Federated identity credential should exist with workload_identity + keep-secret-auth"
+  }
+
+  assert {
+    condition     = castai_aks_cluster.castai_cluster.client_secret == null
+    error_message = "Registration should not send the client secret when authenticating with workload identity"
+  }
+
+  assert {
+    condition     = castai_aks_cluster.castai_cluster.federation_id == "66666666-6666-6666-6666-666666666666"
+    error_message = "Registration should use the managed identity principal with workload_identity + keep-secret-auth"
+  }
+
+  assert {
+    condition     = azurerm_role_assignment.castai_resource_group.principal_id == "66666666-6666-6666-6666-666666666666"
+    error_message = "Role assignments should be on the managed identity with workload_identity + keep-secret-auth"
   }
 }
 
-# Step 2: opting out later must only remove the pre-provisioned workload
-# identity resources; the client_secret setup is untouched.
-run "plan_unprep_with_none" {
-  command = plan
+# --- Cutover lifecycle (apply runs share state) ---
 
-  variables {
-    authentication_method_migration = "none"
-  }
-
-  assert {
-    condition     = length([for r in azurerm_user_assigned_identity.this : r]) == 0
-    error_message = "Managed identity should be removed by the un-prep plan"
-  }
-
-  assert {
-    condition     = length([for r in azurerm_federated_identity_credential.this : r]) == 0
-    error_message = "Federated identity credential should be removed by the un-prep plan"
-  }
-
-  assert {
-    condition     = length([for r in azuread_application.castai : r]) == 1
-    error_message = "Azure AD application should be untouched by the un-prep plan"
-  }
-
-  assert {
-    condition     = castai_aks_cluster.castai_cluster.client_secret != null
-    error_message = "Registration should stay on client_secret in the un-prep plan"
-  }
-}
-
-# Step 3: apply the un-prep. Destroy-only for the workload identity resources.
-run "apply_unprep_with_none" {
+# Step 1: apply the legacy client secret setup.
+run "apply_client_secret_only" {
   command = apply
 
   variables {
+    authentication_method           = "client_secret"
     authentication_method_migration = "none"
   }
 
   assert {
-    condition     = length([for r in azurerm_user_assigned_identity.this : r]) == 0
-    error_message = "Managed identity should be removed from state by the un-prep apply"
+    condition     = length([for r in azuread_application.castai : r]) == 1
+    error_message = "Azure AD application should exist after the client_secret apply"
   }
 
   assert {
-    condition     = length([for r in azurerm_federated_identity_credential.this : r]) == 0
-    error_message = "Federated identity credential should be removed from state by the un-prep apply"
+    condition     = length([for r in azurerm_user_assigned_identity.this : r]) == 0
+    error_message = "Managed identity should NOT exist after the client_secret apply"
+  }
+
+  assert {
+    condition     = castai_aks_cluster.castai_cluster.client_secret == "mock-password-value"
+    error_message = "Registration should carry the client_secret value after the apply"
+  }
+}
+
+# Step 2: switch to workload identity while keeping the client secret
+# resources. Only the workload identity resources are created; nothing is
+# destroyed, and the registration moves to the managed identity in place.
+run "plan_switch_to_workload_identity_with_keep_secret_auth" {
+  command = plan
+
+  variables {
+    authentication_method           = "workload_identity"
+    authentication_method_migration = "keep-secret-auth"
   }
 
   assert {
     condition     = length([for r in azuread_application.castai : r]) == 1
-    error_message = "Azure AD application should remain after the un-prep apply"
+    error_message = "Azure AD application should be kept by the keep-secret-auth switch plan"
+  }
+
+  assert {
+    condition     = length([for r in azuread_application_password.castai : r]) == 1
+    error_message = "Application password should be kept by the keep-secret-auth switch plan"
+  }
+
+  assert {
+    condition     = length([for r in azuread_service_principal.castai : r]) == 1
+    error_message = "Service principal should be kept by the keep-secret-auth switch plan"
+  }
+
+  assert {
+    condition     = length([for r in azurerm_user_assigned_identity.this : r]) == 1
+    error_message = "Managed identity should be added by the keep-secret-auth switch plan"
+  }
+
+  assert {
+    condition     = castai_aks_cluster.castai_cluster.client_secret == null
+    error_message = "Registration should switch off the client secret in the keep-secret-auth switch plan"
+  }
+
+  assert {
+    condition     = castai_aks_cluster.castai_cluster.federation_id == "66666666-6666-6666-6666-666666666666"
+    error_message = "Registration should switch to the managed identity principal in the keep-secret-auth switch plan"
+  }
+}
+
+run "apply_switch_to_workload_identity_with_keep_secret_auth" {
+  command = apply
+
+  variables {
+    authentication_method           = "workload_identity"
+    authentication_method_migration = "keep-secret-auth"
+  }
+
+  assert {
+    condition     = var.authentication_method == "workload_identity" && var.authentication_method_migration == "keep-secret-auth"
+    error_message = "Applying the workload_identity switch with keep-secret-auth"
+  }
+
+  assert {
+    condition     = length([for r in azuread_application.castai : r]) == 1
+    error_message = "Azure AD application should exist after the keep-secret-auth switch"
+  }
+
+  assert {
+    condition     = length([for r in azurerm_user_assigned_identity.this : r]) == 1
+    error_message = "Managed identity should exist after the keep-secret-auth switch"
+  }
+
+  assert {
+    condition     = castai_aks_cluster.castai_cluster.federation_id == "66666666-6666-6666-6666-666666666666"
+    error_message = "Registration should use the managed identity principal after the keep-secret-auth switch"
+  }
+}
+
+# Step 3: drop keep-secret-auth: only the client secret resources are removed;
+# the workload identity setup stays untouched.
+run "plan_remove_keep_secret_auth" {
+  command = plan
+
+  variables {
+    authentication_method           = "workload_identity"
+    authentication_method_migration = "none"
+  }
+
+  assert {
+    condition     = length([for r in azuread_application.castai : r]) == 0
+    error_message = "Azure AD application should be removed by the none plan"
+  }
+
+  assert {
+    condition     = length([for r in azuread_application_password.castai : r]) == 0
+    error_message = "Application password should be removed by the none plan"
+  }
+
+  assert {
+    condition     = length([for r in azuread_service_principal.castai : r]) == 0
+    error_message = "Service principal should be removed by the none plan"
+  }
+
+  assert {
+    condition     = length([for r in azurerm_user_assigned_identity.this : r]) == 1
+    error_message = "Managed identity should stay in the none plan"
+  }
+
+  assert {
+    condition     = castai_aks_cluster.castai_cluster.federation_id == "66666666-6666-6666-6666-666666666666"
+    error_message = "Registration should keep using workload identity in the none plan"
+  }
+}
+
+run "apply_remove_keep_secret_auth" {
+  command = apply
+
+  variables {
+    authentication_method           = "workload_identity"
+    authentication_method_migration = "none"
+  }
+
+  assert {
+    condition     = length([for r in azuread_application.castai : r]) == 0
+    error_message = "Azure AD application should be gone after removing keep-secret-auth"
+  }
+
+  assert {
+    condition     = length([for r in azurerm_user_assigned_identity.this : r]) == 1
+    error_message = "Managed identity should remain after removing keep-secret-auth"
   }
 }
