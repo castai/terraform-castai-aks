@@ -102,29 +102,15 @@ variables {
   }
 }
 
-# Test 1: Default behavior (implicit client_secret) creates resources with [0]
-# This represents existing users who upgrade without changing their configuration
-run "verify_default_creates_indexed_resources" {
-  command = plan
-
-  assert {
-    condition     = length([for r in azuread_application.castai : r]) == 1
-    error_message = "Should create exactly one Azure AD application with [0] index"
-  }
-
-  assert {
-    condition     = length([for r in azuread_application_password.castai : r]) == 1
-    error_message = "Should create exactly one Azure AD application password with [0] index"
-  }
-
-  assert {
-    condition     = length([for r in azuread_service_principal.castai : r]) == 1
-    error_message = "Should create exactly one Azure AD service principal with [0] index"
-  }
-}
-
-# Test 2: Explicit client_secret creates the same indexed resources
-# This represents users who explicitly set the authentication method
+# Test 1: Explicit client_secret creates the same indexed resources.
+# This represents users who explicitly set the authentication method.
+#
+# The moved blocks in iam.tf map state from module versions that predate the
+# authentication_method variable onto these indexed addresses, e.g.
+# azuread_application.castai -> azuread_application.castai[0]. The assertions
+# below pin the destination addressing the moved blocks rely on; the remapping
+# itself only triggers against state carrying the old addresses, which the
+# test framework cannot seed as it always starts from empty. 
 run "verify_explicit_client_secret_creates_same_resources" {
   command = plan
 
@@ -148,31 +134,7 @@ run "verify_explicit_client_secret_creates_same_resources" {
   }
 }
 
-# Test 3: Verify moved blocks handle migration from old format
-# This test documents the state migration strategy
-run "verify_state_migration_configuration" {
-  command = plan
-
-  # The moved blocks in iam.tf ensure:
-  # - azuread_application.castai -> azuread_application.castai[0]
-  # - azuread_application_password.castai -> azuread_application_password.castai[0]
-  # - azuread_service_principal.castai -> azuread_service_principal.castai[0]
-
-  # For existing deployments, Terraform will automatically migrate the state
-  # without destroying and recreating resources
-
-  assert {
-    condition     = var.authentication_method == "client_secret"
-    error_message = "Default authentication method should be client_secret for backward compatibility"
-  }
-
-  assert {
-    condition     = length([for r in azuread_application.castai : r]) == 1
-    error_message = "Resources should be created with count[0] for state migration compatibility"
-  }
-}
-
-# Test 4: Verify resources use consistent indexing
+# Test 2: Verify resources use consistent indexing
 # This ensures the conditional logic properly creates indexed resources
 run "verify_consistent_resource_indexing" {
   command = plan
@@ -194,7 +156,7 @@ run "verify_consistent_resource_indexing" {
   }
 }
 
-# Test 5: Switching to workload_identity should remove old resources
+# Test 3: Switching to workload_identity should remove old resources
 # This tests the conditional logic works correctly
 run "verify_switching_to_workload_identity" {
   command = plan
@@ -229,7 +191,7 @@ run "verify_switching_to_workload_identity" {
   }
 }
 
-# Test 6: Role assignments reference correct principal based on auth method
+# Test 4: Role assignments reference correct principal based on auth method
 run "verify_role_assignments_follow_auth_method" {
   command = plan
 

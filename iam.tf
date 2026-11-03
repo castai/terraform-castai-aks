@@ -3,6 +3,7 @@ locals {
   app_name                           = substr("CAST AI ${var.aks_cluster_name}-${var.resource_group}", 0, 64)
   federated_identity_name            = substr("castai-${var.aks_cluster_name}-${var.resource_group}", 0, 64)
   create_workload_identity_resources = var.authentication_method == "workload_identity" || var.authentication_method_migration == "prepare"
+  create_active_directory_resources  = var.authentication_method == "client_secret" || var.authentication_method_migration == "keep-secret-auth"
 }
 
 data "azurerm_kubernetes_cluster" "castai" {
@@ -94,18 +95,18 @@ resource "azurerm_role_assignment" "castai_additional_resource_groups" {
 data "azuread_client_config" "current" {}
 
 resource "azuread_application" "castai" {
-  count        = var.authentication_method == "client_secret" ? 1 : 0
+  count        = local.create_active_directory_resources ? 1 : 0
   display_name = local.app_name
   owners       = (var.azuread_owners == null ? [data.azuread_client_config.current.object_id] : var.azuread_owners)
 }
 
 resource "azuread_application_password" "castai" {
-  count          = var.authentication_method == "client_secret" ? 1 : 0
+  count          = local.create_active_directory_resources ? 1 : 0
   application_id = azuread_application.castai[0].id
 }
 
 resource "azuread_service_principal" "castai" {
-  count                        = var.authentication_method == "client_secret" ? 1 : 0
+  count                        = local.create_active_directory_resources ? 1 : 0
   client_id                    = azuread_application.castai[0].client_id
   app_role_assignment_required = false
   owners                       = (var.azuread_owners == null ? [data.azuread_client_config.current.object_id] : var.azuread_owners)
