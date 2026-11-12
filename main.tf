@@ -134,6 +134,7 @@ resource "castai_node_template" "this" {
   configuration_id             = try(each.value.configuration_name, null) != null ? castai_node_configuration.this[each.value.configuration_name].id : can(each.value.configuration_id) ? length(regexall(local.configuration_id_regex_pattern, each.value.configuration_id)) > 0 ? each.value.configuration_id : castai_node_configuration.this[each.value.configuration_id].id : null
   should_taint                 = try(each.value.should_taint, true)
   clm_enabled                  = try(each.value.clm_enabled, false)
+  clm_networking_mode          = try(each.value.clm_networking_mode, null)
   rebalancing_config_min_nodes = try(each.value.rebalancing_config_min_nodes, 0)
 
   custom_labels = try(each.value.custom_labels, {})
