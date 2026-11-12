@@ -502,6 +502,8 @@ first move to 12.x.x and complete the migration** by following the instructions 
 Workload identity migration tooling (added in 12.1.x)
 -----------------------------------------------------
 
+> Note: For general information on AKS Impersonation and a step-by-step guide for migrating to it, please refer to https://github.com/castai/terraform-provider-castai/blob/master/docs/impersonation/aks-impersonation.md
+
 Workload identity is the default authentication method from version 13.0.0. Switching an existing cluster from `client_secret` deletes the Azure AD application and its client secret, and a failed apply could leave the cluster disconnected. To make the switch safe and incremental, version 12.1.x introduced the `authentication_method_migration` variable:
 
 * `prepare`: pre-provisions the workload identity resources (a user-assigned managed identity and a federated identity credential) while the module continues to authenticate with `client_secret`. They are not used for authentication and the managed identity receives no role assignments until `authentication_method` is switched, but they allow switching later without creating anything at cutover time. This enables validating that the resources can be created safely. Has no effect if `authentication_method` is `workload_identity`.
@@ -512,6 +514,8 @@ In the 12.1.x-12.x.x releases, `prepare` was the default so the resources exist 
 
 Migrating from 12.x.x to 13.x.x
 -------------------------------
+
+> Note: For general information on AKS Impersonation and a step-by-step guide for migrating to it, please refer to https://github.com/castai/terraform-provider-castai/blob/master/docs/impersonation/aks-impersonation.md
 
 Version 13.0.0 introduces a new default for the authentication method used by CAST AI to access cloud environments. This new authentication method offers better security by utilizing federated identity and no long-living credentials on CAST AI side. The behavior is controlled by the `authentication_method` variable and its default switches from `client_secret` to `workload_identity`.
 
