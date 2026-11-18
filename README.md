@@ -531,6 +531,13 @@ If the value of the variable was previously set to any value, there is no change
 
 If users are using 11.x.x or older, it is recommended that migration to 12.x.x is completed as a separate step from 13.x.x, as both involve delicate migrations. In addition, the standalone releases mentioned in 12.x.x are kept for this release and still available.
 
+Managed identity location taken from `aks_cluster_region` (14.1.0)
+------------------------------------------------------------------
+
+Previously, when using workload identity authentication (the default), the module read the AKS cluster through the `azurerm_kubernetes_cluster` data source during `terraform plan` to determine the location of the CAST AI user-assigned managed identity. This made planning impossible when the module was used in the same Terraform configuration that also creates the AKS cluster, since the cluster does not exist yet at plan time. The location is now taken from the `aks_cluster_region` variable instead, and the module no longer queries the cluster at plan time at all, so it can be used from the very first apply of a configuration that also creates the cluster.
+
+No change is expected on upgrade when `aks_cluster_region` matches the cluster's actual location (which it must anyway for CAST AI to operate): `azurerm` treats the canonical spelling (`eastus`) and the display spelling (`East US`) of a location as equal for `azurerm_user_assigned_identity`. If the variable does not match the cluster's location, the managed identity is replaced - together with its federated identity credential and role assignments - so fix the variable before upgrading. Note that the value is now also validated as an Azure location at plan time.
+
 # Examples 
 
 Usage examples are located in [terraform provider repo](https://github.com/castai/terraform-provider-castai/tree/master/examples/aks)
@@ -608,7 +615,6 @@ Usage examples are located in [terraform provider repo](https://github.com/casta
 | [null_resource.wait_for_cluster](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 | [azuread_client_config.current](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/data-sources/client_config) | data source |
 | [azurerm_kubernetes_cluster.aks](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/kubernetes_cluster) | data source |
-| [azurerm_kubernetes_cluster.castai](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/kubernetes_cluster) | data source |
 | [castai_impersonation_service_account.this](https://registry.terraform.io/providers/castai/castai/latest/docs/data-sources/impersonation_service_account) | data source |
 
 ## Inputs
@@ -621,7 +627,7 @@ Usage examples are located in [terraform provider repo](https://github.com/casta
 | <a name="input_ai_optimizer_values"></a> [ai\_optimizer\_values](#input\_ai\_optimizer\_values) | List of YAML formatted string with ai-optimizer values | `list(string)` | `[]` | no |
 | <a name="input_ai_optimizer_version"></a> [ai\_optimizer\_version](#input\_ai\_optimizer\_version) | Version of castai-ai-optimizer helm chart. Default latest | `string` | `null` | no |
 | <a name="input_aks_cluster_name"></a> [aks\_cluster\_name](#input\_aks\_cluster\_name) | Name of the cluster to be connected to CAST AI. | `string` | n/a | yes |
-| <a name="input_aks_cluster_region"></a> [aks\_cluster\_region](#input\_aks\_cluster\_region) | Region of the AKS cluster | `string` | n/a | yes |
+| <a name="input_aks_cluster_region"></a> [aks\_cluster\_region](#input\_aks\_cluster\_region) | Azure location of the AKS cluster (e.g. eastus or East US). Used for the CAST AI cluster registration and as the location of the user-assigned managed identity created for workload identity authentication, so it must match the cluster's actual location. The module does not query the cluster to determine it, which allows using this module in the same Terraform configuration that creates the cluster. | `string` | n/a | yes |
 | <a name="input_api_url"></a> [api\_url](#input\_api\_url) | URL of alternative CAST AI API to be used during development or testing | `string` | `"https://api.cast.ai"` | no |
 | <a name="input_authentication_method"></a> [authentication\_method](#input\_authentication\_method) | Authentication method for CAST AI. Use 'client\_secret' for service principal with password, or 'workload\_identity' for federated identity credential | `string` | `"workload_identity"` | no |
 | <a name="input_authentication_method_migration"></a> [authentication\_method\_migration](#input\_authentication\_method\_migration) | Controls migration to workload-identity authentication as more secure default. 'prepare' pre-provisions the workload identity resources - but they remain unused until the authentication method is switched. 'keep-secret-auth' keeps the client secret resources (Azure AD application, service principal and password) while authenticating with workload identity. 'none' disables any migration behavior. This variable is used for incremental migration and will be removed in the future. | `string` | `"none"` | no |
