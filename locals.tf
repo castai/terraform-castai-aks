@@ -199,10 +199,6 @@ locals {
         name  = "enabled"
         value = var.install_security_agent
       },
-      {
-        name  = "controller.extraArgs.kube-bench-cloud-provider"
-        value = "aks"
-      },
     ],
     local.set_kvisor_grpc_addr,
     local.set_components_sets,
