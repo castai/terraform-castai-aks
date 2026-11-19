@@ -226,3 +226,47 @@ run "separate_autoscaler_policies_and_evictor_settings" {
     error_message = "Evictor settings should be mapped independently from autoscaler policies"
   }
 }
+
+run "null_autoscaler_and_evictor_settings" {
+  command = plan
+
+  assert {
+    condition     = length(castai_autoscaler_policies.castai_autoscaler_policies) == 0
+    error_message = "Null autoscaler settings should not create a policies resource"
+  }
+
+  assert {
+    condition     = length(castai_evictor.castai_evictor) == 0
+    error_message = "Null evictor settings should not create an evictor resource"
+  }
+}
+
+run "policy_settings_without_optional_nested_blocks" {
+  command = plan
+
+  variables {
+    autoscaler_settings = {
+      enabled = true
+    }
+  }
+
+  assert {
+    condition     = length(castai_autoscaler_policies.castai_autoscaler_policies[0].unschedulable_pods) == 0
+    error_message = "Unset unschedulable_pods should not emit a default block"
+  }
+
+  assert {
+    condition     = length(castai_autoscaler_policies.castai_autoscaler_policies[0].cluster_limits) == 0
+    error_message = "Unset cluster_limits should not emit a default block"
+  }
+
+  assert {
+    condition     = length(castai_autoscaler_policies.castai_autoscaler_policies[0].node_downscaler) == 0
+    error_message = "Unset node_downscaler should not emit a default block"
+  }
+
+  assert {
+    condition     = length(castai_evictor.castai_evictor) == 0
+    error_message = "Evictor should remain independent and unset"
+  }
+}

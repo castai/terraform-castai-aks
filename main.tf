@@ -1253,14 +1253,14 @@ resource "castai_autoscaler_policies" "castai_autoscaler_policies" {
   scoped_mode = try(var.autoscaler_settings.scoped_mode, null)
 
   dynamic "unschedulable_pods" {
-    for_each = try([var.autoscaler_settings.unschedulable_pods], [])
+    for_each = try(var.autoscaler_settings.unschedulable_pods, null) != null ? [var.autoscaler_settings.unschedulable_pods] : []
 
     content {
       enabled                           = try(unschedulable_pods.value.enabled, null)
       partial_template_matching_enabled = try(unschedulable_pods.value.partial_template_matching_enabled, null)
 
       dynamic "pod_pinner" {
-        for_each = try([unschedulable_pods.value.pod_pinner], [])
+        for_each = try(unschedulable_pods.value.pod_pinner, null) != null ? [unschedulable_pods.value.pod_pinner] : []
 
         content {
           enabled = try(pod_pinner.value.enabled, null)
@@ -1270,13 +1270,13 @@ resource "castai_autoscaler_policies" "castai_autoscaler_policies" {
   }
 
   dynamic "cluster_limits" {
-    for_each = try([var.autoscaler_settings.cluster_limits], [])
+    for_each = try(var.autoscaler_settings.cluster_limits, null) != null ? [var.autoscaler_settings.cluster_limits] : []
 
     content {
       enabled = try(cluster_limits.value.enabled, null)
 
       dynamic "cpu" {
-        for_each = try([cluster_limits.value.cpu], [])
+        for_each = try(cluster_limits.value.cpu, null) != null ? [cluster_limits.value.cpu] : []
 
         content {
           min_cores = try(cpu.value.min_cores, null)
@@ -1287,7 +1287,7 @@ resource "castai_autoscaler_policies" "castai_autoscaler_policies" {
   }
 
   dynamic "node_downscaler" {
-    for_each = try([var.autoscaler_settings.node_downscaler], [])
+    for_each = try(var.autoscaler_settings.node_downscaler, null) != null ? [var.autoscaler_settings.node_downscaler] : []
 
     content {
       empty_nodes_enabled = try(node_downscaler.value.empty_nodes_enabled, null)
