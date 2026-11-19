@@ -531,6 +531,60 @@ If the value of the variable was previously set to any value, there is no change
 
 If users are using 11.x.x or older, it is recommended that migration to 12.x.x is completed as a separate step from 13.x.x, as both involve delicate migrations. In addition, the standalone releases mentioned in 12.x.x are kept for this release and still available.
 
+## Migrating to V2 autoscaler resources
+
+The module manages autoscaler policies through `castai_autoscaler_policies` and Evictor through the independent `castai_evictor` resource. Their inputs mirror the provider resources and are configured separately:
+
+```hcl
+autoscaler_settings = {
+  enabled     = true
+  scoped_mode = false
+
+  unschedulable_pods = {
+    enabled                            = true
+    partial_template_matching_enabled = false
+    pod_pinner = {
+      enabled = true
+    }
+  }
+
+  cluster_limits = {
+    enabled = true
+    cpu = {
+      min_cores = 1
+      max_cores = 100
+    }
+  }
+
+  node_downscaler = {
+    empty_nodes_enabled = true
+    empty_nodes_delay   = "300s"
+  }
+}
+
+evictor_settings = {
+  enabled                   = true
+  dry_run                   = false
+  aggressive_mode           = false
+  scoped_mode               = false
+  cycle_interval            = "1m"
+  node_grace_period_minutes = 5
+}
+```
+
+Use the following mapping when upgrading from the legacy module input:
+
+| Previous `autoscaler_settings` field | V2 configuration |
+| --- | --- |
+| `is_scoped_mode` | `autoscaler_settings.scoped_mode` |
+| `node_templates_partial_matching_enabled` | `autoscaler_settings.unschedulable_pods.partial_template_matching_enabled` |
+| `node_downscaler.empty_nodes.enabled` | `autoscaler_settings.node_downscaler.empty_nodes_enabled` |
+| `node_downscaler.empty_nodes.delay_seconds` | `autoscaler_settings.node_downscaler.empty_nodes_delay` as a duration string, for example `"300s"` |
+| `node_downscaler.evictor` | Top-level `evictor_settings`; nested Evictor field names remain unchanged |
+| `node_downscaler.enabled` | No V2 equivalent; configure `empty_nodes_enabled` instead |
+
+Other autoscaler fields retain their previous structure. During upgrade, the legacy `castai_autoscaler` resource is removed from Terraform state without disabling policies.
+
 # Examples 
 
 Usage examples are located in [terraform provider repo](https://github.com/castai/terraform-provider-castai/tree/master/examples/aks)
@@ -626,7 +680,7 @@ Usage examples are located in [terraform provider repo](https://github.com/casta
 | <a name="input_api_url"></a> [api\_url](#input\_api\_url) | URL of alternative CAST AI API to be used during development or testing | `string` | `"https://api.cast.ai"` | no |
 | <a name="input_authentication_method"></a> [authentication\_method](#input\_authentication\_method) | Authentication method for CAST AI. Use 'client\_secret' for service principal with password, or 'workload\_identity' for federated identity credential | `string` | `"workload_identity"` | no |
 | <a name="input_authentication_method_migration"></a> [authentication\_method\_migration](#input\_authentication\_method\_migration) | Controls migration to workload-identity authentication as more secure default. 'prepare' pre-provisions the workload identity resources - but they remain unused until the authentication method is switched. 'keep-secret-auth' keeps the client secret resources (Azure AD application, service principal and password) while authenticating with workload identity. 'none' disables any migration behavior. This variable is used for incremental migration and will be removed in the future. | `string` | `"none"` | no |
-| <a name="input_autoscaler_settings"></a> [autoscaler\_settings](#input\_autoscaler\_settings) | Optional Autoscaler policy definitions to override current autoscaler settings | `any` | `null` | no |
+| <a name="input_autoscaler_settings"></a> [autoscaler\_settings](#input\_autoscaler\_settings) | Optional policy definitions mapped to the castai\_autoscaler\_policies resource | `any` | `null` | no |
 | <a name="input_azuread_owners"></a> [azuread\_owners](#input\_azuread\_owners) | A set of object IDs of principals that will be granted ownership of the Azure AD service principal and application. Defaults to current user. | `list(string)` | `null` | no |
 | <a name="input_ca_certs"></a> [ca\_certs](#input\_ca\_certs) | List of base64-encoded CA certificates to add to the node's trust store. | `list(string)` | `[]` | no |
 | <a name="input_castai_api_token"></a> [castai\_api\_token](#input\_castai\_api\_token) | Optional CAST AI API token created in console.cast.ai API Access keys section. Used only when `wait_for_cluster_ready` is set to true | `string` | `""` | no |
@@ -639,6 +693,7 @@ Usage examples are located in [terraform provider repo](https://github.com/casta
 | <a name="input_delete_nodes_on_disconnect"></a> [delete\_nodes\_on\_disconnect](#input\_delete\_nodes\_on\_disconnect) | Optionally delete Cast AI created nodes when the cluster is destroyed | `bool` | `false` | no |
 | <a name="input_evictor_ext_values"></a> [evictor\_ext\_values](#input\_evictor\_ext\_values) | List of YAML formatted string with evictor-ext values | `list(string)` | `[]` | no |
 | <a name="input_evictor_ext_version"></a> [evictor\_ext\_version](#input\_evictor\_ext\_version) | Version of castai-evictor-ext chart. Default latest | `string` | `null` | no |
+| <a name="input_evictor_settings"></a> [evictor\_settings](#input\_evictor\_settings) | Optional Evictor configuration mapped independently to the castai\_evictor resource | `any` | `null` | no |
 | <a name="input_evictor_values"></a> [evictor\_values](#input\_evictor\_values) | List of YAML formatted string values for evictor helm chart | `list(string)` | `[]` | no |
 | <a name="input_evictor_version"></a> [evictor\_version](#input\_evictor\_version) | Version of castai-evictor chart. If not provided, latest version will be used. | `string` | `null` | no |
 | <a name="input_grpc_url"></a> [grpc\_url](#input\_grpc\_url) | gRPC endpoint used by pod-pinner | `string` | `"grpc.cast.ai:443"` | no |

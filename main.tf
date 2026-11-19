@@ -818,7 +818,7 @@ resource "helm_release" "castai_evictor_self_managed" {
         value = "false"
       },
     ],
-    try(var.autoscaler_settings.node_downscaler.evictor.enabled, null) == false ? [
+    try(var.evictor_settings.enabled, null) == false ? [
       {
         name  = "replicaCount"
         value = "0"
@@ -1258,14 +1258,14 @@ resource "castai_autoscaler_policies" "castai_autoscaler_policies" {
 
   cluster_id  = castai_aks_cluster.castai_cluster.id
   enabled     = try(var.autoscaler_settings.enabled, null)
-  scoped_mode = try(var.autoscaler_settings.is_scoped_mode, null)
+  scoped_mode = try(var.autoscaler_settings.scoped_mode, null)
 
   dynamic "unschedulable_pods" {
     for_each = try([var.autoscaler_settings.unschedulable_pods], [])
 
     content {
       enabled                           = try(unschedulable_pods.value.enabled, null)
-      partial_template_matching_enabled = try(var.autoscaler_settings.node_templates_partial_matching_enabled, null)
+      partial_template_matching_enabled = try(unschedulable_pods.value.partial_template_matching_enabled, null)
 
       dynamic "pod_pinner" {
         for_each = try([unschedulable_pods.value.pod_pinner], [])
@@ -1298,8 +1298,8 @@ resource "castai_autoscaler_policies" "castai_autoscaler_policies" {
     for_each = try([var.autoscaler_settings.node_downscaler], [])
 
     content {
-      empty_nodes_enabled = try(node_downscaler.value.empty_nodes.enabled, null)
-      empty_nodes_delay   = try(format("%ds", node_downscaler.value.empty_nodes.delay_seconds), null)
+      empty_nodes_enabled = try(node_downscaler.value.empty_nodes_enabled, null)
+      empty_nodes_delay   = try(node_downscaler.value.empty_nodes_delay, null)
     }
   }
 
@@ -1314,17 +1314,17 @@ resource "castai_autoscaler_policies" "castai_autoscaler_policies" {
 }
 
 resource "castai_evictor" "castai_evictor" {
-  count = var.autoscaler_settings != null ? 1 : 0
+  count = var.evictor_settings != null ? 1 : 0
 
   cluster_id                             = castai_aks_cluster.castai_cluster.id
-  enabled                                = try(var.autoscaler_settings.node_downscaler.evictor.enabled, null)
-  dry_run                                = try(var.autoscaler_settings.node_downscaler.evictor.dry_run, null)
-  aggressive_mode                        = try(var.autoscaler_settings.node_downscaler.evictor.aggressive_mode, null)
-  scoped_mode                            = try(var.autoscaler_settings.node_downscaler.evictor.scoped_mode, null)
-  cycle_interval                         = try(var.autoscaler_settings.node_downscaler.evictor.cycle_interval, null)
-  node_grace_period_minutes              = try(var.autoscaler_settings.node_downscaler.evictor.node_grace_period_minutes, null)
-  pod_eviction_failure_back_off_interval = try(var.autoscaler_settings.node_downscaler.evictor.pod_eviction_failure_back_off_interval, null)
-  ignore_pod_disruption_budgets          = try(var.autoscaler_settings.node_downscaler.evictor.ignore_pod_disruption_budgets, null)
+  enabled                                = try(var.evictor_settings.enabled, null)
+  dry_run                                = try(var.evictor_settings.dry_run, null)
+  aggressive_mode                        = try(var.evictor_settings.aggressive_mode, null)
+  scoped_mode                            = try(var.evictor_settings.scoped_mode, null)
+  cycle_interval                         = try(var.evictor_settings.cycle_interval, null)
+  node_grace_period_minutes              = try(var.evictor_settings.node_grace_period_minutes, null)
+  pod_eviction_failure_back_off_interval = try(var.evictor_settings.pod_eviction_failure_back_off_interval, null)
+  ignore_pod_disruption_budgets          = try(var.evictor_settings.ignore_pod_disruption_budgets, null)
 
   depends_on = [
     helm_release.castai_agent,

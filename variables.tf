@@ -46,7 +46,13 @@ variable "subscription_id" {
 
 variable "autoscaler_settings" {
   type        = any
-  description = "Optional Autoscaler policy definitions to override current autoscaler settings"
+  description = "Optional policy definitions mapped to the castai_autoscaler_policies resource"
+  default     = null
+}
+
+variable "evictor_settings" {
+  type        = any
+  description = "Optional Evictor configuration mapped independently to the castai_evictor resource"
   default     = null
 }
 
