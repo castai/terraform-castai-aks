@@ -531,59 +531,107 @@ If the value of the variable was previously set to any value, there is no change
 
 If users are using 11.x.x or older, it is recommended that migration to 12.x.x is completed as a separate step from 13.x.x, as both involve delicate migrations. In addition, the standalone releases mentioned in 12.x.x are kept for this release and still available.
 
-## Migrating to V2 autoscaler resources
+Migrating from 14.x.x to 15.x.x
+-------------------------------
 
-The module manages autoscaler policies through `castai_autoscaler_policies` and Evictor through the independent `castai_evictor` resource. Their inputs mirror the provider resources and are configured separately:
+Version 15.0.0 replaces the deprecated `castai_autoscaler` resource with `castai_autoscaler_policies` and `castai_evictor`. Autoscaler policies and Evictor settings now follow the provider V2 resources and are configured separately. The legacy resource is removed from Terraform state without disabling policies.
 
+**Breaking changes:**
+* `autoscaler_settings.is_scoped_mode` is renamed to `scoped_mode`
+* `autoscaler_settings.node_templates_partial_matching_enabled` is moved to `autoscaler_settings.unschedulable_pods.partial_template_matching_enabled`
+* `autoscaler_settings.node_downscaler.empty_nodes` is flattened to `empty_nodes_enabled` and `empty_nodes_delay`
+* `autoscaler_settings.node_downscaler.evictor` is moved to the top-level `evictor_settings` variable
+* `autoscaler_settings.node_downscaler.enabled` is removed; use `empty_nodes_enabled` instead
+
+**Migration guide:**
+
+Old configuration:
 ```hcl
-autoscaler_settings = {
-  enabled     = true
-  scoped_mode = false
+module "castai-aks-cluster" {
+  source = "castai/aks/castai"
 
-  unschedulable_pods = {
-    enabled                            = true
-    partial_template_matching_enabled = false
-    pod_pinner = {
+  autoscaler_settings = {
+    enabled                                 = true
+    is_scoped_mode                          = true
+    node_templates_partial_matching_enabled = false
+
+    unschedulable_pods = {
       enabled = true
     }
-  }
 
-  cluster_limits = {
-    enabled = true
-    cpu = {
-      min_cores = 1
-      max_cores = 100
+    cluster_limits = {
+      enabled = true
+      cpu = {
+        min_cores = 1
+        max_cores = 100
+      }
+    }
+
+    node_downscaler = {
+      enabled = true
+
+      empty_nodes = {
+        enabled       = true
+        delay_seconds = 300
+      }
+
+      evictor = {
+        enabled                   = true
+        dry_run                   = false
+        aggressive_mode           = false
+        scoped_mode               = false
+        cycle_interval            = "1m"
+        node_grace_period_minutes = 5
+      }
     }
   }
-
-  node_downscaler = {
-    empty_nodes_enabled = true
-    empty_nodes_delay   = "300s"
-  }
-}
-
-evictor_settings = {
-  enabled                   = true
-  dry_run                   = false
-  aggressive_mode           = false
-  scoped_mode               = false
-  cycle_interval            = "1m"
-  node_grace_period_minutes = 5
 }
 ```
 
-Use the following mapping when upgrading from the legacy module input:
+New configuration:
+```hcl
+module "castai-aks-cluster" {
+  source = "castai/aks/castai"
 
-| Previous `autoscaler_settings` field | V2 configuration |
-| --- | --- |
-| `is_scoped_mode` | `autoscaler_settings.scoped_mode` |
-| `node_templates_partial_matching_enabled` | `autoscaler_settings.unschedulable_pods.partial_template_matching_enabled` |
-| `node_downscaler.empty_nodes.enabled` | `autoscaler_settings.node_downscaler.empty_nodes_enabled` |
-| `node_downscaler.empty_nodes.delay_seconds` | `autoscaler_settings.node_downscaler.empty_nodes_delay` as a duration string, for example `"300s"` |
-| `node_downscaler.evictor` | Top-level `evictor_settings`; nested Evictor field names remain unchanged |
-| `node_downscaler.enabled` | No V2 equivalent; configure `empty_nodes_enabled` instead |
+  autoscaler_settings = {
+    enabled     = true
+    scoped_mode = true
 
-Other autoscaler fields retain their previous structure. During upgrade, the legacy `castai_autoscaler` resource is removed from Terraform state without disabling policies.
+    unschedulable_pods = {
+      enabled                            = true
+      partial_template_matching_enabled = false
+    }
+
+    cluster_limits = {
+      enabled = true
+      cpu = {
+        min_cores = 1
+        max_cores = 100
+      }
+    }
+
+    node_downscaler = {
+      empty_nodes_enabled = true
+      empty_nodes_delay   = "300s"
+    }
+  }
+
+  evictor_settings = {
+    enabled                   = true
+    dry_run                   = false
+    aggressive_mode           = false
+    scoped_mode               = false
+    cycle_interval            = "1m"
+    node_grace_period_minutes = 5
+  }
+}
+```
+
+**Key changes:**
+* Autoscaler policies are managed by `castai_autoscaler_policies`
+* Evictor is managed independently by `castai_evictor` and can be configured without setting `autoscaler_settings`
+* `empty_nodes_delay` is a duration string, for example `"300s"`, instead of `empty_nodes.delay_seconds`
+* Other autoscaler policy fields retain their previous structure
 
 # Examples 
 
