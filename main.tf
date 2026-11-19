@@ -223,7 +223,10 @@ resource "castai_node_template" "this" {
       }
     }
   }
-  depends_on = [castai_autoscaler.castai_autoscaler_policies]
+  depends_on = [
+    castai_autoscaler_policies.castai_autoscaler_policies,
+    castai_evictor.castai_evictor,
+  ]
 }
 
 resource "castai_workload_scaling_policy" "this" {
@@ -1242,84 +1245,86 @@ resource "helm_release" "castai_pod_mutator_self_managed" {
   depends_on = [helm_release.castai_agent, helm_release.castai_cluster_controller]
 }
 
-resource "castai_autoscaler" "castai_autoscaler_policies" {
-  cluster_id = castai_aks_cluster.castai_cluster.id
+removed {
+  from = castai_autoscaler.castai_autoscaler_policies
 
-  dynamic "autoscaler_settings" {
-    for_each = var.autoscaler_settings != null ? [var.autoscaler_settings] : []
+  lifecycle {
+    destroy = false
+  }
+}
+
+resource "castai_autoscaler_policies" "castai_autoscaler_policies" {
+  count = var.autoscaler_settings != null ? 1 : 0
+
+  cluster_id  = castai_aks_cluster.castai_cluster.id
+  enabled     = try(var.autoscaler_settings.enabled, null)
+  scoped_mode = try(var.autoscaler_settings.is_scoped_mode, null)
+
+  dynamic "unschedulable_pods" {
+    for_each = try([var.autoscaler_settings.unschedulable_pods], [])
 
     content {
-      enabled                                 = try(autoscaler_settings.value.enabled, null)
-      is_scoped_mode                          = try(autoscaler_settings.value.is_scoped_mode, null)
-      node_templates_partial_matching_enabled = try(autoscaler_settings.value.node_templates_partial_matching_enabled, null)
+      enabled                           = try(unschedulable_pods.value.enabled, null)
+      partial_template_matching_enabled = try(var.autoscaler_settings.node_templates_partial_matching_enabled, null)
 
-      dynamic "unschedulable_pods" {
-        for_each = try([autoscaler_settings.value.unschedulable_pods], [])
-
-        content {
-          enabled = try(unschedulable_pods.value.enabled, null)
-
-          dynamic "pod_pinner" {
-            for_each = try([unschedulable_pods.value.pod_pinner], [])
-
-            content {
-              enabled = try(pod_pinner.value.enabled, null)
-            }
-          }
-        }
-      }
-
-      dynamic "cluster_limits" {
-        for_each = try([autoscaler_settings.value.cluster_limits], [])
+      dynamic "pod_pinner" {
+        for_each = try([unschedulable_pods.value.pod_pinner], [])
 
         content {
-          enabled = try(cluster_limits.value.enabled, null)
-
-
-          dynamic "cpu" {
-            for_each = try([cluster_limits.value.cpu], [])
-
-            content {
-              min_cores = try(cpu.value.min_cores, null)
-              max_cores = try(cpu.value.max_cores, null)
-            }
-          }
-        }
-      }
-
-      dynamic "node_downscaler" {
-        for_each = try([autoscaler_settings.value.node_downscaler], [])
-
-        content {
-          enabled = try(node_downscaler.value.enabled, null)
-
-          dynamic "empty_nodes" {
-            for_each = try([node_downscaler.value.empty_nodes], [])
-
-            content {
-              enabled       = try(empty_nodes.value.enabled, null)
-              delay_seconds = try(empty_nodes.value.delay_seconds, null)
-            }
-          }
-
-          dynamic "evictor" {
-            for_each = try([node_downscaler.value.evictor], [])
-
-            content {
-              enabled                                = try(evictor.value.enabled, null)
-              dry_run                                = try(evictor.value.dry_run, null)
-              aggressive_mode                        = try(evictor.value.aggressive_mode, null)
-              scoped_mode                            = try(evictor.value.scoped_mode, null)
-              cycle_interval                         = try(evictor.value.cycle_interval, null)
-              node_grace_period_minutes              = try(evictor.value.node_grace_period_minutes, null)
-              pod_eviction_failure_back_off_interval = try(evictor.value.pod_eviction_failure_back_off_interval, null)
-              ignore_pod_disruption_budgets          = try(evictor.value.ignore_pod_disruption_budgets, null)
-            }
-          }
+          enabled = try(pod_pinner.value.enabled, null)
         }
       }
     }
   }
+
+  dynamic "cluster_limits" {
+    for_each = try([var.autoscaler_settings.cluster_limits], [])
+
+    content {
+      enabled = try(cluster_limits.value.enabled, null)
+
+      dynamic "cpu" {
+        for_each = try([cluster_limits.value.cpu], [])
+
+        content {
+          min_cores = try(cpu.value.min_cores, null)
+          max_cores = try(cpu.value.max_cores, null)
+        }
+      }
+    }
+  }
+
+  dynamic "node_downscaler" {
+    for_each = try([var.autoscaler_settings.node_downscaler], [])
+
+    content {
+      empty_nodes_enabled = try(node_downscaler.value.empty_nodes.enabled, null)
+      empty_nodes_delay   = try(format("%ds", node_downscaler.value.empty_nodes.delay_seconds), null)
+    }
+  }
+
+  depends_on = [
+    helm_release.castai_agent,
+    helm_release.castai_evictor,
+    helm_release.castai_evictor_self_managed,
+    helm_release.castai_evictor_ext,
+    helm_release.castai_pod_pinner,
+    helm_release.castai_pod_pinner_self_managed
+  ]
+}
+
+resource "castai_evictor" "castai_evictor" {
+  count = var.autoscaler_settings != null ? 1 : 0
+
+  cluster_id                             = castai_aks_cluster.castai_cluster.id
+  enabled                                = try(var.autoscaler_settings.node_downscaler.evictor.enabled, null)
+  dry_run                                = try(var.autoscaler_settings.node_downscaler.evictor.dry_run, null)
+  aggressive_mode                        = try(var.autoscaler_settings.node_downscaler.evictor.aggressive_mode, null)
+  scoped_mode                            = try(var.autoscaler_settings.node_downscaler.evictor.scoped_mode, null)
+  cycle_interval                         = try(var.autoscaler_settings.node_downscaler.evictor.cycle_interval, null)
+  node_grace_period_minutes              = try(var.autoscaler_settings.node_downscaler.evictor.node_grace_period_minutes, null)
+  pod_eviction_failure_back_off_interval = try(var.autoscaler_settings.node_downscaler.evictor.pod_eviction_failure_back_off_interval, null)
+  ignore_pod_disruption_budgets          = try(var.autoscaler_settings.node_downscaler.evictor.ignore_pod_disruption_budgets, null)
 
   depends_on = [
     helm_release.castai_agent,
