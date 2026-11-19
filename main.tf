@@ -1317,15 +1317,6 @@ resource "castai_evictor" "castai_evictor" {
   node_grace_period_minutes              = try(var.evictor_settings.node_grace_period_minutes, null)
   pod_eviction_failure_back_off_interval = try(var.evictor_settings.pod_eviction_failure_back_off_interval, null)
   ignore_pod_disruption_budgets          = try(var.evictor_settings.ignore_pod_disruption_budgets, null)
-
-  depends_on = [
-    helm_release.castai_agent,
-    helm_release.castai_evictor,
-    helm_release.castai_evictor_self_managed,
-    helm_release.castai_evictor_ext,
-    helm_release.castai_pod_pinner,
-    helm_release.castai_pod_pinner_self_managed
-  ]
 }
 
 resource "helm_release" "castai_ai_optimizer_proxy" {
