@@ -534,7 +534,7 @@ If users are using 11.x.x or older, it is recommended that migration to 12.x.x i
 Migrating from 14.x.x to 15.x.x
 -------------------------------
 
-Version 15.0.0 replaces the deprecated `castai_autoscaler` resource with `castai_autoscaler_policies` and `castai_evictor`. Autoscaler policies and Evictor settings now follow the provider V2 resources and are configured separately. The legacy resource is destroyed during migration, preserving its existing behavior of disabling policies.
+Version 15.0.0 replaces the deprecated `castai_autoscaler` resource with `castai_autoscaler_policies` and `castai_evictor`. Autoscaler policies and Evictor settings now follow the provider V2 resources and are configured separately.
 
 **Breaking changes:**
 * `autoscaler_settings.is_scoped_mode` is renamed to `scoped_mode`
