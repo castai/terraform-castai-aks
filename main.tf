@@ -1245,14 +1245,6 @@ resource "helm_release" "castai_pod_mutator_self_managed" {
   depends_on = [helm_release.castai_agent, helm_release.castai_cluster_controller]
 }
 
-removed {
-  from = castai_autoscaler.castai_autoscaler_policies
-
-  lifecycle {
-    destroy = false
-  }
-}
-
 resource "castai_autoscaler_policies" "castai_autoscaler_policies" {
   count = var.autoscaler_settings != null ? 1 : 0
 

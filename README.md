@@ -534,7 +534,7 @@ If users are using 11.x.x or older, it is recommended that migration to 12.x.x i
 Migrating from 14.x.x to 15.x.x
 -------------------------------
 
-Version 15.0.0 replaces the deprecated `castai_autoscaler` resource with `castai_autoscaler_policies` and `castai_evictor`. Autoscaler policies and Evictor settings now follow the provider V2 resources and are configured separately. The legacy resource is removed from Terraform state without disabling policies.
+Version 15.0.0 replaces the deprecated `castai_autoscaler` resource with `castai_autoscaler_policies` and `castai_evictor`. Autoscaler policies and Evictor settings now follow the provider V2 resources and are configured separately. The legacy resource is destroyed during migration, preserving its existing behavior of disabling policies.
 
 **Breaking changes:**
 * `autoscaler_settings.is_scoped_mode` is renamed to `scoped_mode`
@@ -642,7 +642,7 @@ Usage examples are located in [terraform provider repo](https://github.com/casta
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.7 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13 |
 | <a name="requirement_azuread"></a> [azuread](#requirement\_azuread) | >= 3.0 |
 | <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | >= 5.0.1 |
 | <a name="requirement_castai"></a> [castai](#requirement\_castai) | >= 9.17.0 |
