@@ -655,7 +655,7 @@ Usage examples are located in [terraform provider repo](https://github.com/casta
 |------|---------|
 | <a name="provider_azuread"></a> [azuread](#provider\_azuread) | >= 3.0 |
 | <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | >= 5.0.1 |
-| <a name="provider_castai"></a> [castai](#provider\_castai) | >= 9.17.0 |
+| <a name="provider_castai"></a> [castai](#provider\_castai) | >= 9.22.0 |
 | <a name="provider_helm"></a> [helm](#provider\_helm) | >= 3.1.0 |
 | <a name="provider_null"></a> [null](#provider\_null) | ~> 3 |
 
