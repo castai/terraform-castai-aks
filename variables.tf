@@ -36,7 +36,7 @@ variable "aks_cluster_name" {
 
 variable "aks_cluster_region" {
   type        = string
-  description = "Azure location of the AKS cluster (e.g. eastus or East US). Used for the CAST AI cluster registration and as the location of the user-assigned managed identity created for workload identity authentication, so it must match the cluster's actual location. The module does not query the cluster to determine it, which allows using this module in the same Terraform configuration that creates the cluster."
+  description = "Azure location of the AKS cluster (e.g. eastus, westeurope)."
 }
 
 variable "subscription_id" {
