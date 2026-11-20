@@ -129,7 +129,7 @@ locals {
         value = "false"
       },
     ],
-    try(var.autoscaler_settings.node_downscaler.evictor.enabled, null) == false ? [
+    try(var.evictor_settings.enabled, null) == false ? [
       {
         name  = "replicaCount"
         value = "0"
