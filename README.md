@@ -531,13 +531,6 @@ If the value of the variable was previously set to any value, there is no change
 
 If users are using 11.x.x or older, it is recommended that migration to 12.x.x is completed as a separate step from 13.x.x, as both involve delicate migrations. In addition, the standalone releases mentioned in 12.x.x are kept for this release and still available.
 
-Managed identity location taken from `aks_cluster_region` (14.1.0)
-------------------------------------------------------------------
-
-Previously, when using workload identity authentication (the default), the module read the AKS cluster through the `azurerm_kubernetes_cluster` data source during `terraform plan` to determine the location of the CAST AI user-assigned managed identity. This made planning impossible when the module was used in the same Terraform configuration that also creates the AKS cluster, since the cluster does not exist yet at plan time. The location is now taken from the `aks_cluster_region` variable instead, and the module no longer queries the cluster at plan time at all, so it can be used from the very first apply of a configuration that also creates the cluster.
-
-No change is expected on upgrade when `aks_cluster_region` matches the cluster's actual location (which it must anyway for CAST AI to operate): `azurerm` treats the canonical spelling (`eastus`) and the display spelling (`East US`) of a location as equal for `azurerm_user_assigned_identity`. If the variable does not match the cluster's location, the managed identity is replaced - together with its federated identity credential and role assignments - so fix the variable before upgrading. Note that the value is now also validated as an Azure location at plan time.
-
 # Examples 
 
 Usage examples are located in [terraform provider repo](https://github.com/castai/terraform-provider-castai/tree/master/examples/aks)
