@@ -186,11 +186,6 @@ run "verify_none_with_client_secret" {
   }
 
   assert {
-    condition     = length([for r in data.azurerm_kubernetes_cluster.castai : r]) == 0
-    error_message = "AKS cluster data source should NOT be read with client_secret + none"
-  }
-
-  assert {
     condition     = length([for r in data.castai_impersonation_service_account.this : r]) == 0
     error_message = "CAST AI impersonation service account should NOT be read with client_secret + none"
   }
@@ -222,8 +217,8 @@ run "verify_prepare_provisions_for_client_secret" {
   }
 
   assert {
-    condition     = length([for r in data.azurerm_kubernetes_cluster.castai : r]) == 1
-    error_message = "AKS cluster data source should be read by prepare"
+    condition     = azurerm_user_assigned_identity.this[0].location == var.aks_cluster_region
+    error_message = "Pre-provisioned managed identity should use aks_cluster_region as its location"
   }
 
   assert {
@@ -315,11 +310,6 @@ run "verify_keep_secret_auth_noop_for_client_secret" {
   assert {
     condition     = length([for r in azurerm_federated_identity_credential.this : r]) == 0
     error_message = "Federated identity credential should NOT be created with client_secret + keep-secret-auth"
-  }
-
-  assert {
-    condition     = length([for r in data.azurerm_kubernetes_cluster.castai : r]) == 0
-    error_message = "AKS cluster data source should NOT be read with client_secret + keep-secret-auth"
   }
 }
 

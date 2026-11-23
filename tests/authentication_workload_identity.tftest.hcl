@@ -95,8 +95,8 @@ run "verify_workload_identity_resources_created" {
   }
 
   assert {
-    condition     = length([for r in data.azurerm_kubernetes_cluster.castai : r]) == 1
-    error_message = "AKS cluster data source should be queried for workload_identity auth"
+    condition     = azurerm_user_assigned_identity.this[0].location == var.aks_cluster_region
+    error_message = "Managed identity location should be taken from aks_cluster_region without querying the cluster"
   }
 
   assert {

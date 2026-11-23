@@ -36,7 +36,7 @@ variable "aks_cluster_name" {
 
 variable "aks_cluster_region" {
   type        = string
-  description = "Region of the AKS cluster"
+  description = "Azure location of the AKS cluster (e.g. eastus, westeurope)."
 }
 
 variable "subscription_id" {

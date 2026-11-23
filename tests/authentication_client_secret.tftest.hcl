@@ -122,11 +122,6 @@ run "verify_workload_identity_resources_not_created" {
   }
 
   assert {
-    condition     = length([for r in data.azurerm_kubernetes_cluster.castai : r]) == 0
-    error_message = "AKS cluster data source should NOT be queried for client_secret auth"
-  }
-
-  assert {
     condition     = length([for r in data.castai_impersonation_service_account.this : r]) == 0
     error_message = "CAST AI impersonation service account should NOT be queried for client_secret auth"
   }

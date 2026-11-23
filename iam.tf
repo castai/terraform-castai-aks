@@ -6,12 +6,6 @@ locals {
   create_active_directory_resources  = var.authentication_method == "client_secret" || var.authentication_method_migration == "keep-secret-auth"
 }
 
-data "azurerm_kubernetes_cluster" "castai" {
-  count               = local.create_workload_identity_resources ? 1 : 0
-  name                = var.aks_cluster_name
-  resource_group_name = var.resource_group
-}
-
 // Azure RM
 resource "azurerm_role_definition" "castai" {
   name        = local.role_name
@@ -138,7 +132,7 @@ resource "azurerm_user_assigned_identity" "this" {
   count               = local.create_workload_identity_resources ? 1 : 0
   name                = "${var.aks_cluster_name}-castai-identity"
   resource_group_name = var.resource_group
-  location            = data.azurerm_kubernetes_cluster.castai[0].location
+  location            = var.aks_cluster_region
 }
 
 resource "azurerm_federated_identity_credential" "this" {
