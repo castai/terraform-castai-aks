@@ -531,6 +531,108 @@ If the value of the variable was previously set to any value, there is no change
 
 If users are using 11.x.x or older, it is recommended that migration to 12.x.x is completed as a separate step from 13.x.x, as both involve delicate migrations. In addition, the standalone releases mentioned in 12.x.x are kept for this release and still available.
 
+Migrating from 15.x.x to 16.x.x
+-------------------------------
+
+Version 16.0.0 replaces the deprecated `castai_autoscaler` resource with `castai_autoscaler_policies` and `castai_evictor`. Autoscaler policies and Evictor settings now follow the provider V2 resources and are configured separately.
+
+**Breaking changes:**
+* `autoscaler_settings.is_scoped_mode` is renamed to `scoped_mode`
+* `autoscaler_settings.node_templates_partial_matching_enabled` is moved to `autoscaler_settings.unschedulable_pods.partial_template_matching_enabled`
+* `autoscaler_settings.node_downscaler.empty_nodes` is flattened to `empty_nodes_enabled` and `empty_nodes_delay`
+* `autoscaler_settings.node_downscaler.evictor` is moved to the top-level `evictor_settings` variable
+* `autoscaler_settings.node_downscaler.enabled` is removed; use `empty_nodes_enabled` instead
+
+**Migration guide:**
+
+Old configuration:
+```hcl
+module "castai-aks-cluster" {
+  source = "castai/aks/castai"
+
+  autoscaler_settings = {
+    enabled                                 = true
+    is_scoped_mode                          = true
+    node_templates_partial_matching_enabled = false
+
+    unschedulable_pods = {
+      enabled = true
+    }
+
+    cluster_limits = {
+      enabled = true
+      cpu = {
+        min_cores = 1
+        max_cores = 100
+      }
+    }
+
+    node_downscaler = {
+      enabled = true
+
+      empty_nodes = {
+        enabled       = true
+        delay_seconds = 300
+      }
+
+      evictor = {
+        enabled                   = true
+        dry_run                   = false
+        aggressive_mode           = false
+        scoped_mode               = false
+        cycle_interval            = "1m"
+        node_grace_period_minutes = 5
+      }
+    }
+  }
+}
+```
+
+New configuration:
+```hcl
+module "castai-aks-cluster" {
+  source = "castai/aks/castai"
+
+  autoscaler_settings = {
+    enabled     = true
+    scoped_mode = true
+
+    unschedulable_pods = {
+      enabled                            = true
+      partial_template_matching_enabled = false
+    }
+
+    cluster_limits = {
+      enabled = true
+      cpu = {
+        min_cores = 1
+        max_cores = 100
+      }
+    }
+
+    node_downscaler = {
+      empty_nodes_enabled = true
+      empty_nodes_delay   = "300s"
+    }
+  }
+
+  evictor_settings = {
+    enabled                   = true
+    dry_run                   = false
+    aggressive_mode           = false
+    scoped_mode               = false
+    cycle_interval            = "1m"
+    node_grace_period_minutes = 5
+  }
+}
+```
+
+**Key changes:**
+* Autoscaler policies are managed by `castai_autoscaler_policies`
+* Evictor is managed independently by `castai_evictor` and can be configured without setting `autoscaler_settings`
+* `empty_nodes_delay` is a duration string, for example `"300s"`, instead of `empty_nodes.delay_seconds`
+* Other autoscaler policy fields retain their previous structure
+
 # Examples 
 
 Usage examples are located in [terraform provider repo](https://github.com/castai/terraform-provider-castai/tree/master/examples/aks)
@@ -543,7 +645,7 @@ Usage examples are located in [terraform provider repo](https://github.com/casta
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13 |
 | <a name="requirement_azuread"></a> [azuread](#requirement\_azuread) | >= 3.0 |
 | <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | >= 5.0.1 |
-| <a name="requirement_castai"></a> [castai](#requirement\_castai) | >= 9.17.0 |
+| <a name="requirement_castai"></a> [castai](#requirement\_castai) | >= 9.22.0 |
 | <a name="requirement_helm"></a> [helm](#requirement\_helm) | >= 3.1.0 |
 | <a name="requirement_null"></a> [null](#requirement\_null) | ~> 3 |
 
@@ -553,7 +655,7 @@ Usage examples are located in [terraform provider repo](https://github.com/casta
 | ---- | ------- |
 | <a name="provider_azuread"></a> [azuread](#provider\_azuread) | >= 3.0 |
 | <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | >= 5.0.1 |
-| <a name="provider_castai"></a> [castai](#provider\_castai) | >= 9.17.0 |
+| <a name="provider_castai"></a> [castai](#provider\_castai) | >= 9.22.0 |
 | <a name="provider_helm"></a> [helm](#provider\_helm) | >= 3.1.0 |
 | <a name="provider_null"></a> [null](#provider\_null) | ~> 3 |
 
@@ -577,7 +679,8 @@ Usage examples are located in [terraform provider repo](https://github.com/casta
 | [azurerm_role_definition.castai](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_definition) | resource |
 | [azurerm_user_assigned_identity.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/user_assigned_identity) | resource |
 | [castai_aks_cluster.castai_cluster](https://registry.terraform.io/providers/castai/castai/latest/docs/resources/aks_cluster) | resource |
-| [castai_autoscaler.castai_autoscaler_policies](https://registry.terraform.io/providers/castai/castai/latest/docs/resources/autoscaler) | resource |
+| [castai_autoscaler_policies.castai_autoscaler_policies](https://registry.terraform.io/providers/castai/castai/latest/docs/resources/autoscaler_policies) | resource |
+| [castai_evictor.castai_evictor](https://registry.terraform.io/providers/castai/castai/latest/docs/resources/evictor) | resource |
 | [castai_node_configuration.this](https://registry.terraform.io/providers/castai/castai/latest/docs/resources/node_configuration) | resource |
 | [castai_node_configuration_default.this](https://registry.terraform.io/providers/castai/castai/latest/docs/resources/node_configuration_default) | resource |
 | [castai_node_template.this](https://registry.terraform.io/providers/castai/castai/latest/docs/resources/node_template) | resource |
@@ -624,7 +727,7 @@ Usage examples are located in [terraform provider repo](https://github.com/casta
 | <a name="input_api_url"></a> [api\_url](#input\_api\_url) | URL of alternative CAST AI API to be used during development or testing | `string` | `"https://api.cast.ai"` | no |
 | <a name="input_authentication_method"></a> [authentication\_method](#input\_authentication\_method) | Authentication method for CAST AI. Use 'client\_secret' for service principal with password, or 'workload\_identity' for federated identity credential | `string` | `"workload_identity"` | no |
 | <a name="input_authentication_method_migration"></a> [authentication\_method\_migration](#input\_authentication\_method\_migration) | Controls migration to workload-identity authentication as more secure default. 'prepare' pre-provisions the workload identity resources - but they remain unused until the authentication method is switched. 'keep-secret-auth' keeps the client secret resources (Azure AD application, service principal and password) while authenticating with workload identity. 'none' disables any migration behavior. This variable is used for incremental migration and will be removed in the future. | `string` | `"none"` | no |
-| <a name="input_autoscaler_settings"></a> [autoscaler\_settings](#input\_autoscaler\_settings) | Optional Autoscaler policy definitions to override current autoscaler settings | `any` | `null` | no |
+| <a name="input_autoscaler_settings"></a> [autoscaler\_settings](#input\_autoscaler\_settings) | Optional policy definitions mapped to the castai\_autoscaler\_policies resource | `any` | `null` | no |
 | <a name="input_azuread_owners"></a> [azuread\_owners](#input\_azuread\_owners) | A set of object IDs of principals that will be granted ownership of the Azure AD service principal and application. Defaults to current user. | `list(string)` | `null` | no |
 | <a name="input_ca_certs"></a> [ca\_certs](#input\_ca\_certs) | List of base64-encoded CA certificates to add to the node's trust store. | `list(string)` | `[]` | no |
 | <a name="input_castai_api_token"></a> [castai\_api\_token](#input\_castai\_api\_token) | Optional CAST AI API token created in console.cast.ai API Access keys section. Used only when `wait_for_cluster_ready` is set to true | `string` | `""` | no |
@@ -637,6 +740,7 @@ Usage examples are located in [terraform provider repo](https://github.com/casta
 | <a name="input_delete_nodes_on_disconnect"></a> [delete\_nodes\_on\_disconnect](#input\_delete\_nodes\_on\_disconnect) | Optionally delete Cast AI created nodes when the cluster is destroyed | `bool` | `false` | no |
 | <a name="input_evictor_ext_values"></a> [evictor\_ext\_values](#input\_evictor\_ext\_values) | List of YAML formatted string with evictor-ext values | `list(string)` | `[]` | no |
 | <a name="input_evictor_ext_version"></a> [evictor\_ext\_version](#input\_evictor\_ext\_version) | Version of castai-evictor-ext chart. Default latest | `string` | `null` | no |
+| <a name="input_evictor_settings"></a> [evictor\_settings](#input\_evictor\_settings) | Optional Evictor configuration mapped independently to the castai\_evictor resource | `any` | `null` | no |
 | <a name="input_evictor_values"></a> [evictor\_values](#input\_evictor\_values) | List of YAML formatted string values for evictor helm chart | `list(string)` | `[]` | no |
 | <a name="input_evictor_version"></a> [evictor\_version](#input\_evictor\_version) | Version of castai-evictor chart. If not provided, latest version will be used. | `string` | `null` | no |
 | <a name="input_grpc_url"></a> [grpc\_url](#input\_grpc\_url) | gRPC endpoint used by pod-pinner | `string` | `"grpc.cast.ai:443"` | no |
