@@ -1349,13 +1349,6 @@ resource "castai_evictor" "castai_evictor" {
     }
   }
 
-  dynamic "timeouts" {
-    for_each = local.evictor_timeouts
-    content {
-      create = try(timeouts.value.create, null)
-      update = try(timeouts.value.update, null)
-    }
-  }
 }
 
 resource "helm_release" "castai_ai_optimizer_proxy" {

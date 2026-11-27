@@ -228,10 +228,6 @@ run "separate_autoscaler_policies_and_evictor_settings" {
         base_mem_cost = "0.004"
         spot_discount = "0.5"
       }]
-      timeouts = {
-        create = "4m"
-        update = "4m"
-      }
     }
   }
 
@@ -273,11 +269,6 @@ run "separate_autoscaler_policies_and_evictor_settings" {
   assert {
     condition     = castai_evictor.castai_evictor[0].pricing_model[0].base_cpu_cost == "0.03" && castai_evictor.castai_evictor[0].pricing_model[0].spot_discount == "0.5"
     error_message = "pricing_model should be mapped"
-  }
-
-  assert {
-    condition     = castai_evictor.castai_evictor[0].timeouts.create == "4m"
-    error_message = "timeouts should be mapped"
   }
 
   assert {

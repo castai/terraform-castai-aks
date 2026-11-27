@@ -54,9 +54,8 @@ locals {
   # The chart kill-switch follows the V2 policy so they cannot disagree.
   evictor_enabled = try(var.evictor_settings.enabled == true, false)
 
-  # pricing_model mirrors the resource block list; timeouts is a block map.
+  # pricing_model mirrors the resource block list.
   evictor_pricing_model = try(var.evictor_settings.pricing_model, null) == null ? [] : var.evictor_settings.pricing_model
-  evictor_timeouts      = try(var.evictor_settings.timeouts, null) == null ? [] : [var.evictor_settings.timeouts]
 
   # Inputs to the Cast AI Umbrella Helm release
   umbrella_set_castai_agent = [for s in concat(

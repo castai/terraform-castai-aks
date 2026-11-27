@@ -52,7 +52,7 @@ variable "autoscaler_settings" {
 
 variable "evictor_settings" {
   type        = any
-  description = "Optional Evictor configuration. Supports every optional field of the castai_evictor resource. Evictions stay disabled when this is null or enabled is unset."
+  description = "Optional Evictor configuration. Supports the optional policy fields of the castai_evictor resource. Evictions stay disabled when this is null or enabled is unset."
   default     = null
 }
 

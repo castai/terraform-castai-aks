@@ -632,7 +632,7 @@ module "castai-aks-cluster" {
 * Evictor is managed independently by `castai_evictor` and can be configured without setting `autoscaler_settings`
 * `empty_nodes_delay` is a duration string, for example `"300s"`, instead of `empty_nodes.delay_seconds`
 * Other autoscaler policy fields retain their previous structure
-* All optional fields of the [`castai_evictor`](https://registry.terraform.io/providers/castai/castai/latest/docs/resources/evictor) resource are supported in `evictor_settings`, including `pricing_model` (a one-element list) and `timeouts` (a map with `create` and `update`)
+* All optional policy fields of the [`castai_evictor`](https://registry.terraform.io/providers/castai/castai/latest/docs/resources/evictor) resource are supported in `evictor_settings`, including `pricing_model` (a one-element list)
 * `evictorEnabled` defaults to `false` when `evictor_settings` is null or `enabled` is unset. Set `evictor_settings.enabled = true` to allow evictions
 
 # Examples 
@@ -742,7 +742,7 @@ Usage examples are located in [terraform provider repo](https://github.com/casta
 | <a name="input_delete_nodes_on_disconnect"></a> [delete\_nodes\_on\_disconnect](#input\_delete\_nodes\_on\_disconnect) | Optionally delete Cast AI created nodes when the cluster is destroyed | `bool` | `false` | no |
 | <a name="input_evictor_ext_values"></a> [evictor\_ext\_values](#input\_evictor\_ext\_values) | List of YAML formatted string with evictor-ext values | `list(string)` | `[]` | no |
 | <a name="input_evictor_ext_version"></a> [evictor\_ext\_version](#input\_evictor\_ext\_version) | Version of castai-evictor-ext chart. Default latest | `string` | `null` | no |
-| <a name="input_evictor_settings"></a> [evictor\_settings](#input\_evictor\_settings) | Optional Evictor configuration. Supports every optional field of the castai\_evictor resource. Evictions stay disabled when this is null or enabled is unset. | `any` | `null` | no |
+| <a name="input_evictor_settings"></a> [evictor\_settings](#input\_evictor\_settings) | Optional Evictor configuration. Supports the optional policy fields of the castai\_evictor resource. Evictions stay disabled when this is null or enabled is unset. | `any` | `null` | no |
 | <a name="input_evictor_values"></a> [evictor\_values](#input\_evictor\_values) | List of YAML formatted string values for evictor helm chart | `list(string)` | `[]` | no |
 | <a name="input_evictor_version"></a> [evictor\_version](#input\_evictor\_version) | Version of castai-evictor chart. If not provided, latest version will be used. | `string` | `null` | no |
 | <a name="input_grpc_url"></a> [grpc\_url](#input\_grpc\_url) | gRPC endpoint used by pod-pinner | `string` | `"grpc.cast.ai:443"` | no |
