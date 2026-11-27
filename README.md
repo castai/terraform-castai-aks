@@ -15,7 +15,7 @@ Website: https://www.cast.ai
 Requirements
 ------------
 
-- [Terraform](https://www.terraform.io/downloads.html) 0.13+
+- [Terraform](https://www.terraform.io/downloads.html) 1.9+
 
 Using the module
 ------------
