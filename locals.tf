@@ -51,6 +51,17 @@ locals {
   install_standalone_charts = !var.umbrella_enabled
   install_umbrella_chart    = var.umbrella_enabled
 
+  # The chart kill-switch follows the V2 policy so they cannot disagree.
+  evictor_enabled = try(var.evictor_settings.enabled == true, false)
+
+  # pricing_model mirrors the resource block list.
+  evictor_pricing_model = try(var.evictor_settings.pricing_model, null) == null ? [] : var.evictor_settings.pricing_model
+
+  evictor_enabled_set = [{
+    name  = "evictorEnabled"
+    value = tostring(local.evictor_enabled)
+  }]
+
   # Inputs to the Cast AI Umbrella Helm release
   umbrella_set_castai_agent = [for s in concat(
     [
@@ -129,6 +140,7 @@ locals {
         value = "false"
       },
     ],
+    local.evictor_enabled_set,
     try(var.evictor_settings.enabled, null) == false ? [
       {
         name  = "replicaCount"
@@ -148,6 +160,7 @@ locals {
         value = "true"
       },
     ],
+    local.evictor_enabled_set,
     local.set_pod_labels,
     local.set_components_sets,
   )) : merge(s, { name = "autoscaler.castai-evictor.${s.name}" })]

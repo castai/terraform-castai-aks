@@ -86,13 +86,13 @@ mock_provider "helm" {}
 mock_provider "null" {}
 
 variables {
-  aks_cluster_name   = "test-cluster"
-  aks_cluster_region = "eastus"
-  subscription_id    = "00000000-0000-0000-0000-000000000000"
-  tenant_id          = "11111111-1111-1111-1111-111111111111"
-  resource_group     = "test-rg"
-  node_resource_group = "test-node-rg"
-  castai_api_token   = "test-token-12345"
+  aks_cluster_name           = "test-cluster"
+  aks_cluster_region         = "eastus"
+  subscription_id            = "00000000-0000-0000-0000-000000000000"
+  tenant_id                  = "11111111-1111-1111-1111-111111111111"
+  resource_group             = "test-rg"
+  node_resource_group        = "test-node-rg"
+  castai_api_token           = "test-token-12345"
   default_node_configuration = "default"
   node_configurations = {
     default = {
@@ -192,7 +192,7 @@ run "separate_autoscaler_policies_and_evictor_settings" {
       enabled     = true
       scoped_mode = true
       unschedulable_pods = {
-        enabled                            = true
+        enabled                           = true
         partial_template_matching_enabled = true
       }
       node_downscaler = {
@@ -201,8 +201,33 @@ run "separate_autoscaler_policies_and_evictor_settings" {
       }
     }
     evictor_settings = {
-      enabled = true
-      dry_run = true
+      enabled                                = true
+      dry_run                                = true
+      aggressive_mode                        = true
+      scoped_mode                            = true
+      cycle_interval                         = "5m"
+      node_grace_period_minutes              = 10
+      pod_eviction_failure_back_off_interval = "10s"
+      ignore_pod_disruption_budgets          = true
+      arm64_supported                        = true
+      drain_timeout                          = "10m"
+      drain_rollback_timeout                 = "5m"
+      emit_node_related_pod_events           = true
+      force_disable_karpenter_mode           = true
+      force_disable_live_migration           = true
+      force_disable_pod_mutations            = true
+      force_disable_woop                     = true
+      max_target_nodes_per_cycle             = 10
+      min_target_nodes_per_cycle             = 1
+      pricing_awareness_enabled              = true
+      soft_tainting                          = true
+      target_node_percentage                 = 50
+      windows                                = true
+      pricing_model = [{
+        base_cpu_cost = "0.03"
+        base_mem_cost = "0.004"
+        spot_discount = "0.5"
+      }]
     }
   }
 
@@ -225,6 +250,31 @@ run "separate_autoscaler_policies_and_evictor_settings" {
     condition     = castai_evictor.castai_evictor[0].enabled == true && castai_evictor.castai_evictor[0].dry_run == true
     error_message = "Evictor settings should be mapped independently from autoscaler policies"
   }
+
+  assert {
+    condition     = castai_evictor.castai_evictor[0].arm64_supported == true && castai_evictor.castai_evictor[0].soft_tainting == true && castai_evictor.castai_evictor[0].windows == true
+    error_message = "Boolean evictor fields should be mapped"
+  }
+
+  assert {
+    condition     = castai_evictor.castai_evictor[0].max_target_nodes_per_cycle == 10 && castai_evictor.castai_evictor[0].target_node_percentage == 50
+    error_message = "Numeric evictor fields should be mapped"
+  }
+
+  assert {
+    condition     = castai_evictor.castai_evictor[0].drain_timeout == "10m" && castai_evictor.castai_evictor[0].drain_rollback_timeout == "5m"
+    error_message = "Duration evictor fields should be mapped"
+  }
+
+  assert {
+    condition     = castai_evictor.castai_evictor[0].pricing_model[0].base_cpu_cost == "0.03" && castai_evictor.castai_evictor[0].pricing_model[0].spot_discount == "0.5"
+    error_message = "pricing_model should be mapped"
+  }
+
+  assert {
+    condition     = anytrue([for s in helm_release.castai_evictor[0].set : s.name == "evictorEnabled" && s.value == "true"])
+    error_message = "Managed mode should pass evictorEnabled from evictor_settings.enabled"
+  }
 }
 
 run "null_autoscaler_and_evictor_settings" {
@@ -238,6 +288,31 @@ run "null_autoscaler_and_evictor_settings" {
   assert {
     condition     = length(castai_evictor.castai_evictor) == 0
     error_message = "Null evictor settings should not create an evictor resource"
+  }
+
+  assert {
+    condition     = anytrue([for s in helm_release.castai_evictor[0].set : s.name == "evictorEnabled" && s.value == "false"])
+    error_message = "Null evictor settings should pass evictorEnabled=false"
+  }
+}
+
+run "explicitly_disabled_evictor" {
+  command = plan
+
+  variables {
+    evictor_settings = {
+      enabled = false
+    }
+  }
+
+  assert {
+    condition     = castai_evictor.castai_evictor[0].enabled == false
+    error_message = "Explicit false should create a disabled evictor policy"
+  }
+
+  assert {
+    condition     = anytrue([for s in helm_release.castai_evictor[0].set : s.name == "evictorEnabled" && s.value == "false"])
+    error_message = "Explicit false should pass evictorEnabled=false"
   }
 }
 

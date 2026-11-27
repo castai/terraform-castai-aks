@@ -781,6 +781,7 @@ resource "helm_release" "castai_evictor" {
         value = "false"
       },
     ],
+    local.evictor_enabled_set,
     local.set_pod_labels,
     local.set_components_sets,
   )
@@ -818,6 +819,7 @@ resource "helm_release" "castai_evictor_self_managed" {
         value = "false"
       },
     ],
+    local.evictor_enabled_set,
     try(var.evictor_settings.enabled, null) == false ? [
       {
         name  = "replicaCount"
@@ -1317,6 +1319,30 @@ resource "castai_evictor" "castai_evictor" {
   node_grace_period_minutes              = try(var.evictor_settings.node_grace_period_minutes, null)
   pod_eviction_failure_back_off_interval = try(var.evictor_settings.pod_eviction_failure_back_off_interval, null)
   ignore_pod_disruption_budgets          = try(var.evictor_settings.ignore_pod_disruption_budgets, null)
+  arm64_supported                        = try(var.evictor_settings.arm64_supported, null)
+  drain_timeout                          = try(var.evictor_settings.drain_timeout, null)
+  drain_rollback_timeout                 = try(var.evictor_settings.drain_rollback_timeout, null)
+  emit_node_related_pod_events           = try(var.evictor_settings.emit_node_related_pod_events, null)
+  force_disable_karpenter_mode           = try(var.evictor_settings.force_disable_karpenter_mode, null)
+  force_disable_live_migration           = try(var.evictor_settings.force_disable_live_migration, null)
+  force_disable_pod_mutations            = try(var.evictor_settings.force_disable_pod_mutations, null)
+  force_disable_woop                     = try(var.evictor_settings.force_disable_woop, null)
+  max_target_nodes_per_cycle             = try(var.evictor_settings.max_target_nodes_per_cycle, null)
+  min_target_nodes_per_cycle             = try(var.evictor_settings.min_target_nodes_per_cycle, null)
+  pricing_awareness_enabled              = try(var.evictor_settings.pricing_awareness_enabled, null)
+  soft_tainting                          = try(var.evictor_settings.soft_tainting, null)
+  target_node_percentage                 = try(var.evictor_settings.target_node_percentage, null)
+  windows                                = try(var.evictor_settings.windows, null)
+
+  dynamic "pricing_model" {
+    for_each = local.evictor_pricing_model
+    content {
+      base_cpu_cost = try(pricing_model.value.base_cpu_cost, null)
+      base_mem_cost = try(pricing_model.value.base_mem_cost, null)
+      spot_discount = try(pricing_model.value.spot_discount, null)
+    }
+  }
+
 }
 
 resource "helm_release" "castai_ai_optimizer_proxy" {
