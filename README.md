@@ -642,7 +642,7 @@ Usage examples are located in [terraform provider repo](https://github.com/casta
 
 | Name | Version |
 | ---- | ------- |
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.9 |
 | <a name="requirement_azuread"></a> [azuread](#requirement\_azuread) | >= 3.0 |
 | <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | >= 5.0.1 |
 | <a name="requirement_castai"></a> [castai](#requirement\_castai) | >= 9.22.0 |
