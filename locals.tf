@@ -51,6 +51,9 @@ locals {
   install_standalone_charts = !var.umbrella_enabled
   install_umbrella_chart    = var.umbrella_enabled
 
+  # The chart kill-switch follows the V2 policy so they cannot disagree.
+  evictor_enabled = try(var.evictor_settings.enabled == true, false)
+
   # Inputs to the Cast AI Umbrella Helm release
   umbrella_set_castai_agent = [for s in concat(
     [
@@ -130,7 +133,7 @@ locals {
       },
       {
         name  = "evictorEnabled"
-        value = tostring(var.evictor_enabled)
+        value = tostring(local.evictor_enabled)
       },
     ],
     try(var.evictor_settings.enabled, null) == false ? [
@@ -153,7 +156,7 @@ locals {
       },
       {
         name  = "evictorEnabled"
-        value = tostring(try(var.evictor_settings.enabled == true, false))
+        value = tostring(local.evictor_enabled)
       },
     ],
     local.set_pod_labels,
