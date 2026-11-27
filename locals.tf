@@ -128,6 +128,10 @@ locals {
         name  = "managedByCASTAI"
         value = "false"
       },
+      {
+        name  = "evictorEnabled"
+        value = tostring(var.evictor_enabled)
+      },
     ],
     try(var.evictor_settings.enabled, null) == false ? [
       {
@@ -146,6 +150,10 @@ locals {
       {
         name  = "castai-evictor-ext.enabled"
         value = "true"
+      },
+      {
+        name  = "evictorEnabled"
+        value = tostring(try(var.evictor_settings.enabled == true, false))
       },
     ],
     local.set_pod_labels,

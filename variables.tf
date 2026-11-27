@@ -56,6 +56,12 @@ variable "evictor_settings" {
   default     = null
 }
 
+variable "evictor_enabled" {
+  type        = bool
+  description = "Kill-switch for the Evictor chart (evictorEnabled). Used only when self_managed is true. Set to true to allow evictions."
+  default     = false
+}
+
 variable "delete_nodes_on_disconnect" {
   type        = bool
   description = "Optionally delete Cast AI created nodes when the cluster is destroyed"
