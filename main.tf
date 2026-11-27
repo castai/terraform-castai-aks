@@ -497,6 +497,12 @@ resource "castai_workload_scaling_policy" "this" {
           min_pressured_pod_percentage   = try(cpu_pressure.value.min_pressured_pod_percentage, null)
         }
       }
+      dynamic "infinite_memory_scaling" {
+        for_each = try([anomaly_detection.value.infinite_memory_scaling], [])
+        content {
+          enabled = try(infinite_memory_scaling.value.enabled, null)
+        }
+      }
     }
   }
 
