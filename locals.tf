@@ -57,6 +57,11 @@ locals {
   # pricing_model mirrors the resource block list.
   evictor_pricing_model = try(var.evictor_settings.pricing_model, null) == null ? [] : var.evictor_settings.pricing_model
 
+  evictor_enabled_set = [{
+    name  = "evictorEnabled"
+    value = tostring(local.evictor_enabled)
+  }]
+
   # Inputs to the Cast AI Umbrella Helm release
   umbrella_set_castai_agent = [for s in concat(
     [
@@ -134,11 +139,8 @@ locals {
         name  = "managedByCASTAI"
         value = "false"
       },
-      {
-        name  = "evictorEnabled"
-        value = tostring(local.evictor_enabled)
-      },
     ],
+    local.evictor_enabled_set,
     try(var.evictor_settings.enabled, null) == false ? [
       {
         name  = "replicaCount"
@@ -157,11 +159,8 @@ locals {
         name  = "castai-evictor-ext.enabled"
         value = "true"
       },
-      {
-        name  = "evictorEnabled"
-        value = tostring(local.evictor_enabled)
-      },
     ],
+    local.evictor_enabled_set,
     local.set_pod_labels,
     local.set_components_sets,
   )) : merge(s, { name = "autoscaler.castai-evictor.${s.name}" })]
