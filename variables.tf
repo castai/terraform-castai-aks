@@ -52,7 +52,7 @@ variable "autoscaler_settings" {
 
 variable "evictor_settings" {
   type        = any
-  description = "Optional Evictor configuration mapped independently to the castai_evictor resource"
+  description = "Optional Evictor configuration. Supports every optional field of the castai_evictor resource."
   default     = null
 }
 
